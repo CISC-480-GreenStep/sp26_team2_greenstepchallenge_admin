@@ -31,6 +31,8 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 
 ### What's NOT Built Yet
 
+- **Group membership management** — ability to view who is in a group and manage members from both directions: clicking on a group should show its members with easy add/remove, and clicking on a user should show their groups with the ability to assign/unassign. Same pattern for challenges (view participants, manage enrollment).
+- **Challenge presets** — ability to create and save reusable templates (preset action sets, categories, point structures) that admins can pull from when creating new challenges, so they don't have to rebuild common configurations from scratch each time.
 - Real authentication (OAuth, JWT, etc.)
 - Python backend (Flask/FastAPI)
 - PostgreSQL database
@@ -218,13 +220,15 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 
 ## Future Goals
 
-1. Connect to Python (FastAPI) backend with PostgreSQL
-2. Real authentication with OAuth/JWT
-3. Coordinate shared database schema with Team 1
-4. Photo upload support for user-submitted content
-5. Content moderation tools (flag/remove comments and photos)
-6. Advanced reporting with saved report templates
-7. Push notification integration for challenge reminders
+1. **Group & challenge membership management** — view/manage members inside groups, view/manage groups from user profiles, view/manage participants inside challenges (bidirectional navigation)
+2. **Challenge presets** — save reusable templates with pre-configured action sets, categories, and point structures for quick challenge creation
+3. Connect to Python (FastAPI) backend with PostgreSQL
+4. Real authentication with OAuth/JWT
+5. Coordinate shared database schema with Team 1
+6. Photo upload support for user-submitted content
+7. Content moderation tools (flag/remove comments and photos)
+8. Advanced reporting with saved report templates
+9. Push notification integration for challenge reminders
 
 ---
 

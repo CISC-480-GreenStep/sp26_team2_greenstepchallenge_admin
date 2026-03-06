@@ -70,6 +70,8 @@ export default function Sidebar({ mobileOpen, onClose }) {
         variant="permanent"
         sx={{
           display: { xs: 'none', md: 'block' },
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
         }}
         open

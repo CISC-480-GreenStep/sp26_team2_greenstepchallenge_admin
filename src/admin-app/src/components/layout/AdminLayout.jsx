@@ -20,11 +20,11 @@ export default function AdminLayout() {
           maxWidth: { xs: '100vw', md: `calc(100vw - ${DRAWER_WIDTH}px)` },
           minHeight: '100vh',
           bgcolor: 'grey.50',
-          overflow: 'hidden',
+          overflowX: 'auto',
         }}
       >
         <Toolbar />
-        <Box sx={{ p: { xs: 1.5, sm: 3 }, overflow: 'hidden' }}>
+        <Box sx={{ p: { xs: 1.5, sm: 3 } }}>
           <Outlet />
         </Box>
       </Box>

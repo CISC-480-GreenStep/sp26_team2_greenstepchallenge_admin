@@ -9,7 +9,12 @@ const MOCK_ACCOUNTS = [
 ];
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('gsc_auth_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
 
   const login = (email, password) => {
     const account = MOCK_ACCOUNTS.find(
@@ -18,10 +23,14 @@ export function AuthProvider({ children }) {
     if (!account) return { success: false, error: 'Invalid email or password' };
     const { password: _pw, ...safeUser } = account;
     setUser(safeUser);
+    localStorage.setItem('gsc_auth_user', JSON.stringify(safeUser));
     return { success: true };
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('gsc_auth_user');
+  };
 
   const hasRole = (requiredRole) => {
     if (!user) return false;

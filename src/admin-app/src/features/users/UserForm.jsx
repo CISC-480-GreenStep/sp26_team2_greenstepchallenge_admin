@@ -49,7 +49,7 @@ export default function UserForm() {
         {isEdit ? 'Edit User' : 'Create User'}
       </Typography>
 
-      <Paper sx={{ p: 3, maxWidth: 600 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 600 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>

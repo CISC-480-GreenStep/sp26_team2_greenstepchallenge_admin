@@ -59,10 +59,10 @@ export default function UserDetail() {
         Back to Users
       </Button>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" fontWeight={700} mb={1}>{user.name}</Typography>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+        <Typography variant="h5" fontWeight={700} mb={1} sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>{user.name}</Typography>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Email</Typography><Typography>{user.email}</Typography></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Email</Typography><Typography sx={{ wordBreak: 'break-all', fontSize: { xs: '0.8rem', sm: '1rem' } }}>{user.email}</Typography></Grid>
           <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Role</Typography><Chip label={user.role} size="small" /></Grid>
           <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Status</Typography><Chip label={user.status} size="small" color={user.status === 'Active' ? 'success' : 'default'} /></Grid>
           <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Group</Typography><Typography>{groupName(user.groupId)}</Typography></Grid>
@@ -80,7 +80,7 @@ export default function UserDetail() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <EmojiEventsIcon sx={{ fontSize: 44, color: '#FFD700' }} />
                 <Box>
-                  <Typography variant="h3" fontWeight={700}>{points.total}</Typography>
+                  <Typography variant="h3" fontWeight={700} sx={{ fontSize: { xs: '2rem', sm: '3rem' } }}>{points.total}</Typography>
                   <Typography variant="caption" color="text.secondary">across {points.breakdown.length} challenge{points.breakdown.length !== 1 ? 's' : ''}</Typography>
                 </Box>
               </Box>
@@ -95,8 +95,8 @@ export default function UserDetail() {
                 <Typography variant="subtitle2" color="text.secondary">Points per Challenge (History)</Typography>
               </Box>
               {points.breakdown.length > 0 ? (
-                <TableContainer>
-                  <Table size="small">
+                <TableContainer sx={{ overflowX: 'auto' }}>
+                  <Table size="small" sx={{ minWidth: 450 }}>
                     <TableHead>
                       <TableRow>
                         <TableCell>Challenge</TableCell>
@@ -135,12 +135,12 @@ export default function UserDetail() {
         </Grid>
       </Grid>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h6" fontWeight={600}>Activity Log ({logs.length})</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Activity Log ({logs.length})</Typography>
         <CSVExport data={logs} filename={`${user.name.replace(/\s+/g, '_')}_activity.csv`} />
       </Stack>
-      <TableContainer component={Paper} sx={{ mb: 3 }}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ mb: 3, overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 450 }}>
           <TableHead>
             <TableRow>
               <TableCell>Action</TableCell>
@@ -163,8 +163,8 @@ export default function UserDetail() {
         </Table>
       </TableContainer>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h6" fontWeight={600}>Participation ({participation.length})</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Participation ({participation.length})</Typography>
         <CSVExport
           data={participation.map((p) => ({
             Challenge: challengeName(p.eventId),
@@ -175,8 +175,8 @@ export default function UserDetail() {
           filename={`${user.name.replace(/\s+/g, '_')}_participation.csv`}
         />
       </Stack>
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow>
               <TableCell>Challenge</TableCell>

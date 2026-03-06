@@ -49,7 +49,7 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 | UI Library | Material UI (MUI) v7               |
 | Charts     | Recharts                           |
 | Routing    | React Router v7                    |
-| Data       | Mock data + localStorage           |
+| Data       | Mock data (from real MPCA files) + localStorage |
 
 ### Planned (not yet implemented)
 
@@ -63,11 +63,10 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start (3 steps)
 
-- Node.js 18+ and npm
-
-### Install and Run
+1. Make sure you have [Node.js](https://nodejs.org/) 18 or newer installed (`node -v` to check)
+2. Open a terminal and run:
 
 ```bash
 cd src/admin-app
@@ -75,18 +74,32 @@ npm install
 npm run dev
 ```
 
-The app will open at `http://localhost:5173`.
+3. Open **http://localhost:5173** in your browser
 
-### Demo Accounts
+That's it — the app runs entirely in the browser with mock data, no backend or database needed.
+
+### Logging In
+
+Click **"Quick Login as Kristin (SuperAdmin)"** on the login page to sign in instantly.
+
+Or use one of the demo accounts:
 
 | Email                           | Password | Role        |
 |---------------------------------|----------|-------------|
 | kristin.mroz@mpca.mn.gov       | admin    | SuperAdmin  |
 | sarah.johnson@mpca.mn.gov     | user     | GeneralUser |
 
+### Managing Challenges
+
+- **Create:** Challenges > "New Challenge" button > fill form > Create
+- **Edit:** Click the pencil icon on any challenge row, or change its Status to Active/Completed/Archived from the edit form
+- **Archive:** Click the archive icon on any non-archived challenge (one-click)
+- **Delete:** Click the trash icon (confirmation required)
+- **Manage Actions:** Edit a challenge > scroll to "Actions" section > add/edit/delete actions with name, category, and points
+
 ### Reset Demo Data
 
-Click the "Reset Demo Data" button on the login page to clear all localStorage changes and restore the original sample data.
+Click the **"Reset Demo Data"** button on the login page to clear all changes and restore the original sample data. All data is stored in your browser's localStorage.
 
 ---
 
@@ -95,7 +108,6 @@ Click the "Reset Demo Data" button on the login page to clear all localStorage c
 ```
 sp26_team2_greenstepchallenge_admin/
 ├── README.md                    ← you are here
-├── data/                        ← sample data files (from client)
 ├── docs/                        ← project documentation
 ├── meetings/                    ← meeting notes and transcripts
 └── src/
@@ -154,6 +166,12 @@ sp26_team2_greenstepchallenge_admin/
 | ActivityLog    | id, userId, action, timestamp, details                      |
 | Group          | id, name, description, createdAt                            |
 
+### Action Categories (from MPCA taxonomy)
+Food, Water, Energy, Transportation, Consumption & Waste
+
+### Data Sources
+Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's Challenge scoring templates, 2022 & 2024 Earth Month trackers, and a sustainability challenge mock draft). The original files have been removed from the repo since all relevant data is now embedded in the JavaScript mock files under `src/admin-app/src/data/mock/`.
+
 ---
 
 ## Timeline (from Project Proposal)
@@ -171,6 +189,14 @@ sp26_team2_greenstepchallenge_admin/
 ---
 
 ## Version History
+
+### v0.3.0 — Real Client Data Integration (Mar 5, 2026)
+- Replaced fabricated mock data with data extracted from actual MPCA client files
+- Challenges now reflect real programs: 2019 & 2020 Commissioner's Challenges, 2022 & 2024 Earth Month Challenges, plus upcoming 2026
+- Actions derived from real MPCA scoring templates (weighted points, tiered difficulty levels, daily yes/no tracking)
+- Participation data includes real tracker entries from 2024 participant "Carla" mapped to the app format
+- Expanded user pool (12 users) with realistic MPCA personas spanning challenge years
+- Activity categories updated to match MPCA taxonomy: Food, Water, Energy, Transportation, Consumption & Waste
 
 ### v0.2.0 — Feature Additions (Mar 5, 2026)
 - Renamed "Events" to "Challenges" throughout the UI

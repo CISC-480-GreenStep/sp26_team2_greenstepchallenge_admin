@@ -61,10 +61,10 @@ export default function ChallengeDetail() {
         Back to Challenges
       </Button>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: event.theme }} />
-          <Typography variant="h5" fontWeight={700}>{event.name}</Typography>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: event.theme, flexShrink: 0 }} />
+          <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' } }}>{event.name}</Typography>
           <Chip label={event.status} size="small" />
         </Box>
         <Typography color="text.secondary" mb={2}>{event.description}</Typography>
@@ -118,8 +118,8 @@ export default function ChallengeDetail() {
       )}
 
       <Typography variant="h6" fontWeight={600} mb={1}>Actions ({actions.length})</Typography>
-      <TableContainer component={Paper} sx={{ mb: 3 }}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ mb: 3, overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 400 }}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
@@ -139,12 +139,12 @@ export default function ChallengeDetail() {
         </Table>
       </TableContainer>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h6" fontWeight={600}>Participation Log ({participation.length})</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Participation Log ({participation.length})</Typography>
         <CSVExport data={participationExport} filename={`${event.name.replace(/\s+/g, '_')}_participation.csv`} />
       </Stack>
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow>
               <TableCell>User</TableCell>

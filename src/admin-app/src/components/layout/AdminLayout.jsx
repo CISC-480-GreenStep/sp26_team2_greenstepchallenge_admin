@@ -16,13 +16,15 @@ export default function AdminLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          maxWidth: { xs: '100vw', md: `calc(100vw - ${DRAWER_WIDTH}px)` },
           minHeight: '100vh',
           bgcolor: 'grey.50',
+          overflow: 'hidden',
         }}
       >
         <Toolbar />
-        <Box sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ p: { xs: 1.5, sm: 3 }, overflow: 'hidden' }}>
           <Outlet />
         </Box>
       </Box>

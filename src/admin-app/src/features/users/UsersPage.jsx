@@ -59,8 +59,8 @@ export default function UsersPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h5" fontWeight={700}>Users</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
+        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Users</Typography>
         <Stack direction="row" spacing={1}>
           <CSVExport data={filtered} filename="users.csv" />
           {isSuperAdmin && (
@@ -83,8 +83,8 @@ export default function UsersPage() {
         </TextField>
       </Stack>
 
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

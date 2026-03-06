@@ -43,8 +43,8 @@ export default function GroupsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h5" fontWeight={700}>Groups</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
+        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Groups</Typography>
         {canManage && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/groups/new')}>
             New Group
@@ -52,8 +52,8 @@ export default function GroupsPage() {
         )}
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 550 }}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

@@ -59,7 +59,7 @@ export default function ReportsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} mb={3}>Reports</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Reports</Typography>
 
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
@@ -95,10 +95,10 @@ export default function ReportsPage() {
       {chartData.length > 0 && (
         <Paper sx={{ p: 2, mb: 3 }}>
           <Typography variant="h6" gutterBottom>Actions by Category</Typography>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chartData}>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={chartData} margin={{ bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-30} textAnchor="end" interval={0} height={60} />
               <YAxis allowDecimals={false} />
               <Tooltip />
               <Bar dataKey="count" fill="#4CAF50" radius={[4, 4, 0, 0]} />
@@ -113,8 +113,8 @@ export default function ReportsPage() {
         </Typography>
       </Stack>
 
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               <TableCell>User</TableCell>

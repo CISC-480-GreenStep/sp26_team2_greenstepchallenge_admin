@@ -38,7 +38,7 @@ export default function GroupForm() {
         {isEdit ? 'Edit Group' : 'Create Group'}
       </Typography>
 
-      <Paper sx={{ p: 3, maxWidth: 500 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 500 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>

@@ -99,7 +99,7 @@ export default function ChallengeForm() {
         {isEdit ? 'Edit Challenge' : 'Create Challenge'}
       </Typography>
 
-      <Paper sx={{ p: 3, maxWidth: 700, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 700, mb: 3 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
@@ -148,8 +148,8 @@ export default function ChallengeForm() {
             <Typography variant="h6" fontWeight={600}>Actions ({actions.length})</Typography>
             <Button size="small" startIcon={<AddIcon />} onClick={openNewAction}>Add Action</Button>
           </Stack>
-          <TableContainer component={Paper}>
-            <Table size="small">
+          <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 400 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>

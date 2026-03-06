@@ -121,7 +121,7 @@ export default function DashboardPage() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} mb={3}>Dashboard</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Dashboard</Typography>
 
       {/* ───── Overview Stats ───── */}
       <Grid container spacing={3} mb={4}>
@@ -152,7 +152,7 @@ export default function DashboardPage() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Challenge Summary</Typography>
-              <TableContainer>
+              <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -195,13 +195,13 @@ export default function DashboardPage() {
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Actions by Category</Typography>
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
-                  <Pie data={stats.categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+                  <Pie data={stats.categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {stats.categoryData.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -212,10 +212,10 @@ export default function DashboardPage() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Participation by Challenge</Typography>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={stats.participationByEvent}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={stats.participationByEvent} margin={{ bottom: 50 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" interval={0} height={70} />
                   <YAxis />
                   <Tooltip />
                   <Legend />
@@ -231,13 +231,13 @@ export default function DashboardPage() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>Monthly Engagement Trend</Typography>
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={stats.trendData}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={stats.trendData} margin={{ bottom: 30 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" interval={0} height={50} />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="actions" name="Actions Completed" stroke="#2196F3" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="actions" name="Actions Completed" stroke="#2196F3" strokeWidth={2} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

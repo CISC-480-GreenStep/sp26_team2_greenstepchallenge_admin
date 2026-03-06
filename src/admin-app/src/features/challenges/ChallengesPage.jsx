@@ -66,8 +66,8 @@ export default function ChallengesPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h5" fontWeight={700}>Challenges</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
+        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Challenges</Typography>
         <Stack direction="row" spacing={1}>
           <CSVExport data={filtered} filename="challenges.csv" />
           {canEdit && (
@@ -106,8 +106,8 @@ export default function ChallengesPage() {
         </TextField>
       </Stack>
 
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

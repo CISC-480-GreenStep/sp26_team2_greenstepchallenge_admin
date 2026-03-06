@@ -32,13 +32,13 @@ export default function TopBar({ onMenuToggle }) {
           Admin Console
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
           <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
             {user?.name}
           </Typography>
-          <Chip label={user?.role} size="small" color="primary" variant="outlined" />
-          <Button size="small" startIcon={<LogoutIcon />} onClick={logout}>
-            Logout
+          <Chip label={user?.role} size="small" color="primary" variant="outlined" sx={{ display: { xs: 'none', sm: 'flex' } }} />
+          <Button size="small" startIcon={<LogoutIcon />} onClick={logout} sx={{ minWidth: { xs: 'auto', sm: 64 } }}>
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Logout</Box>
           </Button>
         </Box>
       </Toolbar>

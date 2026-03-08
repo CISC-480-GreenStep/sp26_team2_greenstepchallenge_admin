@@ -17,54 +17,59 @@ import {
   Card,
   CardContent,
   LinearProgress,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import {
-  getEventById,
-  getActionsByEvent,
-  getParticipationByEvent,
+  getChallengeById,
+  getActionsByChallenge,
+  getParticipationByChallenge,
   getUsers,
   getGroups,
   getChallengeLeaderboard,
 } from "../../data/api";
 import CSVExport from "../../components/shared/CSVExport";
 
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import MobilePreview from "../../components/MobilePreview"; // Adjust the path if needed
+import MobilePreview from "../../components/MobilePreview";
 
 export default function ChallengeDetail() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
-  const [event, setEvent] = useState(null);
+  const [challenge, setChallenge] = useState(null);
   const [actions, setActions] = useState([]);
   const [participation, setParticipation] = useState([]);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const eid = Number(id);
+    const cid = Number(id);
     Promise.all([
-      getEventById(eid),
-      getActionsByEvent(eid),
-      getParticipationByEvent(eid),
+      getChallengeById(cid),
+      getActionsByChallenge(cid),
+      getParticipationByChallenge(cid),
       getUsers(),
       getGroups(),
-      getChallengeLeaderboard(eid),
-    ]).then(([e, a, p, u, g, lb]) => {
-      setEvent(e);
+      getChallengeLeaderboard(cid),
+    ]).then(([c, a, p, u, g, lb]) => {
+      setChallenge(c);
       setActions(a);
       setParticipation(p);
       setUsers(u);
       setGroups(g);
       setLeaderboard(lb);
+    }).catch((err) => {
+      setError(err.message || 'Failed to load challenge details');
     });
   }, [id]);
 
-  if (!event) return <Typography>Loading...</Typography>;
+  if (!challenge) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
 
   const userName = (uid) => users.find((u) => u.id === uid)?.name || "Unknown";
   const actionName = (aid) =>
@@ -78,7 +83,6 @@ export default function ChallengeDetail() {
     Notes: p.notes,
   }));
 
-  // Unique participants (users who have at least one participation)
   const participantMap = {};
   participation.forEach((p) => {
     const uid = p.userId;
@@ -95,6 +99,7 @@ export default function ChallengeDetail() {
 
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate("/challenges")}
@@ -118,7 +123,7 @@ export default function ChallengeDetail() {
               width: 16,
               height: 16,
               borderRadius: "50%",
-              bgcolor: event.theme,
+              bgcolor: challenge.theme,
               flexShrink: 0,
             }}
           />
@@ -127,9 +132,9 @@ export default function ChallengeDetail() {
             fontWeight={700}
             sx={{ fontSize: { xs: "1.15rem", sm: "1.5rem" } }}
           >
-            {event.name}
+            {challenge.name}
           </Typography>
-          <Chip label={event.status} size="small" />
+          <Chip label={challenge.status} size="small" />
           <Button
             variant="outlined"
             size="small"
@@ -141,26 +146,26 @@ export default function ChallengeDetail() {
           </Button>
         </Box>
         <Typography color="text.secondary" mb={2}>
-          {event.description}
+          {challenge.description}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               Category
             </Typography>
-            <Typography>{event.category}</Typography>
+            <Typography>{challenge.category}</Typography>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               Group
             </Typography>
-            {event.groupId ? (
+            {challenge.groupId ? (
               <Button
                 size="small"
                 sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
-                onClick={() => navigate(`/groups/${event.groupId}`)}
+                onClick={() => navigate(`/groups/${challenge.groupId}`)}
               >
-                {groupName(event.groupId)}
+                {groupName(challenge.groupId)}
               </Button>
             ) : (
               <Typography>—</Typography>
@@ -170,18 +175,17 @@ export default function ChallengeDetail() {
             <Typography variant="body2" color="text.secondary">
               Start
             </Typography>
-            <Typography>{event.startDate}</Typography>
+            <Typography>{challenge.startDate}</Typography>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               End
             </Typography>
-            <Typography>{event.endDate}</Typography>
+            <Typography>{challenge.endDate}</Typography>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Participants Section */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" fontWeight={600} mb={1}>
           Participants ({participants.length})
@@ -344,7 +348,7 @@ export default function ChallengeDetail() {
         </Typography>
         <CSVExport
           data={participationExport}
-          filename={`${event.name.replace(/\s+/g, "_")}_participation.csv`}
+          filename={`${challenge.name.replace(/\s+/g, "_")}_participation.csv`}
         />
       </Stack>
       <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
@@ -376,12 +380,10 @@ export default function ChallengeDetail() {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* Mobile Preview Dialog Here*/}
       <Dialog
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
         maxWidth="xs"
-        // This is the new, non-deprecated way to style the inner "Paper"
         slotProps={{
           paper: {
             sx: {
@@ -393,7 +395,7 @@ export default function ChallengeDetail() {
         }}
       >
         <DialogContent sx={{ p: 0 }}>
-          <MobilePreview challenge={event} actions={actions} />
+          <MobilePreview challenge={challenge} actions={actions} />
         </DialogContent>
       </Dialog>
     </Box>

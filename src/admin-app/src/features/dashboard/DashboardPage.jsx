@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Grid, Typography, Card, CardContent, Box, Divider,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, LinearProgress, Stack,
+  Chip, LinearProgress, Stack, CircularProgress, Alert,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import EventIcon from '@mui/icons-material/Event';
@@ -15,45 +15,43 @@ import {
   LineChart, Line, PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import StatCard from '../../components/shared/StatCard';
-import { getEvents, getUsers, getParticipation, getActions, getLeaderboard } from '../../data/api';
-
-const PIE_COLORS = ['#4CAF50', '#2196F3', '#FF9800', '#00BCD4', '#795548', '#9C27B0', '#F44336'];
-const MEDAL_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'];
-const STATUS_COLOR = { Active: 'success', Upcoming: 'info', Completed: 'default', Archived: 'warning' };
+import { getChallenges, getUsers, getParticipation, getActions, getLeaderboard } from '../../data/api';
+import { CHART_COLORS, MEDAL_COLORS, STATUS_COLOR } from '../../lib/constants';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const [events, users, participation, actions, leaderboard] = await Promise.all([
-        getEvents(), getUsers(), getParticipation(), getActions(), getLeaderboard(5),
+      try {
+      const [challenges, users, participation, actions, leaderboard] = await Promise.all([
+        getChallenges(), getUsers(), getParticipation(), getActions(), getLeaderboard(5),
       ]);
 
-      const activeEvents = events.filter((e) => e.status === 'Active').length;
+      const activeChallenges = challenges.filter((c) => c.status === 'Active').length;
       const totalParticipation = participation.length;
       const activeUsers = users.filter((u) => u.status === 'Active').length;
       const totalPoints = leaderboard.reduce((sum, e) => sum + e.points, 0);
 
-      // Challenge summary table
-      const challengeSummary = events
-        .filter((e) => e.status !== 'Archived')
-        .map((e) => {
-          const eventActions = actions.filter((a) => a.eventId === e.id);
-          const eventParticipation = participation.filter((p) => p.eventId === e.id);
-          const maxPoints = eventActions.reduce((sum, a) => sum + a.points, 0);
-          const pointsEarned = eventParticipation.reduce((sum, p) => {
+      const challengeSummary = challenges
+        .filter((c) => c.status !== 'Archived')
+        .map((c) => {
+          const cActions = actions.filter((a) => a.challengeId === c.id);
+          const cParticipation = participation.filter((p) => p.challengeId === c.id);
+          const maxPoints = cActions.reduce((sum, a) => sum + a.points, 0);
+          const pointsEarned = cParticipation.reduce((sum, p) => {
             const action = actions.find((a) => a.id === p.actionId);
             return sum + (action?.points || 0);
           }, 0);
           return {
-            id: e.id,
-            name: e.name,
-            status: e.status,
-            theme: e.theme,
-            actionCount: eventActions.length,
-            participationCount: eventParticipation.length,
-            participantCount: e.participantCount,
+            id: c.id,
+            name: c.name,
+            status: c.status,
+            theme: c.theme,
+            actionCount: cActions.length,
+            participationCount: cParticipation.length,
+            participantCount: c.participantCount,
             maxPoints,
             pointsEarned,
           };
@@ -100,7 +98,7 @@ export default function DashboardPage() {
         .slice(0, 5);
 
       setStats({
-        activeEvents,
+        activeChallenges,
         totalParticipation,
         activeUsers,
         totalPoints,
@@ -111,22 +109,26 @@ export default function DashboardPage() {
         leaderboard,
         mostActive,
       });
+      } catch (err) {
+        setError(err.message || 'Failed to load dashboard data');
+      }
     }
     load();
   }, []);
 
-  if (!stats) return <Typography>Loading...</Typography>;
+  if (!stats) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
 
   const maxLeaderboardPoints = stats.leaderboard[0]?.points || 1;
 
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Dashboard</Typography>
 
       {/* ───── Overview Stats ───── */}
       <Grid container spacing={3} mb={4}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Active Challenges" value={stats.activeEvents} icon={<EventIcon fontSize="inherit" />} color="#4CAF50" />
+          <StatCard title="Active Challenges" value={stats.activeChallenges} icon={<EventIcon fontSize="inherit" />} color="#4CAF50" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard title="Total Actions Taken" value={stats.totalParticipation} icon={<EnergySavingsLeafIcon fontSize="inherit" />} color="#2196F3" />
@@ -197,7 +199,7 @@ export default function DashboardPage() {
                 <PieChart>
                   <Pie data={stats.categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                     {stats.categoryData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />

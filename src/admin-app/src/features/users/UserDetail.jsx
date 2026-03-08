@@ -4,6 +4,7 @@ import {
   Box, Typography, Paper, Chip, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Stack, Card, CardContent,
   LinearProgress, Divider, TextField, MenuItem,
+  CircularProgress, Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -11,7 +12,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import HistoryIcon from '@mui/icons-material/History';
 import {
   getUserById, getActivityLogsByUser, getParticipationByUser,
-  getEvents, getActions, getUserPoints, getGroups, updateUser, ROLES,
+  getChallenges, getActions, getUserPoints, getGroups, updateUser, ROLES,
 } from '../../data/api';
 import { useAuth } from '../auth/AuthContext';
 import { can } from '../../lib/permissions';
@@ -20,9 +21,8 @@ import CSVExport from '../../components/shared/CSVExport';
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, hasRole } = useAuth();
+  const { user: currentUser } = useAuth();
   const userRole = currentUser?.role || ROLES.GENERAL_USER;
-  const canManage = hasRole('Admin');
   const showEmail = can(userRole, 'VIEW_USER_EMAIL');
   const showRole = can(userRole, 'VIEW_USER_ROLE');
   const showGroup = can(userRole, 'VIEW_USER_GROUP');
@@ -34,11 +34,12 @@ export default function UserDetail() {
   const [user, setUser] = useState(null);
   const [logs, setLogs] = useState([]);
   const [participation, setParticipation] = useState([]);
-  const [events, setEvents] = useState([]);
+  const [challenges, setChallenges] = useState([]);
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [points, setPoints] = useState({ total: 0, breakdown: [] });
   const [participationExpanded, setParticipationExpanded] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const uid = Number(id);
@@ -46,29 +47,32 @@ export default function UserDetail() {
       getUserById(uid),
       getActivityLogsByUser(uid),
       getParticipationByUser(uid),
-      getEvents(),
+      getChallenges(),
       getActions(),
       getUserPoints(uid),
       getGroups(),
-    ]).then(([u, l, p, e, a, pts, g]) => {
+    ]).then(([u, l, p, c, a, pts, g]) => {
       setUser(u);
       setLogs(l);
       setParticipation(p);
-      setEvents(e);
+      setChallenges(c);
       setActions(a);
       setPoints(pts);
       setGroups(g);
+    }).catch((err) => {
+      setError(err.message || 'Failed to load user details');
     });
   }, [id]);
 
-  if (!user) return <Typography>Loading...</Typography>;
+  if (!user) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
 
-  const challengeName = (eid) => events.find((e) => e.id === eid)?.name || 'Unknown';
+  const challengeName = (cid) => challenges.find((c) => c.id === cid)?.name || 'Unknown';
   const actionName = (aid) => actions.find((a) => a.id === aid)?.name || 'Unknown';
   const groupName = (gid) => groups.find((g) => g.id === gid)?.name || '—';
 
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/users')} sx={{ mb: 2 }}>
         Back to Users
       </Button>
@@ -200,7 +204,7 @@ export default function UserDetail() {
             </Box>
             <CSVExport
               data={participation.map((p) => ({
-                Challenge: challengeName(p.eventId),
+                Challenge: challengeName(p.challengeId),
                 Action: actionName(p.actionId),
                 Date: p.completedAt,
                 Notes: p.notes,
@@ -225,9 +229,9 @@ export default function UserDetail() {
                       <Button
                         size="small"
                         sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
-                        onClick={() => navigate(`/challenges/${p.eventId}`)}
+                        onClick={() => navigate(`/challenges/${p.challengeId}`)}
                       >
-                        {challengeName(p.eventId)}
+                        {challengeName(p.challengeId)}
                       </Button>
                     </TableCell>
                     <TableCell>{actionName(p.actionId)}</TableCell>

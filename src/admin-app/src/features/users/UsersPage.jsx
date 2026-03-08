@@ -16,6 +16,8 @@ import {
   TextField,
   MenuItem,
   Stack,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -46,6 +48,8 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("All");
   const [groupFilter, setGroupFilter] = useState(initialGroupFilter);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const navigate = useNavigate();
@@ -61,9 +65,15 @@ export default function UsersPage() {
   const showLastActive = can(userRole, "VIEW_USER_LAST_ACTIVE");
 
   const load = async () => {
-    const [u, g] = await Promise.all([getUsers(), getGroups()]);
-    setUsers(u);
-    setGroups(g);
+    try {
+      const [u, g] = await Promise.all([getUsers(), getGroups()]);
+      setUsers(u);
+      setGroups(g);
+    } catch (err) {
+      setError(err.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     load();
@@ -93,8 +103,11 @@ export default function UsersPage() {
     load();
   };
 
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Box
         sx={{
           display: "flex",

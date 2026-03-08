@@ -1,4 +1,4 @@
-export const EVENT_STATUSES = {
+export const CHALLENGE_STATUSES = {
   ACTIVE: 'Active',
   UPCOMING: 'Upcoming',
   COMPLETED: 'Completed',
@@ -6,6 +6,7 @@ export const EVENT_STATUSES = {
 };
 
 export const CATEGORIES = [
+  'General Sustainability',
   'Food',
   'Water',
   'Energy',
@@ -13,7 +14,7 @@ export const CATEGORIES = [
   'Consumption & Waste',
 ];
 
-const events = [
+const challenges = [
   {
     id: 1,
     name: "2019 Commissioner's Sustainability Challenge",
@@ -22,7 +23,7 @@ const events = [
     theme: '#4CAF50',
     startDate: '2019-01-14',
     endDate: '2019-01-18',
-    status: EVENT_STATUSES.ARCHIVED,
+    status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 34,
     groupId: 1,
@@ -35,7 +36,7 @@ const events = [
     theme: '#2196F3',
     startDate: '2020-01-13',
     endDate: '2020-01-17',
-    status: EVENT_STATUSES.ARCHIVED,
+    status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 41,
     groupId: 1,
@@ -48,7 +49,7 @@ const events = [
     theme: '#FF9800',
     startDate: '2022-04-04',
     endDate: '2022-04-29',
-    status: EVENT_STATUSES.ARCHIVED,
+    status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 52,
     groupId: 1,
@@ -61,7 +62,7 @@ const events = [
     theme: '#00BCD4',
     startDate: '2024-04-01',
     endDate: '2024-04-28',
-    status: EVENT_STATUSES.COMPLETED,
+    status: CHALLENGE_STATUSES.COMPLETED,
     createdBy: 1,
     participantCount: 38,
     groupId: 1,
@@ -74,7 +75,7 @@ const events = [
     theme: '#9C27B0',
     startDate: '2026-04-01',
     endDate: '2026-04-30',
-    status: EVENT_STATUSES.UPCOMING,
+    status: CHALLENGE_STATUSES.UPCOMING,
     createdBy: 1,
     participantCount: 0,
     groupId: 3,
@@ -87,11 +88,11 @@ const events = [
     theme: '#795548',
     startDate: '2026-03-03',
     endDate: '2026-03-07',
-    status: EVENT_STATUSES.ACTIVE,
+    status: CHALLENGE_STATUSES.ACTIVE,
     createdBy: 2,
     participantCount: 28,
     groupId: 1,
   },
 ];
 
-export default events;
+export default challenges;

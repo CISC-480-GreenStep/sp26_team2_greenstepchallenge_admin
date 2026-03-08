@@ -6,7 +6,7 @@
  */
 
 import usersData, { ROLES, USER_STATUSES } from './mock/users';
-import eventsData, { EVENT_STATUSES, CATEGORIES } from './mock/events';
+import challengesData, { CHALLENGE_STATUSES, CATEGORIES } from './mock/challenges';
 import actionsData from './mock/actions';
 import participationData from './mock/participation';
 import activityLogsData from './mock/activityLogs';
@@ -15,13 +15,13 @@ import presetsData from './mock/presets';
 
 const STORAGE_KEY = 'greenstep_admin_data';
 /** Bump when mock data structure/content changes; old stored data will be discarded */
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 function loadDefaults() {
   return {
     _version: DATA_VERSION,
     users: [...usersData],
-    events: [...eventsData],
+    challenges: [...challengesData],
     actions: [...actionsData],
     participation: [...participationData],
     activityLogs: [...activityLogsData],
@@ -29,7 +29,7 @@ function loadDefaults() {
     presets: presetsData.map((p) => ({ ...p, actions: [...p.actions] })),
     nextIds: {
       user: usersData.length + 1,
-      event: eventsData.length + 1,
+      challenge: challengesData.length + 1,
       action: actionsData.length + 1,
       group: groupsData.length + 1,
       preset: presetsData.length + 1,
@@ -97,41 +97,41 @@ export async function activateUser(id) {
   return updateUser(id, { status: USER_STATUSES.ACTIVE });
 }
 
-// ─── Events (Challenges) ───────────────────────────
-export async function getEvents() {
+// ─── Challenges ─────────────────────────────────────
+export async function getChallenges() {
   await delay();
-  return [...store.events];
+  return [...store.challenges];
 }
 
-export async function getEventById(id) {
+export async function getChallengeById(id) {
   await delay();
-  return store.events.find((e) => e.id === id) || null;
+  return store.challenges.find((c) => c.id === id) || null;
 }
 
-export async function createEvent(data) {
+export async function createChallenge(data) {
   await delay();
-  const event = { id: store.nextIds.event++, participantCount: 0, ...data };
-  store.events.push(event);
+  const challenge = { id: store.nextIds.challenge++, participantCount: 0, ...data };
+  store.challenges.push(challenge);
   save();
-  return event;
+  return challenge;
 }
 
-export async function updateEvent(id, data) {
+export async function updateChallenge(id, data) {
   await delay();
-  const idx = store.events.findIndex((e) => e.id === id);
-  if (idx === -1) throw new Error('Event not found');
-  store.events[idx] = { ...store.events[idx], ...data };
+  const idx = store.challenges.findIndex((c) => c.id === id);
+  if (idx === -1) throw new Error('Challenge not found');
+  store.challenges[idx] = { ...store.challenges[idx], ...data };
   save();
-  return store.events[idx];
+  return store.challenges[idx];
 }
 
-export async function archiveEvent(id) {
-  return updateEvent(id, { status: EVENT_STATUSES.ARCHIVED });
+export async function archiveChallenge(id) {
+  return updateChallenge(id, { status: CHALLENGE_STATUSES.ARCHIVED });
 }
 
-export async function deleteEvent(id) {
+export async function deleteChallenge(id) {
   await delay();
-  store.events = store.events.filter((e) => e.id !== id);
+  store.challenges = store.challenges.filter((c) => c.id !== id);
   save();
 }
 
@@ -141,9 +141,9 @@ export async function getActions() {
   return [...store.actions];
 }
 
-export async function getActionsByEvent(eventId) {
+export async function getActionsByChallenge(challengeId) {
   await delay();
-  return store.actions.filter((a) => a.eventId === eventId);
+  return store.actions.filter((a) => a.challengeId === challengeId);
 }
 
 export async function createAction(data) {
@@ -175,9 +175,9 @@ export async function getParticipation() {
   return [...store.participation];
 }
 
-export async function getParticipationByEvent(eventId) {
+export async function getParticipationByChallenge(challengeId) {
   await delay();
-  return store.participation.filter((p) => p.eventId === eventId);
+  return store.participation.filter((p) => p.challengeId === challengeId);
 }
 
 export async function getParticipationByUser(userId) {
@@ -185,29 +185,18 @@ export async function getParticipationByUser(userId) {
   return store.participation.filter((p) => p.userId === userId);
 }
 
-export async function getParticipantCountByEvent(eventId) {
-  await delay();
-  const unique = new Set(store.participation.filter((p) => p.eventId === eventId).map((p) => p.userId));
-  return unique.size;
-}
-
-/** Returns { eventId: participantCount } for all events */
-export async function getParticipantCountsByEvents() {
+/** Returns { challengeId: participantCount } for all challenges */
+export async function getParticipantCounts() {
   await delay();
   const counts = {};
   store.participation.forEach((p) => {
-    if (!counts[p.eventId]) counts[p.eventId] = new Set();
-    counts[p.eventId].add(p.userId);
+    if (!counts[p.challengeId]) counts[p.challengeId] = new Set();
+    counts[p.challengeId].add(p.userId);
   });
   return Object.fromEntries(Object.entries(counts).map(([id, set]) => [Number(id), set.size]));
 }
 
 // ─── Activity Logs ──────────────────────────────────
-export async function getActivityLogs() {
-  await delay();
-  return [...store.activityLogs];
-}
-
 export async function getActivityLogsByUser(userId) {
   await delay();
   return store.activityLogs.filter((l) => l.userId === userId);
@@ -308,23 +297,23 @@ export async function getUserPoints(userId) {
     .filter((p) => p.userId === userId)
     .forEach((p) => {
       const action = store.actions.find((a) => a.id === p.actionId);
-      const event = store.events.find((e) => e.id === p.eventId);
-      if (action && event) {
-        if (!byChallenge[event.id]) {
+      const challenge = store.challenges.find((c) => c.id === p.challengeId);
+      if (action && challenge) {
+        if (!byChallenge[challenge.id]) {
           const maxPoints = store.actions
-            .filter((a) => a.eventId === event.id)
+            .filter((a) => a.challengeId === challenge.id)
             .reduce((sum, a) => sum + a.points, 0);
-          byChallenge[event.id] = {
-            challengeId: event.id,
-            challengeName: event.name,
-            status: event.status,
+          byChallenge[challenge.id] = {
+            challengeId: challenge.id,
+            challengeName: challenge.name,
+            status: challenge.status,
             points: 0,
             maxPoints,
             count: 0,
           };
         }
-        byChallenge[event.id].points += action.points;
-        byChallenge[event.id].count += 1;
+        byChallenge[challenge.id].points += action.points;
+        byChallenge[challenge.id].count += 1;
       }
     });
   const breakdown = Object.values(byChallenge);
@@ -332,11 +321,11 @@ export async function getUserPoints(userId) {
   return { total, breakdown };
 }
 
-export async function getChallengeLeaderboard(eventId, limit = 10) {
+export async function getChallengeLeaderboard(challengeId, limit = 10) {
   await delay();
   const pointsByUser = {};
   store.participation
-    .filter((p) => p.eventId === eventId)
+    .filter((p) => p.challengeId === challengeId)
     .forEach((p) => {
       const action = store.actions.find((a) => a.id === p.actionId);
       if (action) {
@@ -346,7 +335,7 @@ export async function getChallengeLeaderboard(eventId, limit = 10) {
       }
     });
   const maxPoints = store.actions
-    .filter((a) => a.eventId === eventId)
+    .filter((a) => a.challengeId === challengeId)
     .reduce((sum, a) => sum + a.points, 0);
   return Object.entries(pointsByUser)
     .map(([uid, data]) => {
@@ -358,4 +347,4 @@ export async function getChallengeLeaderboard(eventId, limit = 10) {
 }
 
 // ─── Re-exports for convenience ─────────────────────
-export { ROLES, USER_STATUSES, EVENT_STATUSES, CATEGORIES };
+export { ROLES, USER_STATUSES, CHALLENGE_STATUSES, CATEGORIES };

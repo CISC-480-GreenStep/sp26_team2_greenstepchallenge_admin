@@ -13,18 +13,22 @@ import {
   Paper,
   IconButton,
   Stack,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getGroups, getUsers, getEvents, deleteGroup } from "../../data/api";
+import { getGroups, getUsers, getChallenges, deleteGroup } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState([]);
   const [users, setUsers] = useState([]);
-  const [events, setEvents] = useState([]);
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
@@ -32,10 +36,16 @@ export default function GroupsPage() {
   const canManage = hasRole("Admin");
 
   const load = async () => {
-    const [g, u, e] = await Promise.all([getGroups(), getUsers(), getEvents()]);
-    setGroups(g);
-    setUsers(u);
-    setEvents(e);
+    try {
+      const [g, u, c] = await Promise.all([getGroups(), getUsers(), getChallenges()]);
+      setGroups(g);
+      setUsers(u);
+      setChallenges(c);
+    } catch (err) {
+      setError(err.message || 'Failed to load groups');
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     load();
@@ -43,7 +53,7 @@ export default function GroupsPage() {
 
   const memberCount = (gid) => users.filter((u) => u.groupId === gid).length;
   const challengeCount = (gid) =>
-    events.filter((e) => e.groupId === gid).length;
+    challenges.filter((c) => c.groupId === gid).length;
 
   const handleDelete = async () => {
     if (pendingDelete) {
@@ -54,8 +64,11 @@ export default function GroupsPage() {
     }
   };
 
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Box
         sx={{
           display: "flex",

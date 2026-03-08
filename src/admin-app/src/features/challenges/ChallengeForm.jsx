@@ -26,12 +26,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
-  getEventById,
-  createEvent,
-  updateEvent,
+  getChallengeById,
+  createChallenge,
+  updateChallenge,
   CATEGORIES,
-  EVENT_STATUSES,
-  getActionsByEvent,
+  CHALLENGE_STATUSES,
+  getActionsByChallenge,
   createAction,
   updateAction,
   deleteAction,
@@ -47,7 +47,7 @@ const EMPTY_FORM = {
   theme: "#4CAF50",
   startDate: "",
   endDate: "",
-  status: EVENT_STATUSES.UPCOMING,
+  status: CHALLENGE_STATUSES.UPCOMING,
   groupId: "",
 };
 
@@ -77,11 +77,11 @@ export default function ChallengeForm() {
     getGroups().then(setGroups);
     getPresets().then(setPresets);
     if (isEdit) {
-      const eid = Number(id);
-      getEventById(eid).then((e) => {
-        if (e) setForm(e);
+      const cid = Number(id);
+      getChallengeById(cid).then((c) => {
+        if (c) setForm(c);
       });
-      getActionsByEvent(eid).then(setActions);
+      getActionsByChallenge(cid).then(setActions);
     }
   }, [id, isEdit]);
 
@@ -111,12 +111,12 @@ export default function ChallengeForm() {
     e.preventDefault();
     const payload = { ...form, groupId: form.groupId || null };
     if (isEdit) {
-      await updateEvent(Number(id), payload);
+      await updateChallenge(Number(id), payload);
     } else {
-      const newEvent = await createEvent({ ...payload, createdBy: user.id });
+      const newChallenge = await createChallenge({ ...payload, createdBy: user.id });
       if (presetActions.length > 0) {
         for (const tmpl of presetActions) {
-          await createAction({ ...tmpl, eventId: newEvent.id });
+          await createAction({ ...tmpl, challengeId: newChallenge.id });
         }
       }
     }
@@ -124,7 +124,7 @@ export default function ChallengeForm() {
   };
 
   const loadActions = async () => {
-    if (isEdit) setActions(await getActionsByEvent(Number(id)));
+    if (isEdit) setActions(await getActionsByChallenge(Number(id)));
   };
 
   const openNewAction = () => {
@@ -148,7 +148,7 @@ export default function ChallengeForm() {
     if (editingAction) {
       await updateAction(editingAction.id, actionForm);
     } else {
-      await createAction({ ...actionForm, eventId: Number(id) });
+      await createAction({ ...actionForm, challengeId: Number(id) });
     }
     setActionDialogOpen(false);
     loadActions();
@@ -165,7 +165,7 @@ export default function ChallengeForm() {
         Back to Challenges
       </Button>
 
-      <Typography variant="h5" fontWeight={700} mb={3}>
+      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>
 
@@ -173,7 +173,7 @@ export default function ChallengeForm() {
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {!isEdit && presets.length > 0 && (
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Paper
                   variant="outlined"
                   sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}
@@ -242,7 +242,7 @@ export default function ChallengeForm() {
                 onChange={handleChange("status")}
                 fullWidth
               >
-                {Object.values(EVENT_STATUSES).map((s) => (
+                {Object.values(CHALLENGE_STATUSES).map((s) => (
                   <MenuItem key={s} value={s}>
                     {s}
                   </MenuItem>

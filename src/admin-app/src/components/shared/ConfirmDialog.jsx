@@ -4,10 +4,10 @@ import {
 
 export default function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog open={open} onClose={onCancel} aria-describedby="confirm-dialog-description">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
+        <DialogContentText id="confirm-dialog-description">{message}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>Cancel</Button>

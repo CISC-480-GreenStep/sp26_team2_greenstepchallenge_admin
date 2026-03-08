@@ -19,6 +19,8 @@ import {
   TextField,
   MenuItem,
   Stack,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
@@ -30,7 +32,7 @@ import EventIcon from '@mui/icons-material/Event';
 import {
   getGroupById,
   getUsers,
-  getEvents,
+  getChallenges,
   updateUser,
   deleteGroup,
 } from '../../data/api';
@@ -45,33 +47,38 @@ export default function GroupDetail() {
 
   const [group, setGroup] = useState(null);
   const [users, setUsers] = useState([]);
-  const [events, setEvents] = useState([]);
+  const [challenges, setChallenges] = useState([]);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [pendingRemoveUser, setPendingRemoveUser] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [error, setError] = useState(null);
 
   const load = async () => {
-    const gid = Number(id);
-    const [g, u, e] = await Promise.all([
-      getGroupById(gid),
-      getUsers(),
-      getEvents(),
-    ]);
-    setGroup(g);
-    setUsers(u);
-    setEvents(e);
+    try {
+      const gid = Number(id);
+      const [g, u, c] = await Promise.all([
+        getGroupById(gid),
+        getUsers(),
+        getChallenges(),
+      ]);
+      setGroup(g);
+      setUsers(u);
+      setChallenges(c);
+    } catch (err) {
+      setError(err.message || 'Failed to load group details');
+    }
   };
 
   useEffect(() => {
     load();
   }, [id]);
 
-  if (!group) return <Typography>Loading...</Typography>;
+  if (!group) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
 
   const members = users.filter((u) => u.groupId === group.id);
-  const groupChallenges = events.filter((e) => e.groupId === group.id);
+  const groupChallenges = challenges.filter((c) => c.groupId === group.id);
   const usersNotInGroup = users.filter((u) => u.groupId !== group.id);
 
   const handleAddMember = async () => {
@@ -98,6 +105,7 @@ export default function GroupDetail() {
 
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate('/groups')}

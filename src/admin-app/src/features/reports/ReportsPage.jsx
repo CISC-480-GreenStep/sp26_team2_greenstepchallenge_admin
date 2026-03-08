@@ -2,46 +2,57 @@ import { useEffect, useState, useMemo } from 'react';
 import {
   Box, Typography, Paper, TextField, MenuItem, Grid, Stack,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  CircularProgress, Alert,
 } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
-  getEvents, getUsers, getParticipation, getActions,
+  getChallenges, getUsers, getParticipation, getActions,
 } from '../../data/api';
 import CSVExport from '../../components/shared/CSVExport';
 
 export default function ReportsPage() {
-  const [events, setEvents] = useState([]);
+  const [challenges, setChallenges] = useState([]);
   const [users, setUsers] = useState([]);
   const [participation, setParticipation] = useState([]);
   const [actions, setActions] = useState([]);
-  const [eventFilter, setEventFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [challengeFilter, setChallengeFilter] = useState('All');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
-    Promise.all([getEvents(), getUsers(), getParticipation(), getActions()])
-      .then(([e, u, p, a]) => { setEvents(e); setUsers(u); setParticipation(p); setActions(a); });
+    (async () => {
+      try {
+        const [c, u, p, a] = await Promise.all([getChallenges(), getUsers(), getParticipation(), getActions()]);
+        setChallenges(c); setUsers(u); setParticipation(p); setActions(a);
+      } catch (err) {
+        setError(err.message || 'Failed to load report data');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const filtered = useMemo(() => {
     return participation.filter((p) => {
-      if (eventFilter !== 'All' && p.eventId !== Number(eventFilter)) return false;
+      if (challengeFilter !== 'All' && p.challengeId !== Number(challengeFilter)) return false;
       if (dateFrom && p.completedAt < dateFrom) return false;
       if (dateTo && p.completedAt > dateTo) return false;
       return true;
     });
-  }, [participation, eventFilter, dateFrom, dateTo]);
+  }, [participation, challengeFilter, dateFrom, dateTo]);
 
   const userName = (uid) => users.find((u) => u.id === uid)?.name || 'Unknown';
-  const challengeName = (eid) => events.find((e) => e.id === eid)?.name || 'Unknown';
+  const challengeName = (cid) => challenges.find((c) => c.id === cid)?.name || 'Unknown';
   const actionName = (aid) => actions.find((a) => a.id === aid)?.name || 'Unknown';
   const actionCategory = (aid) => actions.find((a) => a.id === aid)?.category || 'Unknown';
 
   const tableData = filtered.map((p) => ({
     User: userName(p.userId),
-    Challenge: challengeName(p.eventId),
+    Challenge: challengeName(p.challengeId),
     Action: actionName(p.actionId),
     Category: actionCategory(p.actionId),
     Date: p.completedAt,
@@ -57,8 +68,11 @@ export default function ReportsPage() {
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
   }, [filtered, actions]);
 
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Reports</Typography>
 
       <Paper sx={{ p: 2, mb: 3 }}>
@@ -66,10 +80,10 @@ export default function ReportsPage() {
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               size="small" select label="Challenge" fullWidth
-              value={eventFilter} onChange={(e) => setEventFilter(e.target.value)}
+              value={challengeFilter} onChange={(e) => setChallengeFilter(e.target.value)}
             >
               <MenuItem value="All">All Challenges</MenuItem>
-              {events.map((ev) => <MenuItem key={ev.id} value={ev.id}>{ev.name}</MenuItem>)}
+              {challenges.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
             </TextField>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>

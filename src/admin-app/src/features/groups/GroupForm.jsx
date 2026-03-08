@@ -39,7 +39,7 @@ export default function GroupForm() {
         Back to Groups
       </Button>
 
-      <Typography variant="h5" fontWeight={700} mb={3}>
+      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
         {isEdit ? 'Edit Group' : 'Create Group'}
       </Typography>
 

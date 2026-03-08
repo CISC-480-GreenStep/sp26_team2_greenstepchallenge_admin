@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, IconButton, Chip, Stack,
+  TableHead, TableRow, Paper, IconButton, Chip, Stack, CircularProgress, Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,6 +14,8 @@ import ConfirmDialog from '../../components/shared/ConfirmDialog';
 
 export default function PresetsPage() {
   const [presets, setPresets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
@@ -21,7 +23,13 @@ export default function PresetsPage() {
   const canManage = hasRole('Admin');
 
   const load = async () => {
-    setPresets(await getPresets());
+    try {
+      setPresets(await getPresets());
+    } catch (err) {
+      setError(err.message || 'Failed to load presets');
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => { load(); }, []);
 
@@ -34,8 +42,11 @@ export default function PresetsPage() {
     }
   };
 
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
   return (
     <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/challenges')} sx={{ mb: 2 }}>
         Back to Challenges
       </Button>

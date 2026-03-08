@@ -41,6 +41,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
           <ListItemButton
             key={item.path}
             selected={isSelected(item.path)}
+            aria-current={isSelected(item.path) ? 'page' : undefined}
             onClick={() => { navigate(item.path); onClose?.(); }}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
@@ -58,6 +59,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
         open={mobileOpen}
         onClose={onClose}
         ModalProps={{ keepMounted: true }}
+        aria-label="Main navigation"
         sx={{
           display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
@@ -68,6 +70,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
 
       <Drawer
         variant="permanent"
+        aria-label="Main navigation"
         sx={{
           display: { xs: 'none', md: 'block' },
           width: DRAWER_WIDTH,

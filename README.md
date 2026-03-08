@@ -117,7 +117,8 @@ Click the **"Reset Demo Data"** button on the login page to clear all changes an
 ```
 sp26_team2_greenstepchallenge_admin/
 ├── README.md                    ← you are here
-├── docs/                        ← project documentation
+├── data/                        ← reserved for future DB migrations and seed data
+├── docs/                        ← project documentation and backups
 ├── meetings/                    ← meeting notes and transcripts
 └── src/
     └── admin-app/               ← React application
@@ -125,22 +126,25 @@ sp26_team2_greenstepchallenge_admin/
         ├── src/
         │   ├── components/
         │   │   ├── layout/      ← Sidebar, TopBar, AdminLayout
-        │   │   └── shared/      ← CSVExport, ConfirmDialog, StatCard
+        │   │   ├── shared/      ← CSVExport, ConfirmDialog, StatCard
+        │   │   └── MobilePreview.jsx  ← Phone-frame challenge preview
         │   ├── features/
         │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
         │   │   ├── dashboard/   ← DashboardPage (analytics + leaderboard)
         │   │   ├── challenges/  ← ChallengesPage, ChallengeForm, ChallengeDetail
         │   │   ├── presets/     ← PresetsPage, PresetForm (challenge templates)
-        │   │   ├── groups/      ← GroupsPage, GroupForm
+        │   │   ├── groups/      ← GroupsPage, GroupForm, GroupDetail
         │   │   ├── users/       ← UsersPage, UserForm, UserDetail
         │   │   └── reports/     ← ReportsPage (filters + CSV export)
         │   ├── data/
-        │   │   ├── mock/        ← Fake data fixtures (users, events, actions, participation, groups, activityLogs, presets)
+        │   │   ├── mock/        ← Fake data fixtures (challenges, users, actions, participation, groups, activityLogs, presets)
         │   │   └── api.js       ← API abstraction layer (localStorage-backed)
-        │   ├── hooks/
-        │   ├── lib/          ← permissions.js (role-based view/edit rules)
+        │   ├── lib/
+        │   │   ├── constants.js ← Shared color palettes and status mappings
+        │   │   └── permissions.js ← Role-based view/edit rules
         │   ├── App.jsx
         │   └── main.jsx
+        ├── .env.example
         ├── package.json
         └── vite.config.js
 ```
@@ -178,15 +182,15 @@ All logged-in users can see everyone and click any user to view full details. Pe
 | Entity         | Key Fields                                                  |
 |----------------|-------------------------------------------------------------|
 | User           | id, name, email, role, status, groupId, createdAt, lastActive |
-| Event (Challenge) | id, name, description, category, theme, startDate, endDate, status, createdBy, groupId, participantCount |
-| Action         | id, eventId, name, description, category, points            |
-| Participation  | id, userId, eventId, actionId, completedAt, notes, photoUrl |
+| Challenge      | id, name, description, category, theme, startDate, endDate, status, createdBy, groupId, participantCount |
+| Action         | id, challengeId, name, description, category, points        |
+| Participation  | id, userId, challengeId, actionId, completedAt, notes, photoUrl |
 | ActivityLog    | id, userId, action, timestamp, details                      |
 | Group          | id, name, description, createdAt                            |
 | Preset         | id, name, description, category, theme, status, actions[], createdAt |
 
 ### Action Categories (from MPCA taxonomy)
-Food, Water, Energy, Transportation, Consumption & Waste
+General Sustainability, Food, Water, Energy, Transportation, Consumption & Waste
 
 ### Data Sources
 Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's Challenge scoring templates, 2022 & 2024 Earth Month trackers, and a sustainability challenge mock draft). The original files have been removed from the repo since all relevant data is now embedded in the JavaScript mock files under `src/admin-app/src/data/mock/`.
@@ -208,6 +212,24 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.5.1 — Codebase Cleanup (Mar 8, 2026)
+- **Renamed "Event" → "Challenge"** throughout the entire data layer — mock files, API functions, and all feature components now use consistent `challenge`/`challengeId` terminology
+- Added `'General Sustainability'` to the `CATEGORIES` array (5 of 6 challenges use it)
+- Added loading spinners (`CircularProgress`) to all list and detail pages
+- Added error handling (`try/catch` + `Alert`) to all pages with API calls
+- Added accessibility improvements: `aria-label` on navigation, menus, dialogs, and export buttons; `aria-current="page"` on active nav items; semantic `<main>` wrapper
+- Extracted shared color constants into `lib/constants.js` (chart colors, medal colors, status color map)
+- Standardized responsive page title sizing across all form pages
+- Fixed MUI Grid v7 API consistency (removed deprecated `item` prop usage)
+- Presets now use `CHALLENGE_STATUSES.UPCOMING` constant instead of string literal
+- Removed unused API functions (`getParticipantCountByEvent`, `getActivityLogs`)
+- Updated `package.json` version to `0.5.0`
+- Added `meta description` and `theme-color` to `index.html`
+- Added `.env.example` for future backend configuration
+- Improved all sub-folder READMEs with useful descriptions
+- Updated root `.gitignore` with comprehensive patterns
+- Data version bumped to v4 (old localStorage data auto-reset)
 
 ### v0.5.0 — Challenge Presets (Mar 8, 2026)
 - **Presets page** — list, create, edit, delete reusable challenge templates (Admin/SuperAdmin only)

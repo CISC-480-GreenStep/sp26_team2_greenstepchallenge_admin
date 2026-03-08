@@ -23,6 +23,7 @@ export default function TopBar({ onMenuToggle }) {
         <IconButton
           edge="start"
           onClick={onMenuToggle}
+          aria-label="Open navigation menu"
           sx={{ mr: 2, display: { md: 'none' } }}
         >
           <MenuIcon />

@@ -39,6 +39,7 @@ export default function CSVExport({ data, filename = 'export.csv', label = 'Expo
       startIcon={<FileDownloadIcon />}
       onClick={handleExport}
       disabled={!data || data.length === 0}
+      aria-label="Export data as CSV"
     >
       {label}
     </Button>

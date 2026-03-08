@@ -1,47 +1,76 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Chip, IconButton, TextField, MenuItem, Stack,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getUsers, deactivateUser, activateUser, ROLES, USER_STATUSES, getGroups } from '../../data/api';
-import { useAuth } from '../auth/AuthContext';
-import CSVExport from '../../components/shared/CSVExport';
-import ConfirmDialog from '../../components/shared/ConfirmDialog';
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  TextField,
+  MenuItem,
+  Stack,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import {
+  getUsers,
+  deactivateUser,
+  activateUser,
+  ROLES,
+  USER_STATUSES,
+  getGroups,
+} from "../../data/api";
+import { useAuth } from "../auth/AuthContext";
+import CSVExport from "../../components/shared/CSVExport";
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
 
 export default function UsersPage() {
+  //reads 'group ID' from URL
+  const queryParams = new URLSearchParams(window.location.search);
+  const initialGroupFilter = queryParams.get("groupId") || "All";
+
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All');
-  const [groupFilter, setGroupFilter] = useState('All');
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("All");
+  const [groupFilter, setGroupFilter] = useState(initialGroupFilter);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const navigate = useNavigate();
+
   const { hasRole } = useAuth();
-  const canManage = hasRole('Admin');
-  const isSuperAdmin = hasRole('SuperAdmin');
+  const canManage = hasRole("Admin");
+  const isSuperAdmin = hasRole("SuperAdmin");
 
   const load = async () => {
     const [u, g] = await Promise.all([getUsers(), getGroups()]);
     setUsers(u);
     setGroups(g);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || '';
+  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || "";
 
   const filtered = users.filter((u) => {
     const matchesSearch =
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleFilter === 'All' || u.role === roleFilter;
-    const matchesGroup = groupFilter === 'All' || u.groupId === Number(groupFilter);
+    const matchesRole = roleFilter === "All" || u.role === roleFilter;
+    const matchesGroup =
+      groupFilter === "All" || u.groupId === Number(groupFilter);
     return matchesSearch && matchesRole && matchesGroup;
   });
 
@@ -59,31 +88,78 @@ export default function UsersPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Users</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+        >
+          Users
+        </Typography>
         <Stack direction="row" spacing={1}>
           <CSVExport data={filtered} filename="users.csv" />
           {isSuperAdmin && (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/users/new')}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate("/users/new")}
+            >
               New User
             </Button>
           )}
         </Stack>
       </Box>
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
-        <TextField size="small" label="Search users" value={search} onChange={(e) => setSearch(e.target.value)} sx={{ minWidth: 220 }} />
-        <TextField size="small" select label="Role" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} sx={{ minWidth: 160 }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
+        <TextField
+          size="small"
+          label="Search users"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ minWidth: 220 }}
+        />
+        <TextField
+          size="small"
+          select
+          label="Role"
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          sx={{ minWidth: 160 }}
+        >
           <MenuItem value="All">All</MenuItem>
-          {Object.values(ROLES).map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
+          {Object.values(ROLES).map((r) => (
+            <MenuItem key={r} value={r}>
+              {r}
+            </MenuItem>
+          ))}
         </TextField>
-        <TextField size="small" select label="Group" value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)} sx={{ minWidth: 160 }}>
+        <TextField
+          size="small"
+          select
+          label="Group"
+          value={groupFilter}
+          onChange={(e) => setGroupFilter(e.target.value)}
+          sx={{ minWidth: 160 }}
+        >
           <MenuItem value="All">All Groups</MenuItem>
-          {groups.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+          {groups.map((g) => (
+            <MenuItem key={g.id} value={g.id}>
+              {g.name}
+            </MenuItem>
+          ))}
         </TextField>
       </Stack>
 
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
@@ -101,31 +177,52 @@ export default function UsersPage() {
               <TableRow key={u.id} hover>
                 <TableCell>{u.name}</TableCell>
                 <TableCell>{u.email}</TableCell>
-                <TableCell><Chip label={u.role} size="small" variant="outlined" /></TableCell>
-                <TableCell>{groupName(u.groupId) || '—'}</TableCell>
+                <TableCell>
+                  <Chip label={u.role} size="small" variant="outlined" />
+                </TableCell>
+                <TableCell>{groupName(u.groupId) || "—"}</TableCell>
                 <TableCell>
                   <Chip
                     label={u.status}
                     size="small"
-                    color={u.status === USER_STATUSES.ACTIVE ? 'success' : 'default'}
+                    color={
+                      u.status === USER_STATUSES.ACTIVE ? "success" : "default"
+                    }
                   />
                 </TableCell>
-                <TableCell>{u.lastActive || '—'}</TableCell>
+                <TableCell>{u.lastActive || "—"}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" onClick={() => navigate(`/users/${u.id}`)}>
+                  <IconButton
+                    size="small"
+                    onClick={() => navigate(`/users/${u.id}`)}
+                  >
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
                   {canManage && (
                     <>
-                      <IconButton size="small" onClick={() => navigate(`/users/${u.id}/edit`)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/users/${u.id}/edit`)}
+                      >
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
-                        color={u.status === USER_STATUSES.ACTIVE ? 'error' : 'success'}
-                        onClick={() => { setPendingAction(u); setConfirmOpen(true); }}
+                        color={
+                          u.status === USER_STATUSES.ACTIVE
+                            ? "error"
+                            : "success"
+                        }
+                        onClick={() => {
+                          setPendingAction(u);
+                          setConfirmOpen(true);
+                        }}
                       >
-                        {u.status === USER_STATUSES.ACTIVE ? <BlockIcon fontSize="small" /> : <CheckCircleIcon fontSize="small" />}
+                        {u.status === USER_STATUSES.ACTIVE ? (
+                          <BlockIcon fontSize="small" />
+                        ) : (
+                          <CheckCircleIcon fontSize="small" />
+                        )}
                       </IconButton>
                     </>
                   )}
@@ -133,7 +230,11 @@ export default function UsersPage() {
               </TableRow>
             ))}
             {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={7} align="center">No users found</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  No users found
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
@@ -141,10 +242,17 @@ export default function UsersPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title={pendingAction?.status === USER_STATUSES.ACTIVE ? 'Deactivate User' : 'Activate User'}
-        message={`Are you sure you want to ${pendingAction?.status === USER_STATUSES.ACTIVE ? 'deactivate' : 'activate'} ${pendingAction?.name}?`}
+        title={
+          pendingAction?.status === USER_STATUSES.ACTIVE
+            ? "Deactivate User"
+            : "Activate User"
+        }
+        message={`Are you sure you want to ${pendingAction?.status === USER_STATUSES.ACTIVE ? "deactivate" : "activate"} ${pendingAction?.name}?`}
         onConfirm={handleToggleStatus}
-        onCancel={() => { setConfirmOpen(false); setPendingAction(null); }}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingAction(null);
+        }}
       />
     </Box>
   );

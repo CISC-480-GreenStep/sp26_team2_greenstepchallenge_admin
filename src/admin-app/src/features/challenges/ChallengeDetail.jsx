@@ -1,19 +1,41 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
-  Box, Typography, Paper, Chip, Grid, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Stack, Card, CardContent,
+  Box,
+  Typography,
+  Paper,
+  Chip,
+  Grid,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Stack,
+  Card,
+  CardContent,
   LinearProgress,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import {
-  getEventById, getActionsByEvent, getParticipationByEvent, getUsers, getGroups,
+  getEventById,
+  getActionsByEvent,
+  getParticipationByEvent,
+  getUsers,
+  getGroups,
   getChallengeLeaderboard,
-} from '../../data/api';
-import CSVExport from '../../components/shared/CSVExport';
+} from "../../data/api";
+import CSVExport from "../../components/shared/CSVExport";
+
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import MobilePreview from "../../components/MobilePreview"; // Adjust the path if needed
 
 export default function ChallengeDetail() {
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
@@ -44,9 +66,10 @@ export default function ChallengeDetail() {
 
   if (!event) return <Typography>Loading...</Typography>;
 
-  const userName = (uid) => users.find((u) => u.id === uid)?.name || 'Unknown';
-  const actionName = (aid) => actions.find((a) => a.id === aid)?.name || 'Unknown';
-  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || '—';
+  const userName = (uid) => users.find((u) => u.id === uid)?.name || "Unknown";
+  const actionName = (aid) =>
+    actions.find((a) => a.id === aid)?.name || "Unknown";
+  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || "—";
 
   const participationExport = participation.map((p) => ({
     User: userName(p.userId),
@@ -57,56 +80,143 @@ export default function ChallengeDetail() {
 
   return (
     <Box>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/challenges')} sx={{ mb: 2 }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate("/challenges")}
+        sx={{ mb: 2 }}
+      >
         Back to Challenges
       </Button>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
-          <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: event.theme, flexShrink: 0 }} />
-          <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' } }}>{event.name}</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Box
+            sx={{
+              width: 16,
+              height: 16,
+              borderRadius: "50%",
+              bgcolor: event.theme,
+              flexShrink: 0,
+            }}
+          />
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ fontSize: { xs: "1.15rem", sm: "1.5rem" } }}
+          >
+            {event.name}
+          </Typography>
           <Chip label={event.status} size="small" />
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<VisibilityIcon />}
+            onClick={() => setPreviewOpen(true)}
+            sx={{ ml: "auto" }}
+          >
+            View as User
+          </Button>
         </Box>
-        <Typography color="text.secondary" mb={2}>{event.description}</Typography>
+        <Typography color="text.secondary" mb={2}>
+          {event.description}
+        </Typography>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Category</Typography><Typography>{event.category}</Typography></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Group</Typography><Typography>{groupName(event.groupId)}</Typography></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Start</Typography><Typography>{event.startDate}</Typography></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">End</Typography><Typography>{event.endDate}</Typography></Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Category
+            </Typography>
+            <Typography>{event.category}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Group
+            </Typography>
+            <Typography>{groupName(event.groupId)}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Start
+            </Typography>
+            <Typography>{event.startDate}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              End
+            </Typography>
+            <Typography>{event.endDate}</Typography>
+          </Grid>
         </Grid>
       </Paper>
 
       {leaderboard.length > 0 && (
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <EmojiEventsIcon color="primary" />
-              <Typography variant="h6" fontWeight={600}>Challenge Leaderboard</Typography>
+              <Typography variant="h6" fontWeight={600}>
+                Challenge Leaderboard
+              </Typography>
             </Box>
             <Grid container spacing={2}>
               {leaderboard.map((entry, i) => {
-                const pct = entry.maxPoints > 0 ? Math.round((entry.points / entry.maxPoints) * 100) : 0;
+                const pct =
+                  entry.maxPoints > 0
+                    ? Math.round((entry.points / entry.maxPoints) * 100)
+                    : 0;
                 return (
                   <Grid key={entry.userId} size={{ xs: 12, sm: 6, md: 4 }}>
                     <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
                           <Chip
                             label={`#${i + 1}`}
                             size="small"
-                            sx={i < 3 ? {
-                              bgcolor: ['#FFD700', '#C0C0C0', '#CD7F32'][i],
-                              color: '#fff',
-                              fontWeight: 700,
-                            } : { fontWeight: 600 }}
+                            sx={
+                              i < 3
+                                ? {
+                                    bgcolor: ["#FFD700", "#C0C0C0", "#CD7F32"][
+                                      i
+                                    ],
+                                    color: "#fff",
+                                    fontWeight: 700,
+                                  }
+                                : { fontWeight: 600 }
+                            }
                           />
-                          <Typography variant="body2" fontWeight={600}>{entry.name}</Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {entry.name}
+                          </Typography>
                         </Box>
-                        <Typography variant="body2" fontWeight={700}>{entry.points} pts</Typography>
+                        <Typography variant="body2" fontWeight={700}>
+                          {entry.points} pts
+                        </Typography>
                       </Box>
-                      <LinearProgress variant="determinate" value={pct} sx={{ height: 6, borderRadius: 3, mb: 0.5 }} />
+                      <LinearProgress
+                        variant="determinate"
+                        value={pct}
+                        sx={{ height: 6, borderRadius: 3, mb: 0.5 }}
+                      />
                       <Typography variant="caption" color="text.secondary">
-                        {entry.actionCount} action{entry.actionCount !== 1 ? 's' : ''} completed &middot; {pct}% of max
+                        {entry.actionCount} action
+                        {entry.actionCount !== 1 ? "s" : ""} completed &middot;{" "}
+                        {pct}% of max
                       </Typography>
                     </Paper>
                   </Grid>
@@ -117,8 +227,10 @@ export default function ChallengeDetail() {
         </Card>
       )}
 
-      <Typography variant="h6" fontWeight={600} mb={1}>Actions ({actions.length})</Typography>
-      <TableContainer component={Paper} sx={{ mb: 3, overflowX: 'auto' }}>
+      <Typography variant="h6" fontWeight={600} mb={1}>
+        Actions ({actions.length})
+      </Typography>
+      <TableContainer component={Paper} sx={{ mb: 3, overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 400 }}>
           <TableHead>
             <TableRow>
@@ -139,11 +251,27 @@ export default function ChallengeDetail() {
         </Table>
       </TableContainer>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
-        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Participation Log ({participation.length})</Typography>
-        <CSVExport data={participationExport} filename={`${event.name.replace(/\s+/g, '_')}_participation.csv`} />
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={1}
+        flexWrap="wrap"
+        gap={1}
+      >
+        <Typography
+          variant="h6"
+          fontWeight={600}
+          sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+        >
+          Participation Log ({participation.length})
+        </Typography>
+        <CSVExport
+          data={participationExport}
+          filename={`${event.name.replace(/\s+/g, "_")}_participation.csv`}
+        />
       </Stack>
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow>
@@ -159,15 +287,39 @@ export default function ChallengeDetail() {
                 <TableCell>{userName(p.userId)}</TableCell>
                 <TableCell>{actionName(p.actionId)}</TableCell>
                 <TableCell>{p.completedAt}</TableCell>
-                <TableCell>{p.notes || '—'}</TableCell>
+                <TableCell>{p.notes || "—"}</TableCell>
               </TableRow>
             ))}
             {participation.length === 0 && (
-              <TableRow><TableCell colSpan={4} align="center">No participation yet</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No participation yet
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
+      {/* Mobile Preview Dialog Here*/}
+      <Dialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        maxWidth="xs"
+        // This is the new, non-deprecated way to style the inner "Paper"
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "20px",
+              bgcolor: "transparent",
+              boxShadow: "none",
+            },
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <MobilePreview challenge={event} actions={actions} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

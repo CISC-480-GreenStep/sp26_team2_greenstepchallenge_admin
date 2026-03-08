@@ -8,11 +8,14 @@ import ChallengesPage from './features/challenges/ChallengesPage';
 import ChallengeForm from './features/challenges/ChallengeForm';
 import ChallengeDetail from './features/challenges/ChallengeDetail';
 import GroupsPage from './features/groups/GroupsPage';
+import GroupDetail from './features/groups/GroupDetail';
 import GroupForm from './features/groups/GroupForm';
 import UsersPage from './features/users/UsersPage';
 import UserForm from './features/users/UserForm';
 import UserDetail from './features/users/UserDetail';
 import ReportsPage from './features/reports/ReportsPage';
+import PresetsPage from './features/presets/PresetsPage';
+import PresetForm from './features/presets/PresetForm';
 
 export default function App() {
   return (
@@ -34,9 +37,14 @@ export default function App() {
           <Route path="challenges/:id" element={<ChallengeDetail />} />
           <Route path="challenges/:id/edit" element={<RequireAuth minRole={ROLES.ADMIN}><ChallengeForm /></RequireAuth>} />
 
+          <Route path="presets" element={<RequireAuth minRole={ROLES.ADMIN}><PresetsPage /></RequireAuth>} />
+          <Route path="presets/new" element={<RequireAuth minRole={ROLES.ADMIN}><PresetForm /></RequireAuth>} />
+          <Route path="presets/:id/edit" element={<RequireAuth minRole={ROLES.ADMIN}><PresetForm /></RequireAuth>} />
+
           <Route path="groups" element={<GroupsPage />} />
           <Route path="groups/new" element={<RequireAuth minRole={ROLES.ADMIN}><GroupForm /></RequireAuth>} />
           <Route path="groups/:id/edit" element={<RequireAuth minRole={ROLES.ADMIN}><GroupForm /></RequireAuth>} />
+          <Route path="groups/:id" element={<GroupDetail />} />
 
           <Route path="users" element={<UsersPage />} />
           <Route path="users/new" element={<RequireAuth minRole={ROLES.SUPER_ADMIN}><UserForm /></RequireAuth>} />

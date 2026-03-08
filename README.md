@@ -12,7 +12,7 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.2.0 — Feature-Complete UI
+### Current Version: v0.5.0 — Challenge Presets
 
 **Status:** Frontend MVP with mock data + localStorage persistence. No backend or database connected yet.
 
@@ -21,18 +21,17 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 - **Login page** with mock authentication (email/password) and Reset Demo Data button
 - **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards
 - **Dashboard** — 4 key metric cards, participation bar chart, category pie chart, monthly trend line chart, Challenge Summary table (with per-challenge points earned), and **Global Leaderboard** (ranked by cumulative points across all challenges)
-- **Challenge Management** (renamed from "Events") — list with search/filter by status and group, create/edit forms, detail view with participation log, archive/delete, CSV export
+- **Challenge Management** (renamed from "Events") — list with search/filter by status and group (URL support for groupId), create/edit forms, detail view with **Participants** table (who completed actions), participation log, clickable group link, archive/delete, CSV export
 - **Action CRUD** — admins can add, edit, and delete actions within each challenge (name, description, category, points)
-- **Group Management** — full CRUD for flexible groups (e.g., "MPCA Staff", "April 2026 Cohort"), with member and challenge counts; group filter on Challenges and Users pages
-- **User Management** — list with search/filter by role and group, create/edit forms with group assignment, detail view with activity log, participation history, **global points** total, and **per-challenge points history** table (earned vs max with progress bars), activate/deactivate, CSV export
+- **Group Management** — full CRUD for flexible groups; **Group Detail** page with member list (add/remove), challenges in group, bidirectional links; clickable member/challenge counts on list
+- **User Management** — list with search/filter by role and group, create/edit forms with group assignment, detail view with **Change Group** dropdown (Admin/SuperAdmin), clickable group and challenge links, activity log, participation history, **global points** total, and **per-challenge points history** table (earned vs max with progress bars), activate/deactivate, CSV export
+- **Challenge Presets** — reusable templates with pre-configured actions; create, edit, delete presets from a dedicated page; applying a preset when creating a new challenge pre-fills form fields and automatically creates all template actions; 3 seed presets (H2O Hero Week, Power Down Challenge, Sustainable Commute Week)
 - **Reports** — filter by challenge and date range, category breakdown chart, full participation table, CSV export
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
 - **localStorage persistence** — all changes survive page refresh; "Reset Demo Data" button restores defaults
 
 ### What's NOT Built Yet
 
-- **Group membership management** — ability to view who is in a group and manage members from both directions: clicking on a group should show its members with easy add/remove, and clicking on a user should show their groups with the ability to assign/unassign. Same pattern for challenges (view participants, manage enrollment).
-- **Challenge presets** — ability to create and save reusable templates (preset action sets, categories, point structures) that admins can pull from when creating new challenges, so they don't have to rebuild common configurations from scratch each time.
 - Real authentication (OAuth, JWT, etc.)
 - Python backend (Flask/FastAPI)
 - PostgreSQL database
@@ -91,6 +90,14 @@ Or use one of the demo accounts:
 | kristin.mroz@mpca.mn.gov       | admin    | SuperAdmin  |
 | sarah.johnson@mpca.mn.gov     | user     | GeneralUser |
 
+### Managing Presets
+
+- **View:** Presets page lists all reusable challenge templates with category, theme, and action count
+- **Create:** Presets > "New Preset" > fill in name, description, category, theme, and add action templates > Create
+- **Edit:** Click a preset name or the pencil icon to modify fields and actions
+- **Delete:** Click the trash icon (confirmation required)
+- **Apply:** When creating a new challenge, use the "Quick Start: Select a Template" dropdown — the form fields auto-fill and a preview of actions appears; on submit, all template actions are created automatically
+
 ### Managing Challenges
 
 - **Create:** Challenges > "New Challenge" button > fill form > Create
@@ -123,14 +130,15 @@ sp26_team2_greenstepchallenge_admin/
         │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
         │   │   ├── dashboard/   ← DashboardPage (analytics + leaderboard)
         │   │   ├── challenges/  ← ChallengesPage, ChallengeForm, ChallengeDetail
+        │   │   ├── presets/     ← PresetsPage, PresetForm (challenge templates)
         │   │   ├── groups/      ← GroupsPage, GroupForm
         │   │   ├── users/       ← UsersPage, UserForm, UserDetail
         │   │   └── reports/     ← ReportsPage (filters + CSV export)
         │   ├── data/
-        │   │   ├── mock/        ← Fake data fixtures (users, events, actions, participation, groups, activityLogs)
+        │   │   ├── mock/        ← Fake data fixtures (users, events, actions, participation, groups, activityLogs, presets)
         │   │   └── api.js       ← API abstraction layer (localStorage-backed)
         │   ├── hooks/
-        │   ├── lib/
+        │   ├── lib/          ← permissions.js (role-based view/edit rules)
         │   ├── App.jsx
         │   └── main.jsx
         ├── package.json
@@ -141,6 +149,8 @@ sp26_team2_greenstepchallenge_admin/
 
 ## Role Permissions
 
+All logged-in users can see everyone and click any user to view full details. Permissions are centralized in `src/admin-app/src/lib/permissions.js` — change `PERMS` values there to restrict who sees what.
+
 | Feature                     | SuperAdmin | Admin | GeneralUser |
 |-----------------------------|:----------:|:-----:|:-----------:|
 | View Dashboard + Leaderboard|     ✓      |   ✓   |      ✓      |
@@ -148,12 +158,18 @@ sp26_team2_greenstepchallenge_admin/
 | Create/Edit Challenges      |     ✓      |   ✓   |             |
 | Manage Actions in Challenge |     ✓      |   ✓   |             |
 | Archive/Delete Challenges   |     ✓      |   ✓   |             |
+| View/Manage Presets         |     ✓      |   ✓   |             |
 | View/Manage Groups          |     ✓      |   ✓   |      ✓ (view only) |
-| View Users                  |     ✓      |   ✓   |      ✓      |
+| View Users list + all users |     ✓      |   ✓   |      ✓      |
+| View any user detail        |     ✓      |   ✓   |      ✓      |
+| View email, role, group, status, points, participation, activity log | ✓ | ✓ | ✓ |
 | Create Users                |     ✓      |       |             |
 | Edit/Deactivate Users       |     ✓      |   ✓   |             |
+| Change user's group         |     ✓      |   ✓   |             |
 | View Reports                |     ✓      |   ✓   |      ✓      |
 | Export CSV                  |     ✓      |   ✓   |      ✓      |
+
+**Customizing permissions:** Edit `src/admin-app/src/lib/permissions.js`. Each `PERMS` entry sets the minimum role (e.g. `ROLES.ADMIN` to hide from GeneralUser). Set to `ROLES.GENERAL_USER` to allow all.
 
 ---
 
@@ -167,6 +183,7 @@ sp26_team2_greenstepchallenge_admin/
 | Participation  | id, userId, eventId, actionId, completedAt, notes, photoUrl |
 | ActivityLog    | id, userId, action, timestamp, details                      |
 | Group          | id, name, description, createdAt                            |
+| Preset         | id, name, description, category, theme, status, actions[], createdAt |
 
 ### Action Categories (from MPCA taxonomy)
 Food, Water, Energy, Transportation, Consumption & Waste
@@ -191,6 +208,22 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.5.0 — Challenge Presets (Mar 8, 2026)
+- **Presets page** — list, create, edit, delete reusable challenge templates (Admin/SuperAdmin only)
+- **Preset actions** — each preset stores action templates (name, description, category, points) that are auto-created on challenge creation
+- **ChallengeForm integration** — "Quick Start" dropdown dynamically loads presets from the store; selecting a preset pre-fills form fields and shows an actions preview table; on submit, actions are bulk-created
+- 3 seed presets: H2O Hero Week (5 water actions), Power Down Challenge (4 energy actions), Sustainable Commute Week (5 transportation actions)
+- Sidebar nav item for Presets (between Challenges and Groups)
+- Data version bumped to v3 (old localStorage data auto-reset)
+
+### v0.4.0 — Group & Challenge Management (Mar 7, 2026)
+- **Group Detail page** — view group info, members table with add/remove, challenges in group; Edit/Delete buttons
+- **Groups** — clickable group name → Group Detail; Members count → Users filtered by group; Challenges count → Challenges filtered by group
+- **Challenges** — clickable name → Challenge Detail; clickable Group → Group Detail; clickable Participants count → Challenge Detail; URL filter `?groupId=X`
+- **Challenge Detail** — Participants table (users who completed actions with points); clickable Group link
+- **User Detail** — Change Group dropdown for Admin/SuperAdmin; clickable group/challenge links in participation and points tables
+- Participant counts now derived from participation data
 
 ### v0.3.0 — Real Client Data Integration (Mar 5, 2026)
 - Replaced fabricated mock data with data extracted from actual MPCA client files
@@ -220,15 +253,13 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 
 ## Future Goals
 
-1. **Group & challenge membership management** — view/manage members inside groups, view/manage groups from user profiles, view/manage participants inside challenges (bidirectional navigation)
-2. **Challenge presets** — save reusable templates with pre-configured action sets, categories, and point structures for quick challenge creation
-3. Connect to Python (FastAPI) backend with PostgreSQL
-4. Real authentication with OAuth/JWT
-5. Coordinate shared database schema with Team 1
-6. Photo upload support for user-submitted content
-7. Content moderation tools (flag/remove comments and photos)
-8. Advanced reporting with saved report templates
-9. Push notification integration for challenge reminders
+1. Connect to Python (FastAPI) backend with PostgreSQL
+2. Real authentication with OAuth/JWT
+3. Coordinate shared database schema with Team 1
+4. Photo upload support for user-submitted content
+5. Content moderation tools (flag/remove comments and photos)
+6. Advanced reporting with saved report templates
+7. Push notification integration for challenge reminders
 
 ---
 

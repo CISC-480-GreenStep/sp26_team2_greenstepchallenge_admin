@@ -31,6 +31,7 @@ import {
   getGroups,
 } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
+import { can } from "../../lib/permissions";
 import CSVExport from "../../components/shared/CSVExport";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 
@@ -49,9 +50,15 @@ export default function UsersPage() {
   const [pendingAction, setPendingAction] = useState(null);
   const navigate = useNavigate();
 
-  const { hasRole } = useAuth();
+  const { user, hasRole } = useAuth();
+  const userRole = user?.role || ROLES.GENERAL_USER;
   const canManage = hasRole("Admin");
   const isSuperAdmin = hasRole("SuperAdmin");
+  const showEmail = can(userRole, "VIEW_USER_EMAIL");
+  const showRole = can(userRole, "VIEW_USER_ROLE");
+  const showGroup = can(userRole, "VIEW_USER_GROUP");
+  const showStatus = can(userRole, "VIEW_USER_STATUS");
+  const showLastActive = can(userRole, "VIEW_USER_LAST_ACTIVE");
 
   const load = async () => {
     const [u, g] = await Promise.all([getUsers(), getGroups()]);
@@ -164,34 +171,43 @@ export default function UsersPage() {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Group</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Last Active</TableCell>
+              {showEmail && <TableCell>Email</TableCell>}
+              {showRole && <TableCell>Role</TableCell>}
+              {showGroup && <TableCell>Group</TableCell>}
+              {showStatus && <TableCell>Status</TableCell>}
+              {showLastActive && <TableCell>Last Active</TableCell>}
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filtered.map((u) => (
-              <TableRow key={u.id} hover>
+              <TableRow
+                key={u.id}
+                hover
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/users/${u.id}`)}
+              >
                 <TableCell>{u.name}</TableCell>
-                <TableCell>{u.email}</TableCell>
-                <TableCell>
-                  <Chip label={u.role} size="small" variant="outlined" />
-                </TableCell>
-                <TableCell>{groupName(u.groupId) || "—"}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={u.status}
-                    size="small"
-                    color={
-                      u.status === USER_STATUSES.ACTIVE ? "success" : "default"
-                    }
-                  />
-                </TableCell>
-                <TableCell>{u.lastActive || "—"}</TableCell>
-                <TableCell align="right">
+                {showEmail && <TableCell>{u.email}</TableCell>}
+                {showRole && (
+                  <TableCell>
+                    <Chip label={u.role} size="small" variant="outlined" />
+                  </TableCell>
+                )}
+                {showGroup && <TableCell>{groupName(u.groupId) || "—"}</TableCell>}
+                {showStatus && (
+                  <TableCell>
+                    <Chip
+                      label={u.status}
+                      size="small"
+                      color={
+                        u.status === USER_STATUSES.ACTIVE ? "success" : "default"
+                      }
+                    />
+                  </TableCell>
+                )}
+                  {showLastActive && <TableCell>{u.lastActive || "—"}</TableCell>}
+                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                   <IconButton
                     size="small"
                     onClick={() => navigate(`/users/${u.id}`)}
@@ -231,7 +247,17 @@ export default function UsersPage() {
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell
+                  colSpan={
+                    2 +
+                    (showEmail ? 1 : 0) +
+                    (showRole ? 1 : 0) +
+                    (showGroup ? 1 : 0) +
+                    (showStatus ? 1 : 0) +
+                    (showLastActive ? 1 : 0)
+                  }
+                  align="center"
+                >
                   No users found
                 </TableCell>
               </TableRow>

@@ -8,12 +8,14 @@ import EventIcon from '@mui/icons-material/Event';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 const DRAWER_WIDTH = 240;
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
   { label: 'Challenges', path: '/challenges', icon: <EventIcon /> },
+  { label: 'Presets', path: '/presets', icon: <BookmarkIcon /> },
   { label: 'Groups', path: '/groups', icon: <GroupsIcon /> },
   { label: 'Users', path: '/users', icon: <PeopleIcon /> },
   { label: 'Reports', path: '/reports', icon: <AssessmentIcon /> },

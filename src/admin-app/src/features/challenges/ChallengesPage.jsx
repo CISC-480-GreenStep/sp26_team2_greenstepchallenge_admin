@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Chip, IconButton, TextField, MenuItem,
@@ -10,7 +10,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getEvents, archiveEvent, deleteEvent, EVENT_STATUSES, getGroups } from '../../data/api';
+import { getEvents, archiveEvent, deleteEvent, EVENT_STATUSES, getGroups, getParticipantCountsByEvents } from '../../data/api';
 import { useAuth } from '../auth/AuthContext';
 import CSVExport from '../../components/shared/CSVExport';
 import ConfirmDialog from '../../components/shared/ConfirmDialog';
@@ -23,11 +23,15 @@ const statusColor = {
 };
 
 export default function ChallengesPage() {
+  const [searchParams] = useSearchParams();
+  const initialGroupFilter = searchParams.get('groupId') || 'All';
+
   const [events, setEvents] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [participantCounts, setParticipantCounts] = useState({});
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [groupFilter, setGroupFilter] = useState('All');
+  const [groupFilter, setGroupFilter] = useState(initialGroupFilter);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
@@ -35,11 +39,22 @@ export default function ChallengesPage() {
   const canEdit = hasRole('Admin');
 
   const load = async () => {
-    const [e, g] = await Promise.all([getEvents(), getGroups()]);
+    const [e, g, counts] = await Promise.all([
+      getEvents(),
+      getGroups(),
+      getParticipantCountsByEvents(),
+    ]);
     setEvents(e);
     setGroups(g);
+    setParticipantCounts(counts);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+  useEffect(() => {
+    const gid = searchParams.get('groupId');
+    if (gid) setGroupFilter(gid);
+  }, [searchParams]);
 
   const groupName = (gid) => groups.find((g) => g.id === gid)?.name || '';
 
@@ -123,15 +138,44 @@ export default function ChallengesPage() {
           <TableBody>
             {filtered.map((event) => (
               <TableRow key={event.id} hover>
-                <TableCell>{event.name}</TableCell>
+                <TableCell>
+                  <Button
+                    size="small"
+                    sx={{ p: 0, minWidth: 'auto', textTransform: 'none', fontWeight: 600 }}
+                    onClick={() => navigate(`/challenges/${event.id}`)}
+                  >
+                    {event.name}
+                  </Button>
+                </TableCell>
                 <TableCell>{event.category}</TableCell>
-                <TableCell>{groupName(event.groupId) || '—'}</TableCell>
+                <TableCell>
+                  {event.groupId ? (
+                    <Button
+                      size="small"
+                      sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                      onClick={() => navigate(`/groups/${event.groupId}`)}
+                    >
+                      {groupName(event.groupId) || '—'}
+                    </Button>
+                  ) : (
+                    '—'
+                  )}
+                </TableCell>
                 <TableCell>{event.startDate}</TableCell>
                 <TableCell>{event.endDate}</TableCell>
                 <TableCell>
                   <Chip label={event.status} size="small" color={statusColor[event.status] || 'default'} />
                 </TableCell>
-                <TableCell align="right">{event.participantCount}</TableCell>
+                <TableCell align="right">
+                  <Button
+                    size="small"
+                    variant="text"
+                    sx={{ fontWeight: 600 }}
+                    onClick={() => navigate(`/challenges/${event.id}`)}
+                  >
+                    {participantCounts[event.id] ?? event.participantCount ?? 0}
+                  </Button>
+                </TableCell>
                 <TableCell align="right">
                   <IconButton size="small" onClick={() => navigate(`/challenges/${event.id}`)}>
                     <VisibilityIcon fontSize="small" />

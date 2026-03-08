@@ -35,27 +35,9 @@ import {
   updateAction,
   deleteAction,
   getGroups,
+  getPresets,
 } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
-
-const CHALLENGE_PRESETS = {
-  WATER_WEEK: {
-    name: "H2O Hero Week",
-    description:
-      "A week-long challenge focused on reducing water waste in the office and at home.",
-    category: "Water",
-    theme: "#2196F3", // Blue
-    status: "Upcoming",
-  },
-  ENERGY_SAVER: {
-    name: "Power Down Challenge",
-    description:
-      "Compete to see who can reduce their energy footprint the most by unplugging devices.",
-    category: "Energy",
-    theme: "#FFC107", // Yellow/Gold
-    status: "Upcoming",
-  },
-};
 
 const EMPTY_FORM = {
   name: "",
@@ -79,27 +61,20 @@ export default function ChallengeForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
-  //Auto-fill logic for Presets
-  const handleApplyPreset = (event) => {
-    const selectedPreset = CHALLENGE_PRESETS[event.target.value];
-    if (selectedPreset) {
-      // spreads the preset data into the form, overwriting empty fields
-      setForm((prev) => ({
-        ...prev,
-        ...selectedPreset,
-      }));
-    }
-  };
   const { user } = useAuth();
   const [form, setForm] = useState(EMPTY_FORM);
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetId, setSelectedPresetId] = useState('');
+  const [presetActions, setPresetActions] = useState([]);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [editingAction, setEditingAction] = useState(null);
   const [actionForm, setActionForm] = useState(EMPTY_ACTION);
 
   useEffect(() => {
     getGroups().then(setGroups);
+    getPresets().then(setPresets);
     if (isEdit) {
       const eid = Number(id);
       getEventById(eid).then((e) => {
@@ -108,6 +83,25 @@ export default function ChallengeForm() {
       getActionsByEvent(eid).then(setActions);
     }
   }, [id, isEdit]);
+
+  const handleApplyPreset = (e) => {
+    const pid = e.target.value;
+    setSelectedPresetId(pid);
+    const preset = presets.find((p) => p.id === pid);
+    if (preset) {
+      setForm((prev) => ({
+        ...prev,
+        name: preset.name,
+        description: preset.description,
+        category: preset.category,
+        theme: preset.theme,
+        status: preset.status || prev.status,
+      }));
+      setPresetActions(preset.actions || []);
+    } else {
+      setPresetActions([]);
+    }
+  };
 
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -118,7 +112,12 @@ export default function ChallengeForm() {
     if (isEdit) {
       await updateEvent(Number(id), payload);
     } else {
-      await createEvent({ ...payload, createdBy: user.id });
+      const newEvent = await createEvent({ ...payload, createdBy: user.id });
+      if (presetActions.length > 0) {
+        for (const tmpl of presetActions) {
+          await createAction({ ...tmpl, eventId: newEvent.id });
+        }
+      }
     }
     navigate("/challenges");
   };
@@ -168,31 +167,33 @@ export default function ChallengeForm() {
       <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 700, mb: 3 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Paper
-                variant="outlined"
-                sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}
-              >
-                <Typography variant="subtitle2" color="primary" gutterBottom>
-                  Quick Start: Select a Template
-                </Typography>
-                <TextField
-                  select
-                  fullWidth
-                  size="small"
-                  value=""
-                  onChange={handleApplyPreset}
-                  label="Choose a Preset"
+            {!isEdit && presets.length > 0 && (
+              <Grid item xs={12}>
+                <Paper
+                  variant="outlined"
+                  sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}
                 >
-                  <MenuItem value="WATER_WEEK">
-                    Water Sustainability Week
-                  </MenuItem>
-                  <MenuItem value="ENERGY_SAVER">
-                    Energy Saver Challenge
-                  </MenuItem>
-                </TextField>
-              </Paper>
-            </Grid>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    Quick Start: Select a Template
+                  </Typography>
+                  <TextField
+                    select
+                    fullWidth
+                    size="small"
+                    value={selectedPresetId}
+                    onChange={handleApplyPreset}
+                    label="Choose a Preset"
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {presets.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.name} ({p.category})
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Paper>
+              </Grid>
+            )}
 
             <Grid size={{ xs: 12 }}>
               <TextField
@@ -292,6 +293,37 @@ export default function ChallengeForm() {
               </TextField>
             </Grid>
           </Grid>
+
+          {!isEdit && presetActions.length > 0 && (
+            <Box mt={3}>
+              <Typography variant="subtitle2" fontWeight={600} mb={1}>
+                Actions from Preset ({presetActions.length})
+              </Typography>
+              <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                These actions will be created automatically when you submit.
+              </Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
+                <Table size="small" sx={{ minWidth: 400 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Category</TableCell>
+                      <TableCell align="right">Points</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {presetActions.map((a, i) => (
+                      <TableRow key={i}>
+                        <TableCell>{a.name}</TableCell>
+                        <TableCell>{a.category}</TableCell>
+                        <TableCell align="right">{a.points}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          )}
 
           <Stack direction="row" spacing={2} mt={3}>
             <Button type="submit" variant="contained">

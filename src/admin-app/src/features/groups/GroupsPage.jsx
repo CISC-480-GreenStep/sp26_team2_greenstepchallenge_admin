@@ -99,10 +99,18 @@ export default function GroupsPage() {
           <TableBody>
             {groups.map((g) => (
               <TableRow key={g.id} hover>
-                <TableCell>{g.name}</TableCell>
+                <TableCell>
+                  <Button
+                    size="small"
+                    sx={{ p: 0, minWidth: 'auto', textTransform: 'none', fontWeight: 600 }}
+                    onClick={() => navigate(`/groups/${g.id}`)}
+                  >
+                    {g.name}
+                  </Button>
+                </TableCell>
                 <TableCell>{g.description}</TableCell>
 
-                {/*Makes 'Members' interactive */}
+                {/* Members - links to Users filtered by group */}
                 <TableCell align="right">
                   <Button
                     size="small"
@@ -114,7 +122,17 @@ export default function GroupsPage() {
                   </Button>
                 </TableCell>
 
-                <TableCell align="right">{challengeCount(g.id)}</TableCell>
+                {/* Challenges - links to Challenges filtered by group */}
+                <TableCell align="right">
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => navigate(`/challenges?groupId=${g.id}`)}
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {challengeCount(g.id)}
+                  </Button>
+                </TableCell>
                 <TableCell>{g.createdAt}</TableCell>
                 {canManage && (
                   <TableCell align="right">

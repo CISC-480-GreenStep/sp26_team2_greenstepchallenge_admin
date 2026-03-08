@@ -78,6 +78,21 @@ export default function ChallengeDetail() {
     Notes: p.notes,
   }));
 
+  // Unique participants (users who have at least one participation)
+  const participantMap = {};
+  participation.forEach((p) => {
+    const uid = p.userId;
+    if (!participantMap[uid]) {
+      participantMap[uid] = { userId: uid, count: 0, points: 0 };
+    }
+    const action = actions.find((a) => a.id === p.actionId);
+    participantMap[uid].count += 1;
+    participantMap[uid].points += action?.points || 0;
+  });
+  const participants = Object.values(participantMap).sort(
+    (a, b) => b.points - a.points
+  );
+
   return (
     <Box>
       <Button
@@ -139,7 +154,17 @@ export default function ChallengeDetail() {
             <Typography variant="body2" color="text.secondary">
               Group
             </Typography>
-            <Typography>{groupName(event.groupId)}</Typography>
+            {event.groupId ? (
+              <Button
+                size="small"
+                sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
+                onClick={() => navigate(`/groups/${event.groupId}`)}
+              >
+                {groupName(event.groupId)}
+              </Button>
+            ) : (
+              <Typography>—</Typography>
+            )}
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
@@ -155,6 +180,57 @@ export default function ChallengeDetail() {
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Participants Section */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" fontWeight={600} mb={1}>
+          Participants ({participants.length})
+        </Typography>
+        <Typography variant="body2" color="text.secondary" mb={1}>
+          Users who have completed at least one action in this challenge
+        </Typography>
+        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+          <Table size="small" sx={{ minWidth: 400 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>User</TableCell>
+                <TableCell align="right">Actions Completed</TableCell>
+                <TableCell align="right">Points</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {participants.map((entry) => (
+                <TableRow key={entry.userId} hover>
+                  <TableCell>
+                    <Button
+                      size="small"
+                      sx={{
+                        p: 0,
+                        minWidth: "auto",
+                        textTransform: "none",
+                      }}
+                      onClick={() => navigate(`/users/${entry.userId}`)}
+                    >
+                      {userName(entry.userId)}
+                    </Button>
+                  </TableCell>
+                  <TableCell align="right">{entry.count}</TableCell>
+                  <TableCell align="right">{entry.points}</TableCell>
+                </TableRow>
+              ))}
+              {participants.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
+                    <Typography color="text.secondary">
+                      No participants yet
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
 
       {leaderboard.length > 0 && (
         <Card sx={{ mb: 3 }}>

@@ -11,22 +11,28 @@ import actionsData from './mock/actions';
 import participationData from './mock/participation';
 import activityLogsData from './mock/activityLogs';
 import groupsData from './mock/groups';
+import presetsData from './mock/presets';
 
 const STORAGE_KEY = 'greenstep_admin_data';
+/** Bump when mock data structure/content changes; old stored data will be discarded */
+const DATA_VERSION = 3;
 
 function loadDefaults() {
   return {
+    _version: DATA_VERSION,
     users: [...usersData],
     events: [...eventsData],
     actions: [...actionsData],
     participation: [...participationData],
     activityLogs: [...activityLogsData],
     groups: [...groupsData],
+    presets: presetsData.map((p) => ({ ...p, actions: [...p.actions] })),
     nextIds: {
       user: usersData.length + 1,
       event: eventsData.length + 1,
       action: actionsData.length + 1,
       group: groupsData.length + 1,
+      preset: presetsData.length + 1,
     },
   };
 }
@@ -34,7 +40,10 @@ function loadDefaults() {
 function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    const stored = raw ? JSON.parse(raw) : null;
+    if (stored && stored._version >= DATA_VERSION) {
+      return stored;
+    }
   } catch { /* ignore corrupt data */ }
   return null;
 }
@@ -176,6 +185,23 @@ export async function getParticipationByUser(userId) {
   return store.participation.filter((p) => p.userId === userId);
 }
 
+export async function getParticipantCountByEvent(eventId) {
+  await delay();
+  const unique = new Set(store.participation.filter((p) => p.eventId === eventId).map((p) => p.userId));
+  return unique.size;
+}
+
+/** Returns { eventId: participantCount } for all events */
+export async function getParticipantCountsByEvents() {
+  await delay();
+  const counts = {};
+  store.participation.forEach((p) => {
+    if (!counts[p.eventId]) counts[p.eventId] = new Set();
+    counts[p.eventId].add(p.userId);
+  });
+  return Object.fromEntries(Object.entries(counts).map(([id, set]) => [Number(id), set.size]));
+}
+
 // ─── Activity Logs ──────────────────────────────────
 export async function getActivityLogs() {
   await delay();
@@ -218,6 +244,41 @@ export async function updateGroup(id, data) {
 export async function deleteGroup(id) {
   await delay();
   store.groups = store.groups.filter((g) => g.id !== id);
+  save();
+}
+
+// ─── Presets ─────────────────────────────────────────
+export async function getPresets() {
+  await delay();
+  return store.presets.map((p) => ({ ...p, actions: [...p.actions] }));
+}
+
+export async function getPresetById(id) {
+  await delay();
+  const p = store.presets.find((p) => p.id === id);
+  return p ? { ...p, actions: [...p.actions] } : null;
+}
+
+export async function createPreset(data) {
+  await delay();
+  const preset = { id: store.nextIds.preset++, createdAt: new Date().toISOString().slice(0, 10), actions: [], ...data };
+  store.presets.push(preset);
+  save();
+  return { ...preset, actions: [...preset.actions] };
+}
+
+export async function updatePreset(id, data) {
+  await delay();
+  const idx = store.presets.findIndex((p) => p.id === id);
+  if (idx === -1) throw new Error('Preset not found');
+  store.presets[idx] = { ...store.presets[idx], ...data };
+  save();
+  return { ...store.presets[idx], actions: [...store.presets[idx].actions] };
+}
+
+export async function deletePreset(id) {
+  await delay();
+  store.presets = store.presets.filter((p) => p.id !== id);
   save();
 }
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Chip, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Stack, Card, CardContent,
-  LinearProgress, Divider,
+  LinearProgress, Divider, TextField, MenuItem,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -11,13 +11,26 @@ import PublicIcon from '@mui/icons-material/Public';
 import HistoryIcon from '@mui/icons-material/History';
 import {
   getUserById, getActivityLogsByUser, getParticipationByUser,
-  getEvents, getActions, getUserPoints, getGroups,
+  getEvents, getActions, getUserPoints, getGroups, updateUser, ROLES,
 } from '../../data/api';
+import { useAuth } from '../auth/AuthContext';
+import { can } from '../../lib/permissions';
 import CSVExport from '../../components/shared/CSVExport';
 
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser, hasRole } = useAuth();
+  const userRole = currentUser?.role || ROLES.GENERAL_USER;
+  const canManage = hasRole('Admin');
+  const showEmail = can(userRole, 'VIEW_USER_EMAIL');
+  const showRole = can(userRole, 'VIEW_USER_ROLE');
+  const showGroup = can(userRole, 'VIEW_USER_GROUP');
+  const showStatus = can(userRole, 'VIEW_USER_STATUS');
+  const showActivityLog = can(userRole, 'VIEW_USER_ACTIVITY_LOG');
+  const showParticipation = can(userRole, 'VIEW_USER_PARTICIPATION');
+  const showPoints = can(userRole, 'VIEW_USER_POINTS');
+  const canChangeGroup = can(userRole, 'CHANGE_USER_GROUP');
   const [user, setUser] = useState(null);
   const [logs, setLogs] = useState([]);
   const [participation, setParticipation] = useState([]);
@@ -25,6 +38,7 @@ export default function UserDetail() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [points, setPoints] = useState({ total: 0, breakdown: [] });
+  const [participationExpanded, setParticipationExpanded] = useState(false);
 
   useEffect(() => {
     const uid = Number(id);
@@ -62,13 +76,46 @@ export default function UserDetail() {
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Typography variant="h5" fontWeight={700} mb={1} sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>{user.name}</Typography>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Email</Typography><Typography sx={{ wordBreak: 'break-all', fontSize: { xs: '0.8rem', sm: '1rem' } }}>{user.email}</Typography></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Role</Typography><Chip label={user.role} size="small" /></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Status</Typography><Chip label={user.status} size="small" color={user.status === 'Active' ? 'success' : 'default'} /></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Group</Typography><Typography>{groupName(user.groupId)}</Typography></Grid>
+          {showEmail && <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Email</Typography><Typography sx={{ wordBreak: 'break-all', fontSize: { xs: '0.8rem', sm: '1rem' } }}>{user.email}</Typography></Grid>}
+          {showRole && <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Role</Typography><Chip label={user.role} size="small" /></Grid>}
+          {showStatus && <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">Status</Typography><Chip label={user.status} size="small" color={user.status === 'Active' ? 'success' : 'default'} /></Grid>}
+          {showGroup && (
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="body2" color="text.secondary">Group</Typography>
+            {canChangeGroup ? (
+              <TextField
+                select
+                size="small"
+                value={user.groupId || ''}
+                onChange={async (e) => {
+                  const gid = e.target.value ? Number(e.target.value) : null;
+                  await updateUser(user.id, { groupId: gid });
+                  setUser((u) => ({ ...u, groupId: gid }));
+                }}
+                sx={{ mt: 0.5, minWidth: 180 }}
+              >
+                <MenuItem value="">No Group</MenuItem>
+                {groups.map((g) => (
+                  <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>
+                ))}
+              </TextField>
+            ) : user.groupId ? (
+              <Button
+                size="small"
+                sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                onClick={() => navigate(`/groups/${user.groupId}`)}
+              >
+                {groupName(user.groupId)}
+              </Button>
+            ) : (
+              <Typography>—</Typography>
+            )}
+          </Grid>
+          )}
         </Grid>
       </Paper>
 
+      {showPoints && (
       <Grid container spacing={3} mb={3}>
         <Grid size={{ xs: 12, sm: 4 }}>
           <Card sx={{ height: '100%' }}>
@@ -111,7 +158,15 @@ export default function UserDetail() {
                         const pct = b.maxPoints > 0 ? Math.round((b.points / b.maxPoints) * 100) : 0;
                         return (
                           <TableRow key={b.challengeId}>
-                            <TableCell>{b.challengeName}</TableCell>
+                            <TableCell>
+                              <Button
+                                size="small"
+                                sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                                onClick={() => navigate(`/challenges/${b.challengeId}`)}
+                              >
+                                {b.challengeName}
+                              </Button>
+                            </TableCell>
                             <TableCell><Chip label={b.status} size="small" /></TableCell>
                             <TableCell align="right"><strong>{b.points}</strong></TableCell>
                             <TableCell align="right">{b.maxPoints}</TableCell>
@@ -134,72 +189,110 @@ export default function UserDetail() {
           </Card>
         </Grid>
       </Grid>
+      )}
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
-        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Activity Log ({logs.length})</Typography>
-        <CSVExport data={logs} filename={`${user.name.replace(/\s+/g, '_')}_activity.csv`} />
-      </Stack>
-      <TableContainer component={Paper} sx={{ mb: 3, overflowX: 'auto' }}>
-        <Table size="small" sx={{ minWidth: 450 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Action</TableCell>
-              <TableCell>Details</TableCell>
-              <TableCell>Timestamp</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {logs.map((l) => (
-              <TableRow key={l.id}>
-                <TableCell>{l.action}</TableCell>
-                <TableCell>{l.details}</TableCell>
-                <TableCell>{l.timestamp}</TableCell>
-              </TableRow>
-            ))}
-            {logs.length === 0 && (
-              <TableRow><TableCell colSpan={3} align="center">No activity</TableCell></TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {showParticipation && (
+        <>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
+            <Box>
+              <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Participation ({participation.length})</Typography>
+              <Typography variant="caption" color="text.secondary">Sustainability actions completed in challenges — this is what shows on challenge leaderboards</Typography>
+            </Box>
+            <CSVExport
+              data={participation.map((p) => ({
+                Challenge: challengeName(p.eventId),
+                Action: actionName(p.actionId),
+                Date: p.completedAt,
+                Notes: p.notes,
+              }))}
+              filename={`${user.name.replace(/\s+/g, '_')}_participation.csv`}
+            />
+          </Stack>
+          <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 500 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Challenge</TableCell>
+                  <TableCell>Action</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Notes</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(participationExpanded ? participation : participation.slice(0, 10)).map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell>
+                      <Button
+                        size="small"
+                        sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                        onClick={() => navigate(`/challenges/${p.eventId}`)}
+                      >
+                        {challengeName(p.eventId)}
+                      </Button>
+                    </TableCell>
+                    <TableCell>{actionName(p.actionId)}</TableCell>
+                    <TableCell>{p.completedAt}</TableCell>
+                    <TableCell>{p.notes || '—'}</TableCell>
+                  </TableRow>
+                ))}
+                {participation.length === 0 && (
+                  <TableRow><TableCell colSpan={4} align="center">No participation</TableCell></TableRow>
+                )}
+                {participation.length > 10 && (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 1.5 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => setParticipationExpanded((v) => !v)}
+                      >
+                        {participationExpanded
+                          ? 'Show less'
+                          : `View more (${participation.length - 10} more)`}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
-        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Participation ({participation.length})</Typography>
-        <CSVExport
-          data={participation.map((p) => ({
-            Challenge: challengeName(p.eventId),
-            Action: actionName(p.actionId),
-            Date: p.completedAt,
-            Notes: p.notes,
-          }))}
-          filename={`${user.name.replace(/\s+/g, '_')}_participation.csv`}
-        />
-      </Stack>
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-        <Table size="small" sx={{ minWidth: 500 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Challenge</TableCell>
-              <TableCell>Action</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Notes</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {participation.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>{challengeName(p.eventId)}</TableCell>
-                <TableCell>{actionName(p.actionId)}</TableCell>
-                <TableCell>{p.completedAt}</TableCell>
-                <TableCell>{p.notes || '—'}</TableCell>
-              </TableRow>
-            ))}
-            {participation.length === 0 && (
-              <TableRow><TableCell colSpan={4} align="center">No participation</TableCell></TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {showActivityLog && (
+        <>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} flexWrap="wrap" gap={1}>
+            <Box>
+              <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Admin Activity Log ({logs.length})</Typography>
+              <Typography variant="caption" color="text.secondary">System actions like created challenge, exported report — admins only; GeneralUsers typically have none</Typography>
+            </Box>
+            <CSVExport data={logs} filename={`${user.name.replace(/\s+/g, '_')}_activity.csv`} />
+          </Stack>
+          <TableContainer component={Paper} sx={{ mb: 3, overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 450 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Action</TableCell>
+                  <TableCell>Details</TableCell>
+                  <TableCell>Timestamp</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {logs.map((l) => (
+                  <TableRow key={l.id}>
+                    <TableCell>{l.action}</TableCell>
+                    <TableCell>{l.details}</TableCell>
+                    <TableCell>{l.timestamp}</TableCell>
+                  </TableRow>
+                ))}
+                {logs.length === 0 && (
+                  <TableRow><TableCell colSpan={3} align="center">No admin activity</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
     </Box>
   );
 }

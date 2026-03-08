@@ -92,8 +92,8 @@ Or use one of the demo accounts:
 
 ### Managing Presets
 
-- **View:** Presets page lists all reusable challenge templates with category, theme, and action count
-- **Create:** Presets > "New Preset" > fill in name, description, category, theme, and add action templates > Create
+- **View:** From the Challenges page, click "Manage Presets" to see all reusable templates with category, theme, and action count
+- **Create:** Manage Presets > "New Preset" > fill in name, description, category, theme, and add action templates > Create
 - **Edit:** Click a preset name or the pencil icon to modify fields and actions
 - **Delete:** Click the trash icon (confirmation required)
 - **Apply:** When creating a new challenge, use the "Quick Start: Select a Template" dropdown — the form fields auto-fill and a preview of actions appears; on submit, all template actions are created automatically
@@ -214,7 +214,8 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 - **Preset actions** — each preset stores action templates (name, description, category, points) that are auto-created on challenge creation
 - **ChallengeForm integration** — "Quick Start" dropdown dynamically loads presets from the store; selecting a preset pre-fills form fields and shows an actions preview table; on submit, actions are bulk-created
 - 3 seed presets: H2O Hero Week (5 water actions), Power Down Challenge (4 energy actions), Sustainable Commute Week (5 transportation actions)
-- Sidebar nav item for Presets (between Challenges and Groups)
+- "Manage Presets" button on the Challenges page (Admin/SuperAdmin only)
+- Back buttons added to all detail and form pages for consistent navigation
 - Data version bumped to v3 (old localStorage data auto-reset)
 
 ### v0.4.0 — Group & Challenge Management (Mar 7, 2026)

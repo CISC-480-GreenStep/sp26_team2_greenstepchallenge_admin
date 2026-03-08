@@ -12,7 +12,7 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.5.0 — Challenge Presets
+### Current Version: v0.5.2 — Clickable Entity Links & Dynamic Back Navigation
 
 **Status:** Frontend MVP with mock data + localStorage persistence. No backend or database connected yet.
 
@@ -20,13 +20,13 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 
 - **Login page** with mock authentication (email/password) and Reset Demo Data button
 - **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards
-- **Dashboard** — 4 key metric cards, participation bar chart, category pie chart, monthly trend line chart, Challenge Summary table (with per-challenge points earned), and **Global Leaderboard** (ranked by cumulative points across all challenges)
+- **Dashboard** — 4 key metric cards, participation bar chart, category pie chart, monthly trend line chart, Challenge Summary table (with clickable challenge names), and **Global Leaderboard** (ranked by cumulative points across all challenges, with clickable user names)
 - **Challenge Management** (renamed from "Events") — list with search/filter by status and group (URL support for groupId), create/edit forms, detail view with **Participants** table (who completed actions), participation log, clickable group link, archive/delete, CSV export
 - **Action CRUD** — admins can add, edit, and delete actions within each challenge (name, description, category, points)
 - **Group Management** — full CRUD for flexible groups; **Group Detail** page with member list (add/remove), challenges in group, bidirectional links; clickable member/challenge counts on list
 - **User Management** — list with search/filter by role and group, create/edit forms with group assignment, detail view with **Change Group** dropdown (Admin/SuperAdmin), clickable group and challenge links, activity log, participation history, **global points** total, and **per-challenge points history** table (earned vs max with progress bars), activate/deactivate, CSV export
 - **Challenge Presets** — reusable templates with pre-configured actions; create, edit, delete presets from a dedicated page; applying a preset when creating a new challenge pre-fills form fields and automatically creates all template actions; 3 seed presets (H2O Hero Week, Power Down Challenge, Sustainable Commute Week)
-- **Reports** — filter by challenge and date range, category breakdown chart, full participation table, CSV export
+- **Reports** — filter by challenge and date range, category breakdown chart, full participation table with clickable user/challenge links, CSV export
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
 - **localStorage persistence** — all changes survive page refresh; "Reset Demo Data" button restores defaults
 
@@ -127,6 +127,7 @@ sp26_team2_greenstepchallenge_admin/
         │   ├── components/
         │   │   ├── layout/      ← Sidebar, TopBar, AdminLayout
         │   │   ├── shared/      ← CSVExport, ConfirmDialog, StatCard
+        │   │   ├── EntityLink.jsx     ← Reusable clickable entity link (user/challenge/group)
         │   │   └── MobilePreview.jsx  ← Phone-frame challenge preview
         │   ├── features/
         │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
@@ -212,6 +213,14 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.5.2 — Clickable Entity Links & Dynamic Back Navigation (Mar 8, 2026)
+- **EntityLink component** — new reusable `<EntityLink>` component renders any entity name (user, challenge, group) as a clickable link that navigates to its detail page; handles missing IDs gracefully and uses `stopPropagation` for proper behavior inside clickable table rows
+- **Dynamic back buttons** — all 8 back buttons across detail and form pages now use browser history (`navigate(-1)`) instead of hardcoded paths, so clicking "Back" always returns to the previous page regardless of how you got there
+- **Dashboard links** — challenge names in Challenge Summary table, user names in Global Leaderboard, and user names in Most Active Users table are now clickable
+- **ChallengeDetail links** — user names in Leaderboard cards and Participation Log table are now clickable
+- **UsersPage links** — group name column is now a clickable link to the group detail page
+- **ReportsPage links** — User and Challenge columns in the results table are now clickable links to their respective detail pages
 
 ### v0.5.1 — Codebase Cleanup (Mar 8, 2026)
 - **Renamed "Event" → "Challenge"** throughout the entire data layer — mock files, API functions, and all feature components now use consistent `challenge`/`challengeId` terminology

@@ -108,10 +108,10 @@ export default function GroupDetail() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/groups')}
+        onClick={() => navigate(-1)}
         sx={{ mb: 2 }}
       >
-        Back to Groups
+        Back
       </Button>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>

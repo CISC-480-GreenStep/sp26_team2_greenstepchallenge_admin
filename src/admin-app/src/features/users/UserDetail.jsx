@@ -73,8 +73,8 @@ export default function UserDetail() {
   return (
     <Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/users')} sx={{ mb: 2 }}>
-        Back to Users
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+        Back
       </Button>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>

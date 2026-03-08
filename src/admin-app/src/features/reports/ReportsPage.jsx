@@ -11,6 +11,7 @@ import {
   getChallenges, getUsers, getParticipation, getActions,
 } from '../../data/api';
 import CSVExport from '../../components/shared/CSVExport';
+import EntityLink from '../../components/EntityLink';
 
 export default function ReportsPage() {
   const [challenges, setChallenges] = useState([]);
@@ -140,14 +141,18 @@ export default function ReportsPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tableData.map((row, i) => (
+            {filtered.map((p, i) => (
               <TableRow key={i}>
-                <TableCell>{row.User}</TableCell>
-                <TableCell>{row.Challenge}</TableCell>
-                <TableCell>{row.Action}</TableCell>
-                <TableCell>{row.Category}</TableCell>
-                <TableCell>{row.Date}</TableCell>
-                <TableCell>{row.Notes || '—'}</TableCell>
+                <TableCell>
+                  <EntityLink type="users" id={p.userId}>{userName(p.userId)}</EntityLink>
+                </TableCell>
+                <TableCell>
+                  <EntityLink type="challenges" id={p.challengeId}>{challengeName(p.challengeId)}</EntityLink>
+                </TableCell>
+                <TableCell>{actionName(p.actionId)}</TableCell>
+                <TableCell>{actionCategory(p.actionId)}</TableCell>
+                <TableCell>{p.completedAt}</TableCell>
+                <TableCell>{p.notes || '—'}</TableCell>
               </TableRow>
             ))}
             {tableData.length === 0 && (

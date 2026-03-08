@@ -47,8 +47,8 @@ export default function PresetsPage() {
   return (
     <Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/challenges')} sx={{ mb: 2 }}>
-        Back to Challenges
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+        Back
       </Button>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>

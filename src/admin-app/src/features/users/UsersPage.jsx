@@ -36,6 +36,7 @@ import { useAuth } from "../auth/AuthContext";
 import { can } from "../../lib/permissions";
 import CSVExport from "../../components/shared/CSVExport";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import EntityLink from "../../components/EntityLink";
 
 export default function UsersPage() {
   //reads 'group ID' from URL
@@ -207,7 +208,13 @@ export default function UsersPage() {
                     <Chip label={u.role} size="small" variant="outlined" />
                   </TableCell>
                 )}
-                {showGroup && <TableCell>{groupName(u.groupId) || "—"}</TableCell>}
+                {showGroup && (
+                  <TableCell>
+                    <EntityLink type="groups" id={u.groupId}>
+                      {groupName(u.groupId) || "—"}
+                    </EntityLink>
+                  </TableCell>
+                )}
                 {showStatus && (
                   <TableCell>
                     <Chip

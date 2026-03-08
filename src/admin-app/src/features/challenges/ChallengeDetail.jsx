@@ -31,6 +31,7 @@ import {
   getChallengeLeaderboard,
 } from "../../data/api";
 import CSVExport from "../../components/shared/CSVExport";
+import EntityLink from "../../components/EntityLink";
 
 import { Dialog, DialogContent } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -102,10 +103,10 @@ export default function ChallengeDetail() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/challenges")}
+        onClick={() => navigate(-1)}
         sx={{ mb: 2 }}
       >
-        Back to Challenges
+        Back
       </Button>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
@@ -281,7 +282,7 @@ export default function ChallengeDetail() {
                             }
                           />
                           <Typography variant="body2" fontWeight={600}>
-                            {entry.name}
+                            <EntityLink type="users" id={entry.userId}>{entry.name}</EntityLink>
                           </Typography>
                         </Box>
                         <Typography variant="body2" fontWeight={700}>
@@ -364,7 +365,9 @@ export default function ChallengeDetail() {
           <TableBody>
             {participation.map((p) => (
               <TableRow key={p.id}>
-                <TableCell>{userName(p.userId)}</TableCell>
+                <TableCell>
+                  <EntityLink type="users" id={p.userId}>{userName(p.userId)}</EntityLink>
+                </TableCell>
                 <TableCell>{actionName(p.actionId)}</TableCell>
                 <TableCell>{p.completedAt}</TableCell>
                 <TableCell>{p.notes || "—"}</TableCell>

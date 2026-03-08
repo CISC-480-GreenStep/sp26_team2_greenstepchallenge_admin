@@ -17,6 +17,7 @@ import {
 import StatCard from '../../components/shared/StatCard';
 import { getChallenges, getUsers, getParticipation, getActions, getLeaderboard } from '../../data/api';
 import { CHART_COLORS, MEDAL_COLORS, STATUS_COLOR } from '../../lib/constants';
+import EntityLink from '../../components/EntityLink';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
@@ -173,7 +174,7 @@ export default function DashboardPage() {
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: c.theme, flexShrink: 0 }} />
-                            {c.name}
+                            <EntityLink type="challenges" id={c.id}>{c.name}</EntityLink>
                           </Box>
                         </TableCell>
                         <TableCell><Chip label={c.status} size="small" color={STATUS_COLOR[c.status] || 'default'} /></TableCell>
@@ -273,7 +274,9 @@ export default function DashboardPage() {
                         ) : (
                           <Chip label={i + 1} size="small" variant="outlined" sx={{ minWidth: 28 }} />
                         )}
-                        <Typography variant="body2" fontWeight={i < 3 ? 600 : 400}>{entry.name}</Typography>
+                        <Typography variant="body2" fontWeight={i < 3 ? 600 : 400}>
+                          <EntityLink type="users" id={entry.userId}>{entry.name}</EntityLink>
+                        </Typography>
                       </Box>
                       <Typography variant="body2" fontWeight={700}>{entry.points} pts</Typography>
                     </Box>
@@ -317,7 +320,9 @@ export default function DashboardPage() {
                     {stats.mostActive.map((entry, i) => (
                       <TableRow key={entry.userId}>
                         <TableCell>{i + 1}</TableCell>
-                        <TableCell>{entry.name}</TableCell>
+                        <TableCell>
+                          <EntityLink type="users" id={entry.userId}>{entry.name}</EntityLink>
+                        </TableCell>
                         <TableCell align="right">
                           <Chip label={entry.actionCount} size="small" color="primary" variant="outlined" />
                         </TableCell>

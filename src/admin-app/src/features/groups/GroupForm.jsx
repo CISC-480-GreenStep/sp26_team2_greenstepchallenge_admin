@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box, Typography, TextField, Button, Stack, Paper, Grid,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getGroupById, createGroup, updateGroup } from '../../data/api';
 
 const EMPTY = { name: '', description: '' };
@@ -34,6 +35,10 @@ export default function GroupForm() {
 
   return (
     <Box>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/groups')} sx={{ mb: 2 }}>
+        Back to Groups
+      </Button>
+
       <Typography variant="h5" fontWeight={700} mb={3}>
         {isEdit ? 'Edit Group' : 'Create Group'}
       </Typography>

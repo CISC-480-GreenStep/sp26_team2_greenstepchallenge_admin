@@ -7,6 +7,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getPresets, deletePreset } from '../../data/api';
 import { useAuth } from '../auth/AuthContext';
 import ConfirmDialog from '../../components/shared/ConfirmDialog';
@@ -35,6 +36,10 @@ export default function PresetsPage() {
 
   return (
     <Box>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/challenges')} sx={{ mb: 2 }}>
+        Back to Challenges
+      </Button>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
         <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           Challenge Presets

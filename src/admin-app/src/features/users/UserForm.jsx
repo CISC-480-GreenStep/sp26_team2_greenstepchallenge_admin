@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box, Typography, TextField, MenuItem, Button, Stack, Paper, Grid,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getUserById, createUser, updateUser, ROLES, USER_STATUSES, getGroups } from '../../data/api';
 
 const EMPTY = {
@@ -45,6 +46,10 @@ export default function UserForm() {
 
   return (
     <Box>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/users')} sx={{ mb: 2 }}>
+        Back to Users
+      </Button>
+
       <Typography variant="h5" fontWeight={700} mb={3}>
         {isEdit ? 'Edit User' : 'Create User'}
       </Typography>

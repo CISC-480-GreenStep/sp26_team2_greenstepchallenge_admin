@@ -24,6 +24,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   getEventById,
   createEvent,
@@ -160,6 +161,10 @@ export default function ChallengeForm() {
 
   return (
     <Box>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate("/challenges")} sx={{ mb: 2 }}>
+        Back to Challenges
+      </Button>
+
       <Typography variant="h5" fontWeight={700} mb={3}>
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>

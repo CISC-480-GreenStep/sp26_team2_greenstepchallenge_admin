@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { getEvents, archiveEvent, deleteEvent, EVENT_STATUSES, getGroups, getParticipantCountsByEvents } from '../../data/api';
 import { useAuth } from '../auth/AuthContext';
 import CSVExport from '../../components/shared/CSVExport';
@@ -83,12 +84,17 @@ export default function ChallengesPage() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
         <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Challenges</Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <CSVExport data={filtered} filename="challenges.csv" />
           {canEdit && (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/challenges/new')}>
-              New Challenge
-            </Button>
+            <>
+              <Button variant="outlined" startIcon={<BookmarkIcon />} onClick={() => navigate('/presets')}>
+                Manage Presets
+              </Button>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/challenges/new')}>
+                New Challenge
+              </Button>
+            </>
           )}
         </Stack>
       </Box>

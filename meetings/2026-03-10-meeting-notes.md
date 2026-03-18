@@ -36,5 +36,3 @@
 - Challenges are temporary, like Earth week
 
 ---
-
-*Note: Some handwritten items were omitted because they were not clearly legible in the source.*

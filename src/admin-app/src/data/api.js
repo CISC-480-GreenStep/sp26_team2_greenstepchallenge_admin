@@ -57,7 +57,14 @@ export async function getUserById(id) {
 }
 
 export async function createUser(data) {
-  return unwrap(await supabase.from('users').insert(data).select().single());
+  const res = await fetch('/.netlify/functions/invite-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Failed to invite user');
+  return result;
 }
 
 export async function updateUser(id, data) {

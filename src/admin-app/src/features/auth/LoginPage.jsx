@@ -3,32 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Card, CardContent, TextField, Button, Typography, Alert, Stack,
 } from '@mui/material';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { useAuth } from './AuthContext';
-import { resetDemoData } from '../../data/api';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, devLogin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
-  const [resetMsg, setResetMsg] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = login(email, password);
+    setError('');
+    setSubmitting(true);
+    const result = await login(email);
+    setSubmitting(false);
     if (result.success) {
-      navigate('/');
+      setSent(true);
     } else {
       setError(result.error);
     }
-  };
-
-  const handleReset = () => {
-    resetDemoData();
-    setResetMsg('Demo data has been reset to defaults.');
-    setTimeout(() => setResetMsg(''), 3000);
   };
 
   return (
@@ -48,58 +43,51 @@ export default function LoginPage() {
             GreenStep Admin
           </Typography>
           <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
-            Sign in to the admin console
+            Sign in with your email
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {resetMsg && <Alert severity="success" sx={{ mb: 2 }}>{resetMsg}</Alert>}
 
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={2}>
-              <TextField
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                fullWidth
-              />
-              <TextField
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                fullWidth
-              />
-              <Button type="submit" variant="contained" size="large" fullWidth>
-                Sign In
-              </Button>
-            </Stack>
-          </form>
+          {sent ? (
+            <Alert severity="success">
+              Check your email for a magic link to sign in. You can close this tab.
+            </Alert>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={2}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  fullWidth
+                  autoFocus
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  disabled={submitting}
+                >
+                  {submitting ? 'Sending...' : 'Send Magic Link'}
+                </Button>
+              </Stack>
+            </form>
+          )}
 
           <Box sx={{ mt: 3 }}>
             <Button
               variant="outlined"
               size="small"
               fullWidth
-              onClick={() => {
-                const result = login('kristin.mroz@mpca.mn.gov', 'admin');
+              onClick={async () => {
+                const result = await devLogin('kristin.mroz@mpca.mn.gov');
                 if (result.success) navigate('/');
               }}
             >
               Quick Login as Kristin (SuperAdmin)
-            </Button>
-          </Box>
-
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Button
-              size="small"
-              color="warning"
-              startIcon={<RestartAltIcon />}
-              onClick={handleReset}
-            >
-              Reset Demo Data
             </Button>
           </Box>
         </CardContent>

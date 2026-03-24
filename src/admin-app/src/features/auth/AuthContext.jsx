@@ -1,35 +1,80 @@
-import { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { supabase } from '../../data/supabase';
 import { ROLES } from '../../data/api';
 
 const AuthContext = createContext(null);
 
-const MOCK_ACCOUNTS = [
-  { email: 'kristin.mroz@mpca.mn.gov', password: 'admin', id: 1, name: 'Kristin Mroz-Risse', role: ROLES.SUPER_ADMIN },
-  { email: 'sarah.johnson@mpca.mn.gov', password: 'user', id: 5, name: 'Sarah Johnson', role: ROLES.GENERAL_USER },
-];
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('gsc_auth_user');
-      return stored ? JSON.parse(stored) : null;
-    } catch { return null; }
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email, password) => {
-    const account = MOCK_ACCOUNTS.find(
-      (a) => a.email === email && a.password === password,
+  // Look up the app user row by email to get role, name, etc.
+  async function loadAppUser(email) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    if (error || !data) return null;
+    return data;
+  }
+
+  useEffect(() => {
+    // Restore session on mount
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user?.email) {
+        const appUser = await loadAppUser(session.user.email);
+        setUser(appUser);
+      } else {
+        // Restore dev login session if present
+        const devEmail = localStorage.getItem('gsc_dev_user');
+        if (devEmail) {
+          const appUser = await loadAppUser(devEmail);
+          if (appUser) setUser(appUser);
+        }
+      }
+      setLoading(false);
+    });
+
+    // Listen for auth changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user?.email) {
+          const appUser = await loadAppUser(session.user.email);
+          setUser(appUser);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      },
     );
-    if (!account) return { success: false, error: 'Invalid email or password' };
-    const { password: _pw, ...safeUser } = account;
-    setUser(safeUser);
-    localStorage.setItem('gsc_auth_user', JSON.stringify(safeUser));
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) return { success: false, error: error.message };
     return { success: true };
   };
 
-  const logout = () => {
+  // Dev-only: bypass Supabase Auth and load user directly from DB
+  const devLogin = async (email) => {
+    const appUser = await loadAppUser(email);
+    if (!appUser) return { success: false, error: 'User not found in database' };
+    setUser(appUser);
+    localStorage.setItem('gsc_dev_user', email);
+    return { success: true };
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('gsc_auth_user');
+    localStorage.removeItem('gsc_dev_user');
   };
 
   const hasRole = (requiredRole) => {
@@ -39,8 +84,8 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, login, logout, hasRole }),
-    [user],
+    () => ({ user, loading, login, devLogin, logout, hasRole }),
+    [user, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

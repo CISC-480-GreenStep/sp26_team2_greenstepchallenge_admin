@@ -12,7 +12,7 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.5.2 — Clickable Entity Links & Dynamic Back Navigation
+### Current Version: v0.6.1 — Responsive Dashboard Optimization
 
 **Status:** Frontend MVP with mock data + localStorage persistence. No backend or database connected yet.
 
@@ -20,7 +20,7 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 
 - **Login page** with mock authentication (email/password) and Reset Demo Data button
 - **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards
-- **Dashboard** — 4 key metric cards, participation bar chart, category pie chart, monthly trend line chart, Challenge Summary table (with clickable challenge names), and **Global Leaderboard** (ranked by cumulative points across all challenges, with clickable user names)
+- **Customizable Dashboard** — 22 available widgets (8 stat cards, 9 charts, 5 tables/lists) arranged in a drag-and-drop grid; click **Customize** to enter edit mode where widgets can be rearranged by dragging and resized from corners; **Widget Library** drawer lets you toggle any widget on/off and apply **Quick Layout Presets** (Default, Executive Summary, Analytics Deep Dive, Compact Overview); layout persists to localStorage per user; HCI-informed design with affordance cues (grip handles, dashed borders in edit mode), feedback (snackbar confirmations), error prevention (can't remove all widgets, cancel/reset available), and progressive disclosure (edit controls only appear when customizing)
 - **Challenge Management** (renamed from "Events") — list with search/filter by status and group (URL support for groupId), create/edit forms, detail view with **Participants** table (who completed actions), participation log, clickable group link, archive/delete, CSV export
 - **Action CRUD** — admins can add, edit, and delete actions within each challenge (name, description, category, points)
 - **Group Management** — full CRUD for flexible groups; **Group Detail** page with member list (add/remove), challenges in group, bidirectional links; clickable member/challenge counts on list
@@ -49,6 +49,7 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 | Build Tool | Vite                               |
 | UI Library | Material UI (MUI) v7               |
 | Charts     | Recharts                           |
+| Dashboard Grid | react-grid-layout v2 (drag-and-drop) |
 | Routing    | React Router v7                    |
 | Data       | Mock data (from real MPCA files) + localStorage |
 
@@ -131,7 +132,14 @@ sp26_team2_greenstepchallenge_admin/
         │   │   └── MobilePreview.jsx  ← Phone-frame challenge preview
         │   ├── features/
         │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
-        │   │   ├── dashboard/   ← DashboardPage (analytics + leaderboard)
+        │   │   ├── dashboard/   ← Customizable drag-and-drop dashboard
+        │   │   │   ├── DashboardPage.jsx    ← Data loading, edit mode, widget renderer
+        │   │   │   ├── DashboardGrid.jsx    ← ResponsiveGridLayout wrapper
+        │   │   │   ├── DashboardWidget.jsx  ← Card frame with drag handle + remove
+        │   │   │   ├── WidgetCatalog.jsx    ← Drawer for widget library + presets
+        │   │   │   ├── dashboardConfig.js   ← Widget registry, layouts, presets
+        │   │   │   ├── hooks/useDashboardLayout.js ← Layout state + localStorage
+        │   │   │   └── widgets/             ← 15 widget components (stat, chart, table)
         │   │   ├── challenges/  ← ChallengesPage, ChallengeForm, ChallengeDetail
         │   │   ├── presets/     ← PresetsPage, PresetForm (challenge templates)
         │   │   ├── groups/      ← GroupsPage, GroupForm, GroupDetail
@@ -214,6 +222,26 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 
 ## Version History
 
+### v0.6.1 — Responsive Dashboard Optimization (Mar 24, 2026)
+- **Full responsive testing** — headless browser testing across 9 viewport sizes: desktop (1920, 1440, 1280), tablet landscape (1024), tablet portrait (768), and mobile (430, 390, 375, 360)
+- **Compact stat cards** — reduced from h=3 to h=2 across all breakpoints, saving ~33% vertical space; stat cards now show 4-across on desktop, 2-per-row on tablet/mobile (previously stacked 1-per-row on mobile, wasting entire screen on just numbers)
+- **Explicit responsive layouts** — `autoLayout` helper generates breakpoint-specific layouts for all 5 breakpoints (lg/md/sm/xs/xxs) instead of relying on auto-generation; stats always 2-per-row on small screens, charts/tables go full-width
+- **Per-breakpoint grid margins** — margins reduce from 16px (desktop) → 14/12/10/8px (smaller screens) to preserve content space on mobile
+- **Compact widget chrome** — smaller title bar height, reduced padding, and responsive font sizes via MUI breakpoint system; fonts scale from 0.7rem (mobile) to 0.8rem (desktop) for titles
+- **Preset layouts are now responsive** — all 4 presets (Default, Executive, Analytics, Compact) auto-generate mobile-friendly layouts via `buildResponsiveLayouts`
+
+### v0.6.0 — Customizable Dashboard with Drag-and-Drop Widgets (Mar 24, 2026)
+- **Drag-and-drop dashboard** — powered by `react-grid-layout` v2; every dashboard section is now an independent widget that can be rearranged and resized on a responsive 12-column grid
+- **22 available widgets** across 3 categories:
+  - **Overview Stats (8):** Active Challenges, Total Actions Taken, Active Users, Total Points Earned, Completion Rate, Avg Points Per User, New Users This Month, Top Category
+  - **Charts (9):** Actions by Category (pie), Participation by Challenge (bar), Monthly Engagement Trend (line), Challenge Status Breakdown (donut), Points by Challenge (bar), User Registration Timeline (area), Group Performance (bar), Challenge Completion Rates (horizontal bar), Points Distribution (histogram)
+  - **Tables & Lists (5):** Challenge Summary, Global Leaderboard, Most Active Users, Recent Activity Feed, Upcoming Challenges
+- **Edit mode** — click "Customize" to toggle edit mode; widgets show grip handles and dashed borders; drag title bars to reorder, resize from bottom-right corner; "Save" persists to localStorage, "Cancel" reverts changes
+- **Widget Library drawer** — slide-out panel to search, browse by category (with active counts), and toggle any of the 22 widgets on/off with one click
+- **Quick Layout Presets** — 4 built-in presets (Default, Executive Summary, Analytics Deep Dive, Compact Overview) that set both widget visibility and arrangement; one click to apply, then customize further
+- **HCI principles** — visibility (edit badge, instruction banner), affordance (grab cursors, resize handles, toggle switches), feedback (snackbar confirmations on save/reset/preset), error prevention (can't remove all widgets, cancel button restores previous state, reset to default always available), recognition over recall (widget descriptions in catalog), consistency (unified card-frame design)
+- **Widget component architecture** — each widget is a self-contained component under `features/dashboard/widgets/`; data loading centralized in `DashboardPage`; layout state managed by `useDashboardLayout` hook; configuration in `dashboardConfig.js`
+
 ### v0.5.2 — Clickable Entity Links & Dynamic Back Navigation (Mar 8, 2026)
 - **EntityLink component** — new reusable `<EntityLink>` component renders any entity name (user, challenge, group) as a clickable link that navigates to its detail page; handles missing IDs gracefully and uses `stopPropagation` for proper behavior inside clickable table rows
 - **Dynamic back buttons** — all 8 back buttons across detail and form pages now use browser history (`navigate(-1)`) instead of hardcoded paths, so clicking "Back" always returns to the previous page regardless of how you got there
@@ -292,6 +320,7 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 5. Content moderation tools (flag/remove comments and photos)
 6. Advanced reporting with saved report templates
 7. Push notification integration for challenge reminders
+8. Save dashboard layouts per-user in the database (currently localStorage only)
 
 ---
 

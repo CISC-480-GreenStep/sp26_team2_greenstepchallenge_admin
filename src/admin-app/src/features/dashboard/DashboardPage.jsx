@@ -84,7 +84,7 @@ export default function DashboardPage() {
         const challengeSummary = challenges
           .filter((c) => c.status !== 'Archived')
           .map((c) => {
-            const cActions = actions.filter((a) => a.challengeId === c.id);
+            const cActions = actions.filter((a) => (c.actionIds || []).includes(a.id));
             const cPart = participation.filter((p) => p.challengeId === c.id);
             const maxPoints = cActions.reduce((sum, a) => sum + a.points, 0);
             const pointsEarned = cPart.reduce((sum, p) => {
@@ -102,7 +102,7 @@ export default function DashboardPage() {
 
         // Participation by challenge (bar chart)
         const participationByEvent = challengeSummary.map((c) => ({
-          name: c.name.length > 18 ? c.name.slice(0, 18) + '…' : c.name,
+          name: c.name.length > 18 ? c.name.slice(0, 18) + '\u2026' : c.name,
           participants: c.participantCount,
           actions: c.participationCount,
         }));
@@ -126,7 +126,7 @@ export default function DashboardPage() {
 
         // Points by challenge
         const pointsByChallengeData = challengeSummary.map((c) => ({
-          name: c.name.length > 15 ? c.name.slice(0, 15) + '…' : c.name,
+          name: c.name.length > 15 ? c.name.slice(0, 15) + '\u2026' : c.name,
           earned: c.pointsEarned,
           max: c.maxPoints,
         }));
@@ -167,12 +167,12 @@ export default function DashboardPage() {
         const completionRatesData = challenges
           .filter((c) => c.status !== 'Archived')
           .map((c) => {
-            const cActions = actions.filter((a) => a.challengeId === c.id);
+            const cActions = actions.filter((a) => (c.actionIds || []).includes(a.id));
             const totalPossible = cActions.length * Math.max(c.participantCount || 1, 1);
             const completed = participation.filter((p) => p.challengeId === c.id).length;
             const rate = totalPossible > 0 ? Math.round((completed / totalPossible) * 100) : 0;
             return {
-              name: c.name.length > 20 ? c.name.slice(0, 20) + '…' : c.name,
+              name: c.name.length > 20 ? c.name.slice(0, 20) + '\u2026' : c.name,
               rate: Math.min(rate, 100),
             };
           });
@@ -188,11 +188,11 @@ export default function DashboardPage() {
         const bucketSize = Math.max(Math.ceil(maxPts / 5), 10);
         const buckets = {};
         for (let i = 0; i <= maxPts; i += bucketSize) {
-          buckets[`${i}–${i + bucketSize - 1}`] = 0;
+          buckets[`${i}\u2013${i + bucketSize - 1}`] = 0;
         }
         userPointValues.forEach((pts) => {
           const idx = Math.floor(pts / bucketSize) * bucketSize;
-          const label = `${idx}–${idx + bucketSize - 1}`;
+          const label = `${idx}\u2013${idx + bucketSize - 1}`;
           if (buckets[label] !== undefined) buckets[label]++;
         });
         const pointsDistributionData = Object.entries(buckets).map(([range, count]) => ({ range, count }));
@@ -285,7 +285,7 @@ export default function DashboardPage() {
 
   const handleApplyPreset = (presetId) => {
     applyPreset(presetId);
-    setSnackbar('Layout preset applied — drag to customize further');
+    setSnackbar('Layout preset applied \u2014 drag to customize further');
   };
 
   const handleReset = () => {

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Box, Typography, TextField, MenuItem, Button, Stack, Paper, Grid,
+  Box, Typography, TextField, MenuItem, Button, Stack, Paper, Grid, Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getUserById, createUser, updateUser, ROLES, USER_STATUSES, getGroups } from '../../data/api';
+import { getUserById, createUser, updateUser, getUserByEmail, activateUser, ROLES, USER_STATUSES, getGroups } from '../../data/api';
 
 const EMPTY = {
   name: '',
@@ -20,6 +20,8 @@ export default function UserForm() {
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY);
   const [groups, setGroups] = useState([]);
+  const [existingUser, setExistingUser] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     getGroups().then(setGroups);
@@ -35,12 +37,35 @@ export default function UserForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setExistingUser(null);
+
     const payload = { ...form, groupId: form.groupId || null };
-    if (isEdit) {
-      await updateUser(Number(id), payload);
-    } else {
-      await createUser(payload);
+
+    if (!isEdit) {
+      // Check if user with this email already exists
+      const existing = await getUserByEmail(form.email);
+      if (existing) {
+        setExistingUser(existing);
+        return;
+      }
     }
+
+    try {
+      if (isEdit) {
+        await updateUser(Number(id), payload);
+      } else {
+        await createUser(payload);
+      }
+      navigate('/users');
+    } catch (err) {
+      setError(err.message || 'Failed to save user');
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!existingUser) return;
+    await activateUser(existingUser.id);
     navigate('/users');
   };
 
@@ -55,6 +80,26 @@ export default function UserForm() {
       </Typography>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 600 }}>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        {existingUser && (
+          <Alert
+            severity={existingUser.status === USER_STATUSES.DEACTIVATED ? 'warning' : 'info'}
+            sx={{ mb: 2 }}
+            action={
+              existingUser.status === USER_STATUSES.DEACTIVATED ? (
+                <Button color="inherit" size="small" onClick={handleReactivate}>
+                  Reactivate
+                </Button>
+              ) : null
+            }
+          >
+            {existingUser.status === USER_STATUSES.DEACTIVATED
+              ? `A deactivated user with this email already exists (${existingUser.name}). Would you like to reactivate them?`
+              : `An active user with this email already exists (${existingUser.name}).`}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>

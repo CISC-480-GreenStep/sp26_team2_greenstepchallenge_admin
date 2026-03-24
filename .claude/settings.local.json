@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm run:*)",
+      "Bash(open /Users/joshdunlap/Documents/GitHub/sp26_team2_greenstepchallenge_admin/.claude/worktrees/vibrant-borg/supabase/migrations/)",
+      "Bash(pbcopy)",
+      "Bash(curl -s \"https://kyburiaubfmbnxbryeqq.supabase.co/rest/v1/users?select=id,name&limit=3\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YnVyaWF1YmZtYm54YnJ5ZXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTA3NDksImV4cCI6MjA4ODcyNjc0OX0.um0jAXms2FyGvkYwon20ujPT5YCRMGhdsHIUA83SWsk\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YnVyaWF1YmZtYm54YnJ5ZXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTA3NDksImV4cCI6MjA4ODcyNjc0OX0.um0jAXms2FyGvkYwon20ujPT5YCRMGhdsHIUA83SWsk\")",
+      "Bash(curl -s \"https://kyburiaubfmbnxbryeqq.supabase.co/rest/v1/departments\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YnVyaWF1YmZtYm54YnJ5ZXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTA3NDksImV4cCI6MjA4ODcyNjc0OX0.um0jAXms2FyGvkYwon20ujPT5YCRMGhdsHIUA83SWsk\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5YnVyaWF1YmZtYm54YnJ5ZXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTA3NDksImV4cCI6MjA4ODcyNjc0OX0.um0jAXms2FyGvkYwon20ujPT5YCRMGhdsHIUA83SWsk\" -H \"Content-Type: application/json\" -H \"Prefer: return=representation\" -X POST -d '{\"\"name\"\": \"\"Test Dept\"\", \"\"description\"\": \"\"test\"\"}')",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(git merge:*)"
+    ]
+  }
+}

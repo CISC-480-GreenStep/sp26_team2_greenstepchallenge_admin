@@ -64,6 +64,9 @@ export const PERMS = {
   /** Who can activate/deactivate users */
   ACTIVATE_DEACTIVATE_USER: ROLES.ADMIN,
 
+  /** Who can permanently delete users */
+  DELETE_USER: ROLES.SUPER_ADMIN,
+
   // ─── Future: scope to specific users (e.g. GeneralUser sees only same group) ───
   // When needed, add: canViewUser(userId, viewerUserId, viewerRole, viewerGroupId)
   // and filter the users list / block detail access accordingly.

@@ -5,4 +5,7 @@ const groups = [
   { id: 4, name: 'Building A', description: 'Employees in Building A campus', createdAt: '2026-01-10' },
 ];
 
+/** @deprecated Use departments instead */
 export default groups;
+
+export const departments = groups;

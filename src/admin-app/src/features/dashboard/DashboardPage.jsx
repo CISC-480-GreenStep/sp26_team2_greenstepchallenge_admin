@@ -38,7 +38,7 @@ export default function DashboardPage() {
       const challengeSummary = challenges
         .filter((c) => c.status !== 'Archived')
         .map((c) => {
-          const cActions = actions.filter((a) => a.challengeId === c.id);
+          const cActions = actions.filter((a) => (c.actionIds || []).includes(a.id));
           const cParticipation = participation.filter((p) => p.challengeId === c.id);
           const maxPoints = cActions.reduce((sum, a) => sum + a.points, 0);
           const pointsEarned = cParticipation.reduce((sum, p) => {

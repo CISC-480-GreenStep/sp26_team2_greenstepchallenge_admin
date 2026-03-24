@@ -1,92 +1,67 @@
 /**
- * Mock API layer with localStorage persistence.
- * Each function returns a Promise so the rest of the app can treat it exactly
- * like a real fetch() call. When the backend is ready, swap these
- * implementations for real HTTP requests.
+ * Supabase API layer.
+ * DB columns use camelCase (matching the UI), so no conversion is needed.
  */
 
-import usersData, { ROLES, USER_STATUSES } from './mock/users';
-import challengesData, { CHALLENGE_STATUSES, CATEGORIES } from './mock/challenges';
-import actionsData from './mock/actions';
-import participationData from './mock/participation';
-import activityLogsData from './mock/activityLogs';
-import groupsData from './mock/groups';
-import presetsData from './mock/presets';
+import { supabase } from './supabase';
 
-const STORAGE_KEY = 'greenstep_admin_data';
-/** Bump when mock data structure/content changes; old stored data will be discarded */
-const DATA_VERSION = 4;
+// ─── Constants ──────────────────────────────────────
+export const ROLES = {
+  SUPER_ADMIN: 'SuperAdmin',
+  ADMIN: 'Admin',
+  GENERAL_USER: 'GeneralUser',
+};
 
-function loadDefaults() {
-  return {
-    _version: DATA_VERSION,
-    users: [...usersData],
-    challenges: [...challengesData],
-    actions: [...actionsData],
-    participation: [...participationData],
-    activityLogs: [...activityLogsData],
-    groups: [...groupsData],
-    presets: presetsData.map((p) => ({ ...p, actions: [...p.actions] })),
-    nextIds: {
-      user: usersData.length + 1,
-      challenge: challengesData.length + 1,
-      action: actionsData.length + 1,
-      group: groupsData.length + 1,
-      preset: presetsData.length + 1,
-    },
-  };
+export const USER_STATUSES = {
+  ACTIVE: 'Active',
+  DEACTIVATED: 'Deactivated',
+};
+
+export const CHALLENGE_STATUSES = {
+  ACTIVE: 'Active',
+  UPCOMING: 'Upcoming',
+  COMPLETED: 'Completed',
+  ARCHIVED: 'Archived',
+};
+
+export const ACTIONS = [
+  'General Sustainability',
+  'Food',
+  'Water',
+  'Energy',
+  'Transportation',
+  'Consumption & Waste',
+];
+
+/** @deprecated Use ACTIONS instead */
+export const CATEGORIES = ACTIONS;
+
+// ─── Helpers ────────────────────────────────────────
+function unwrap({ data, error }) {
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const stored = raw ? JSON.parse(raw) : null;
-    if (stored && stored._version >= DATA_VERSION) {
-      return stored;
-    }
-  } catch { /* ignore corrupt data */ }
-  return null;
-}
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-}
-
-let store = loadFromStorage() || loadDefaults();
-
+// Clear old mock localStorage on first load
 export function resetDemoData() {
-  localStorage.removeItem(STORAGE_KEY);
-  store = loadDefaults();
+  localStorage.removeItem('greenstep_admin_data');
 }
-
-const delay = (ms = 150) => new Promise((r) => setTimeout(r, ms));
 
 // ─── Users ──────────────────────────────────────────
 export async function getUsers() {
-  await delay();
-  return [...store.users];
+  return unwrap(await supabase.from('users').select('*').order('id'));
 }
 
 export async function getUserById(id) {
-  await delay();
-  return store.users.find((u) => u.id === id) || null;
+  return unwrap(await supabase.from('users').select('*').eq('id', id).single());
 }
 
 export async function createUser(data) {
-  await delay();
-  const user = { id: store.nextIds.user++, createdAt: new Date().toISOString().slice(0, 10), lastActive: null, ...data };
-  store.users.push(user);
-  save();
-  return user;
+  return unwrap(await supabase.from('users').insert(data).select().single());
 }
 
 export async function updateUser(id, data) {
-  await delay();
-  const idx = store.users.findIndex((u) => u.id === id);
-  if (idx === -1) throw new Error('User not found');
-  store.users[idx] = { ...store.users[idx], ...data };
-  save();
-  return store.users[idx];
+  return unwrap(await supabase.from('users').update(data).eq('id', id).select().single());
 }
 
 export async function deactivateUser(id) {
@@ -99,30 +74,58 @@ export async function activateUser(id) {
 
 // ─── Challenges ─────────────────────────────────────
 export async function getChallenges() {
-  await delay();
-  return [...store.challenges];
+  const challenges = unwrap(await supabase.from('challenges').select('*').order('id'));
+  const ca = unwrap(await supabase.from('challenge_actions').select('challengeId, actionId'));
+  const cp = unwrap(await supabase.from('challenge_participants').select('challengeId, userId'));
+  for (const c of challenges) {
+    c.actionIds = ca.filter((r) => r.challengeId === c.id).map((r) => r.actionId);
+    c.participants = cp.filter((r) => r.challengeId === c.id).map((r) => r.userId);
+  }
+  return challenges;
 }
 
 export async function getChallengeById(id) {
-  await delay();
-  return store.challenges.find((c) => c.id === id) || null;
+  const challenge = unwrap(await supabase.from('challenges').select('*').eq('id', id).single());
+  if (!challenge) return null;
+  const ca = unwrap(await supabase.from('challenge_actions').select('actionId').eq('challengeId', id));
+  const cp = unwrap(await supabase.from('challenge_participants').select('userId').eq('challengeId', id));
+  challenge.actionIds = ca.map((r) => r.actionId);
+  challenge.participants = cp.map((r) => r.userId);
+  return challenge;
 }
 
 export async function createChallenge(data) {
-  await delay();
-  const challenge = { id: store.nextIds.challenge++, participantCount: 0, ...data };
-  store.challenges.push(challenge);
-  save();
+  const { actionIds, participants, ...rest } = data;
+  const challenge = unwrap(await supabase.from('challenges').insert(rest).select().single());
+  if (actionIds?.length) {
+    await supabase.from('challenge_actions').insert(actionIds.map((aid) => ({ challengeId: challenge.id, actionId: aid })));
+  }
+  if (participants?.length) {
+    await supabase.from('challenge_participants').insert(participants.map((uid) => ({ challengeId: challenge.id, userId: uid })));
+  }
+  challenge.actionIds = actionIds || [];
+  challenge.participants = participants || [];
   return challenge;
 }
 
 export async function updateChallenge(id, data) {
-  await delay();
-  const idx = store.challenges.findIndex((c) => c.id === id);
-  if (idx === -1) throw new Error('Challenge not found');
-  store.challenges[idx] = { ...store.challenges[idx], ...data };
-  save();
-  return store.challenges[idx];
+  const { actionIds, participants, ...rest } = data;
+  if (Object.keys(rest).length > 0) {
+    unwrap(await supabase.from('challenges').update(rest).eq('id', id));
+  }
+  if (actionIds !== undefined) {
+    await supabase.from('challenge_actions').delete().eq('challengeId', id);
+    if (actionIds.length) {
+      await supabase.from('challenge_actions').insert(actionIds.map((aid) => ({ challengeId: id, actionId: aid })));
+    }
+  }
+  if (participants !== undefined) {
+    await supabase.from('challenge_participants').delete().eq('challengeId', id);
+    if (participants.length) {
+      await supabase.from('challenge_participants').insert(participants.map((uid) => ({ challengeId: id, userId: uid })));
+    }
+  }
+  return getChallengeById(id);
 }
 
 export async function archiveChallenge(id) {
@@ -130,66 +133,50 @@ export async function archiveChallenge(id) {
 }
 
 export async function deleteChallenge(id) {
-  await delay();
-  store.challenges = store.challenges.filter((c) => c.id !== id);
-  save();
+  unwrap(await supabase.from('challenges').delete().eq('id', id));
 }
 
 // ─── Actions ────────────────────────────────────────
 export async function getActions() {
-  await delay();
-  return [...store.actions];
+  return unwrap(await supabase.from('actions').select('*').order('id'));
 }
 
 export async function getActionsByChallenge(challengeId) {
-  await delay();
-  return store.actions.filter((a) => a.challengeId === challengeId);
+  const ca = unwrap(await supabase.from('challenge_actions').select('actionId').eq('challengeId', challengeId));
+  if (!ca.length) return [];
+  const actionIds = ca.map((r) => r.actionId);
+  return unwrap(await supabase.from('actions').select('*').in('id', actionIds).order('id'));
 }
 
 export async function createAction(data) {
-  await delay();
-  const action = { id: store.nextIds.action++, ...data };
-  store.actions.push(action);
-  save();
-  return action;
+  return unwrap(await supabase.from('actions').insert(data).select().single());
 }
 
 export async function updateAction(id, data) {
-  await delay();
-  const idx = store.actions.findIndex((a) => a.id === id);
-  if (idx === -1) throw new Error('Action not found');
-  store.actions[idx] = { ...store.actions[idx], ...data };
-  save();
-  return store.actions[idx];
+  return unwrap(await supabase.from('actions').update(data).eq('id', id).select().single());
 }
 
 export async function deleteAction(id) {
-  await delay();
-  store.actions = store.actions.filter((a) => a.id !== id);
-  save();
+  unwrap(await supabase.from('actions').delete().eq('id', id));
 }
 
 // ─── Participation ──────────────────────────────────
 export async function getParticipation() {
-  await delay();
-  return [...store.participation];
+  return unwrap(await supabase.from('participation').select('*').order('id'));
 }
 
 export async function getParticipationByChallenge(challengeId) {
-  await delay();
-  return store.participation.filter((p) => p.challengeId === challengeId);
+  return unwrap(await supabase.from('participation').select('*').eq('challengeId', challengeId).order('id'));
 }
 
 export async function getParticipationByUser(userId) {
-  await delay();
-  return store.participation.filter((p) => p.userId === userId);
+  return unwrap(await supabase.from('participation').select('*').eq('userId', userId).order('id'));
 }
 
-/** Returns { challengeId: participantCount } for all challenges */
 export async function getParticipantCounts() {
-  await delay();
+  const data = unwrap(await supabase.from('participation').select('challengeId, userId'));
   const counts = {};
-  store.participation.forEach((p) => {
+  data.forEach((p) => {
     if (!counts[p.challengeId]) counts[p.challengeId] = new Set();
     counts[p.challengeId].add(p.userId);
   });
@@ -198,153 +185,174 @@ export async function getParticipantCounts() {
 
 // ─── Activity Logs ──────────────────────────────────
 export async function getActivityLogsByUser(userId) {
-  await delay();
-  return store.activityLogs.filter((l) => l.userId === userId);
+  return unwrap(await supabase.from('activity_logs').select('*').eq('userId', userId).order('timestamp', { ascending: false }));
 }
 
-// ─── Groups ─────────────────────────────────────────
+// ─── Groups / Departments ───────────────────────────
 export async function getGroups() {
-  await delay();
-  return [...store.groups];
+  return unwrap(await supabase.from('departments').select('*').order('id'));
 }
 
 export async function getGroupById(id) {
-  await delay();
-  return store.groups.find((g) => g.id === id) || null;
+  return unwrap(await supabase.from('departments').select('*').eq('id', id).single());
 }
 
 export async function createGroup(data) {
-  await delay();
-  const group = { id: store.nextIds.group++, createdAt: new Date().toISOString().slice(0, 10), ...data };
-  store.groups.push(group);
-  save();
-  return group;
+  return unwrap(await supabase.from('departments').insert(data).select().single());
 }
 
 export async function updateGroup(id, data) {
-  await delay();
-  const idx = store.groups.findIndex((g) => g.id === id);
-  if (idx === -1) throw new Error('Group not found');
-  store.groups[idx] = { ...store.groups[idx], ...data };
-  save();
-  return store.groups[idx];
+  return unwrap(await supabase.from('departments').update(data).eq('id', id).select().single());
 }
 
 export async function deleteGroup(id) {
-  await delay();
-  store.groups = store.groups.filter((g) => g.id !== id);
-  save();
+  unwrap(await supabase.from('departments').delete().eq('id', id));
 }
 
 // ─── Presets ─────────────────────────────────────────
 export async function getPresets() {
-  await delay();
-  return store.presets.map((p) => ({ ...p, actions: [...p.actions] }));
+  const presets = unwrap(await supabase.from('presets').select('*').order('id'));
+  const pa = unwrap(await supabase.from('preset_actions').select('*').order('id'));
+  for (const p of presets) {
+    p.actions = pa.filter((a) => a.presetId === p.id);
+  }
+  return presets;
 }
 
 export async function getPresetById(id) {
-  await delay();
-  const p = store.presets.find((p) => p.id === id);
-  return p ? { ...p, actions: [...p.actions] } : null;
+  const preset = unwrap(await supabase.from('presets').select('*').eq('id', id).single());
+  if (!preset) return null;
+  preset.actions = unwrap(await supabase.from('preset_actions').select('*').eq('presetId', id).order('id'));
+  return preset;
 }
 
 export async function createPreset(data) {
-  await delay();
-  const preset = { id: store.nextIds.preset++, createdAt: new Date().toISOString().slice(0, 10), actions: [], ...data };
-  store.presets.push(preset);
-  save();
-  return { ...preset, actions: [...preset.actions] };
+  const { actions: presetActions, ...rest } = data;
+  const preset = unwrap(await supabase.from('presets').insert(rest).select().single());
+  preset.actions = [];
+  if (presetActions?.length) {
+    const rows = presetActions.map((a) => ({ ...a, presetId: preset.id }));
+    preset.actions = unwrap(await supabase.from('preset_actions').insert(rows).select());
+  }
+  return preset;
 }
 
 export async function updatePreset(id, data) {
-  await delay();
-  const idx = store.presets.findIndex((p) => p.id === id);
-  if (idx === -1) throw new Error('Preset not found');
-  store.presets[idx] = { ...store.presets[idx], ...data };
-  save();
-  return { ...store.presets[idx], actions: [...store.presets[idx].actions] };
+  const { actions: presetActions, ...rest } = data;
+  if (Object.keys(rest).length > 0) {
+    unwrap(await supabase.from('presets').update(rest).eq('id', id));
+  }
+  if (presetActions !== undefined) {
+    await supabase.from('preset_actions').delete().eq('presetId', id);
+    if (presetActions.length) {
+      const rows = presetActions.map((a) => ({ ...a, presetId: id }));
+      await supabase.from('preset_actions').insert(rows);
+    }
+  }
+  return getPresetById(id);
 }
 
 export async function deletePreset(id) {
-  await delay();
-  store.presets = store.presets.filter((p) => p.id !== id);
-  save();
+  unwrap(await supabase.from('presets').delete().eq('id', id));
 }
 
-// ─── Leaderboard helper ─────────────────────────────
+// ─── Templates ──────────────────────────────────────
+export async function getTemplates() {
+  return unwrap(await supabase.from('templates').select('*').order('id'));
+}
+
+export async function getTemplateById(id) {
+  return unwrap(await supabase.from('templates').select('*').eq('id', id).single());
+}
+
+export async function createTemplate(data) {
+  return unwrap(await supabase.from('templates').insert(data).select().single());
+}
+
+export async function updateTemplate(id, data) {
+  return unwrap(await supabase.from('templates').update(data).eq('id', id).select().single());
+}
+
+export async function deleteTemplate(id) {
+  unwrap(await supabase.from('templates').delete().eq('id', id));
+}
+
+// ─── Leaderboard helpers ────────────────────────────
 export async function getLeaderboard(limit = 5) {
-  await delay();
+  const participation = unwrap(await supabase.from('participation').select('userId, actionId'));
+  const actions = unwrap(await supabase.from('actions').select('id, points'));
+  const users = unwrap(await supabase.from('users').select('id, name'));
+
+  const actionPoints = Object.fromEntries(actions.map((a) => [a.id, a.points]));
   const pointsByUser = {};
-  store.participation.forEach((p) => {
-    const action = store.actions.find((a) => a.id === p.actionId);
-    if (action) {
-      pointsByUser[p.userId] = (pointsByUser[p.userId] || 0) + action.points;
-    }
+  participation.forEach((p) => {
+    pointsByUser[p.userId] = (pointsByUser[p.userId] || 0) + (actionPoints[p.actionId] || 0);
   });
+
+  const userNames = Object.fromEntries(users.map((u) => [u.id, u.name]));
   return Object.entries(pointsByUser)
-    .map(([userId, points]) => {
-      const user = store.users.find((u) => u.id === Number(userId));
-      return { userId: Number(userId), name: user?.name || 'Unknown', points };
-    })
+    .map(([userId, points]) => ({ userId: Number(userId), name: userNames[userId] || 'Unknown', points }))
     .sort((a, b) => b.points - a.points)
     .slice(0, limit);
 }
 
 export async function getUserPoints(userId) {
-  await delay();
+  const participation = unwrap(await supabase.from('participation').select('challengeId, actionId').eq('userId', userId));
+  const actions = unwrap(await supabase.from('actions').select('id, points'));
+  const challenges = unwrap(await supabase.from('challenges').select('id, name, status'));
+  const ca = unwrap(await supabase.from('challenge_actions').select('challengeId, actionId'));
+
+  const actionPoints = Object.fromEntries(actions.map((a) => [a.id, a.points]));
+  const challengeMap = Object.fromEntries(challenges.map((c) => [c.id, c]));
+
+  const maxPointsByChallenge = {};
+  ca.forEach((r) => {
+    maxPointsByChallenge[r.challengeId] = (maxPointsByChallenge[r.challengeId] || 0) + (actionPoints[r.actionId] || 0);
+  });
+
   const byChallenge = {};
-  store.participation
-    .filter((p) => p.userId === userId)
-    .forEach((p) => {
-      const action = store.actions.find((a) => a.id === p.actionId);
-      const challenge = store.challenges.find((c) => c.id === p.challengeId);
-      if (action && challenge) {
-        if (!byChallenge[challenge.id]) {
-          const maxPoints = store.actions
-            .filter((a) => a.challengeId === challenge.id)
-            .reduce((sum, a) => sum + a.points, 0);
-          byChallenge[challenge.id] = {
-            challengeId: challenge.id,
-            challengeName: challenge.name,
-            status: challenge.status,
-            points: 0,
-            maxPoints,
-            count: 0,
-          };
-        }
-        byChallenge[challenge.id].points += action.points;
-        byChallenge[challenge.id].count += 1;
-      }
-    });
+  participation.forEach((p) => {
+    const pts = actionPoints[p.actionId] || 0;
+    const c = challengeMap[p.challengeId];
+    if (!c) return;
+    if (!byChallenge[c.id]) {
+      byChallenge[c.id] = {
+        challengeId: c.id,
+        challengeName: c.name,
+        status: c.status,
+        points: 0,
+        maxPoints: maxPointsByChallenge[c.id] || 0,
+        count: 0,
+      };
+    }
+    byChallenge[c.id].points += pts;
+    byChallenge[c.id].count += 1;
+  });
+
   const breakdown = Object.values(byChallenge);
   const total = breakdown.reduce((sum, b) => sum + b.points, 0);
   return { total, breakdown };
 }
 
 export async function getChallengeLeaderboard(challengeId, limit = 10) {
-  await delay();
+  const participation = unwrap(await supabase.from('participation').select('userId, actionId').eq('challengeId', challengeId));
+  const actions = unwrap(await supabase.from('actions').select('id, points'));
+  const users = unwrap(await supabase.from('users').select('id, name'));
+  const ca = unwrap(await supabase.from('challenge_actions').select('actionId').eq('challengeId', challengeId));
+
+  const actionPoints = Object.fromEntries(actions.map((a) => [a.id, a.points]));
+  const userNames = Object.fromEntries(users.map((u) => [u.id, u.name]));
+  const maxPoints = ca.reduce((sum, r) => sum + (actionPoints[r.actionId] || 0), 0);
+
   const pointsByUser = {};
-  store.participation
-    .filter((p) => p.challengeId === challengeId)
-    .forEach((p) => {
-      const action = store.actions.find((a) => a.id === p.actionId);
-      if (action) {
-        if (!pointsByUser[p.userId]) pointsByUser[p.userId] = { points: 0, count: 0 };
-        pointsByUser[p.userId].points += action.points;
-        pointsByUser[p.userId].count += 1;
-      }
-    });
-  const maxPoints = store.actions
-    .filter((a) => a.challengeId === challengeId)
-    .reduce((sum, a) => sum + a.points, 0);
+  participation.forEach((p) => {
+    if (!pointsByUser[p.userId]) pointsByUser[p.userId] = { points: 0, count: 0 };
+    pointsByUser[p.userId].points += actionPoints[p.actionId] || 0;
+    pointsByUser[p.userId].count += 1;
+  });
+
   return Object.entries(pointsByUser)
-    .map(([uid, data]) => {
-      const user = store.users.find((u) => u.id === Number(uid));
-      return { userId: Number(uid), name: user?.name || 'Unknown', points: data.points, actionCount: data.count, maxPoints };
-    })
+    .map(([uid, d]) => ({ userId: Number(uid), name: userNames[uid] || 'Unknown', points: d.points, actionCount: d.count, maxPoints }))
     .sort((a, b) => b.points - a.points)
     .slice(0, limit);
 }
-
-// ─── Re-exports for convenience ─────────────────────
-export { ROLES, USER_STATUSES, CHALLENGE_STATUSES, CATEGORIES };

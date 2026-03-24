@@ -5,7 +5,7 @@ export const CHALLENGE_STATUSES = {
   ARCHIVED: 'Archived',
 };
 
-export const CATEGORIES = [
+export const ACTIONS = [
   'General Sustainability',
   'Food',
   'Water',
@@ -13,6 +13,9 @@ export const CATEGORIES = [
   'Transportation',
   'Consumption & Waste',
 ];
+
+/** @deprecated Use ACTIONS instead */
+export const CATEGORIES = ACTIONS;
 
 const challenges = [
   {
@@ -23,10 +26,13 @@ const challenges = [
     theme: '#4CAF50',
     startDate: '2019-01-14',
     endDate: '2019-01-18',
+    joinBy: '2019-01-13',
     status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 34,
+    participants: [5, 6, 7, 10],
     groupId: 1,
+    actionIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
   },
   {
     id: 2,
@@ -36,10 +42,13 @@ const challenges = [
     theme: '#2196F3',
     startDate: '2020-01-13',
     endDate: '2020-01-17',
+    joinBy: '2020-01-12',
     status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 41,
+    participants: [5, 8, 10, 12],
     groupId: 1,
+    actionIds: [15, 16, 17, 18, 19, 20, 21, 22, 23],
   },
   {
     id: 3,
@@ -49,10 +58,13 @@ const challenges = [
     theme: '#FF9800',
     startDate: '2022-04-04',
     endDate: '2022-04-29',
+    joinBy: '2022-04-03',
     status: CHALLENGE_STATUSES.ARCHIVED,
     createdBy: 1,
     participantCount: 52,
+    participants: [5, 6, 9, 11],
     groupId: 1,
+    actionIds: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
   },
   {
     id: 4,
@@ -62,10 +74,13 @@ const challenges = [
     theme: '#00BCD4',
     startDate: '2024-04-01',
     endDate: '2024-04-28',
+    joinBy: '2024-03-31',
     status: CHALLENGE_STATUSES.COMPLETED,
     createdBy: 1,
     participantCount: 38,
+    participants: [5, 9, 10, 11],
     groupId: 1,
+    actionIds: [36, 37, 38, 39, 40],
   },
   {
     id: 5,
@@ -75,10 +90,13 @@ const challenges = [
     theme: '#9C27B0',
     startDate: '2026-04-01',
     endDate: '2026-04-30',
+    joinBy: '2026-03-31',
     status: CHALLENGE_STATUSES.UPCOMING,
     createdBy: 1,
     participantCount: 0,
+    participants: [],
     groupId: 3,
+    actionIds: [41, 42, 43, 44, 45],
   },
   {
     id: 6,
@@ -88,10 +106,13 @@ const challenges = [
     theme: '#795548',
     startDate: '2026-03-03',
     endDate: '2026-03-07',
+    joinBy: '2026-03-02',
     status: CHALLENGE_STATUSES.ACTIVE,
     createdBy: 2,
     participantCount: 28,
+    participants: [5, 6, 8, 9, 10, 11, 12],
     groupId: 1,
+    actionIds: [46, 47, 48, 49, 50],
   },
 ];
 

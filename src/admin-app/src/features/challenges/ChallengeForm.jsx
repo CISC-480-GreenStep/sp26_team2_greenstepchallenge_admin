@@ -113,11 +113,14 @@ export default function ChallengeForm() {
     if (isEdit) {
       await updateChallenge(Number(id), payload);
     } else {
-      const newChallenge = await createChallenge({ ...payload, createdBy: user.id });
+      const newChallenge = await createChallenge({ ...payload, createdBy: user.id, actionIds: [], participants: [], joinBy: null });
       if (presetActions.length > 0) {
+        const newActionIds = [];
         for (const tmpl of presetActions) {
-          await createAction({ ...tmpl, challengeId: newChallenge.id });
+          const newAction = await createAction({ ...tmpl });
+          newActionIds.push(newAction.id);
         }
+        await updateChallenge(newChallenge.id, { actionIds: newActionIds });
       }
     }
     navigate("/challenges");
@@ -148,7 +151,12 @@ export default function ChallengeForm() {
     if (editingAction) {
       await updateAction(editingAction.id, actionForm);
     } else {
-      await createAction({ ...actionForm, challengeId: Number(id) });
+      const newAction = await createAction({ ...actionForm });
+      // Add the new action's ID to this challenge's actionIds
+      const challenge = await getChallengeById(Number(id));
+      if (challenge) {
+        await updateChallenge(Number(id), { actionIds: [...(challenge.actionIds || []), newAction.id] });
+      }
     }
     setActionDialogOpen(false);
     loadActions();
@@ -156,6 +164,11 @@ export default function ChallengeForm() {
 
   const handleActionDelete = async (actionId) => {
     await deleteAction(actionId);
+    // Remove from challenge's actionIds
+    const challenge = await getChallengeById(Number(id));
+    if (challenge) {
+      await updateChallenge(Number(id), { actionIds: (challenge.actionIds || []).filter((aid) => aid !== actionId) });
+    }
     loadActions();
   };
 

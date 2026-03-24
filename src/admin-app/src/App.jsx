@@ -3,6 +3,7 @@ import { ROLES } from './data/api';
 import AdminLayout from './components/layout/AdminLayout';
 import RequireAuth from './features/auth/RequireAuth';
 import LoginPage from './features/auth/LoginPage';
+import AuthCallback from './features/auth/AuthCallback';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ChallengesPage from './features/challenges/ChallengesPage';
 import ChallengeForm from './features/challenges/ChallengeForm';
@@ -22,6 +23,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         <Route
           element={

@@ -25,6 +25,13 @@ export function AuthProvider({ children }) {
       if (session?.user?.email) {
         const appUser = await loadAppUser(session.user.email);
         setUser(appUser);
+      } else {
+        // Restore dev login session if present
+        const devEmail = localStorage.getItem('gsc_dev_user');
+        if (devEmail) {
+          const appUser = await loadAppUser(devEmail);
+          if (appUser) setUser(appUser);
+        }
       }
       setLoading(false);
     });
@@ -55,9 +62,19 @@ export function AuthProvider({ children }) {
     return { success: true };
   };
 
+  // Dev-only: bypass Supabase Auth and load user directly from DB
+  const devLogin = async (email) => {
+    const appUser = await loadAppUser(email);
+    if (!appUser) return { success: false, error: 'User not found in database' };
+    setUser(appUser);
+    localStorage.setItem('gsc_dev_user', email);
+    return { success: true };
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    localStorage.removeItem('gsc_dev_user');
   };
 
   const hasRole = (requiredRole) => {
@@ -67,7 +84,7 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, login, logout, hasRole }),
+    () => ({ user, loading, login, devLogin, logout, hasRole }),
     [user, loading],
   );
 

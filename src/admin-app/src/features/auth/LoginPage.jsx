@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Card, CardContent, TextField, Button, Typography, Alert, Stack,
 } from '@mui/material';
 import { useAuth } from './AuthContext';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, devLogin } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -74,6 +76,20 @@ export default function LoginPage() {
               </Stack>
             </form>
           )}
+
+          <Box sx={{ mt: 3 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              fullWidth
+              onClick={async () => {
+                const result = await devLogin('kristin.mroz@mpca.mn.gov');
+                if (result.success) navigate('/');
+              }}
+            >
+              Quick Login as Kristin (SuperAdmin)
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Box>

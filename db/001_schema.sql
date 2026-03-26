@@ -35,13 +35,63 @@ CREATE TABLE categories (
   description   TEXT
 );
 
+CREATE TABLE actions (
+  id            SERIAL PRIMARY KEY,
+  category_id   INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+  name          VARCHAR(255) NOT NULL,
+  description   TEXT,
+  points        INTEGER NOT NULL DEFAULT 1,
+
+  CONSTRAINT positive_points_actions CHECK (points > 0)
+);
+
+CREATE TABLE themes (
+  id            SERIAL PRIMARY KEY,
+  name          VARCHAR(255) NOT NULL UNIQUE,
+  description   TEXT,
+  bg_color_dark_1    VARCHAR(7) -- e.g., #RRGGBB
+  bg_color_light_1    VARCHAR(7) -- e.g., #RRGGBB
+  bg_color_dark_2    VARCHAR(7) -- e.g., #RRGGBB
+  bg_color_light_2   VARCHAR(7) -- e.g., #RRGGB
+  accent_color_1     VARCHAR(7) -- e.g., #RRGGBB
+  accent_color_2     VARCHAR(7) -- e.g., #RRGGBB
+  accent_color_3     VARCHAR(7) -- e.g., #RRGGBB
+  accent_color_4     VARCHAR(7) -- e.g., #RRGGBB
+  accent_color_5     VARCHAR(7) -- e.g., #RRGGBB
+  accent_color_6     VARCHAR(7) -- e.g., #RRGGBB
+  hyperlink_color     VARCHAR(7) -- e.g., #RRGGBB
+  followed_hyperlink_color VARCHAR(7) -- e.g., #RRGGBB
+  created_by        INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at        TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE groups (
+  id            SERIAL PRIMARY KEY,
+  name          VARCHAR(255) NOT NULL UNIQUE,
+  description   TEXT,
+  created_by    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
+  member        INTEGER REFERENCES users(id) ON DELETE SET NULL,
+);
+
+CREATE TABLE templates (
+  id                SERIAL PRIMARY KEY,
+  name              VARCHAR(255) NOT NULL,
+  description       TEXT,
+  category_id       INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+  theme_id          INTEGER NOT NULL REFERENCES themes(id) ON DELETE RESTRICT,
+  created_by        INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT valid_date_range CHECK (end_date >= start_date)
+);
+
 CREATE TABLE challenges (
   id                SERIAL PRIMARY KEY,
   name              VARCHAR(255) NOT NULL,
   description       TEXT,
-  event_type        VARCHAR(100),
   category_id       INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
-  theme             VARCHAR(7) NOT NULL DEFAULT '#4CAF50',
+  theme_id          INTEGER NOT NULL REFERENCES themes(id) ON DELETE RESTRICT,
   start_date        DATE NOT NULL,
   end_date          DATE NOT NULL,
   start_time        TIME,
@@ -54,16 +104,7 @@ CREATE TABLE challenges (
   CONSTRAINT valid_date_range CHECK (end_date >= start_date)
 );
 
-CREATE TABLE actions (
-  id            SERIAL PRIMARY KEY,
-  challenge_id  INTEGER NOT NULL REFERENCES challenges(id) ON DELETE CASCADE,
-  name          VARCHAR(255) NOT NULL,
-  description   TEXT,
-  category_id   INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
-  points        INTEGER NOT NULL DEFAULT 1,
 
-  CONSTRAINT positive_points_actions CHECK (points > 0)
-);
 
 CREATE TABLE participation (
   id            SERIAL PRIMARY KEY,

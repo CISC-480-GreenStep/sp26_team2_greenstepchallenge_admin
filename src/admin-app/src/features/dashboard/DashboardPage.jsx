@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Typography, Button, CircularProgress, Alert, Snackbar,
-  Tooltip, Chip, Stack,
+  Tooltip, Chip, Stack, Switch, FormControlLabel, Paper,
 } from '@mui/material';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import SaveIcon from '@mui/icons-material/Save';
@@ -13,12 +13,12 @@ import {
 import useDashboardLayout from './hooks/useDashboardLayout';
 import DashboardGrid from './DashboardGrid';
 import WidgetCatalog from './WidgetCatalog';
+import ComparisonMode from './ComparisonMode';
 
 import StatWidget from './widgets/StatWidget';
 import ChallengeSummaryWidget from './widgets/ChallengeSummaryWidget';
 import CategoryPieWidget from './widgets/CategoryPieWidget';
 import ParticipationBarWidget from './widgets/ParticipationBarWidget';
-import EngagementTrendWidget from './widgets/EngagementTrendWidget';
 import LeaderboardWidget from './widgets/LeaderboardWidget';
 import MostActiveUsersWidget from './widgets/MostActiveUsersWidget';
 import ChallengeStatusWidget from './widgets/ChallengeStatusWidget';
@@ -32,9 +32,18 @@ import UpcomingChallengesWidget from './widgets/UpcomingChallengesWidget';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
+  const [selectedChallengeIds, setSelectedChallengeIds] = useState([]);
+  const [allChallenges, setAllChallenges] = useState([]); 
   const [error, setError] = useState(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
+  const [isComparisonModeActive, setIsComparisonModeActive] = useState(false);
+
+  useEffect(() => {
+    if (selectedChallengeIds.length <= 1) {
+      setIsComparisonModeActive(false);
+    }
+  }, [selectedChallengeIds]);
 
   const {
     visible, layouts, isEditing,
@@ -43,6 +52,7 @@ export default function DashboardPage() {
   } = useDashboardLayout();
 
   // ─── Data Loading ─────────────────────────────────────
+  // ─── Data Loading ─────────────────────────────────────
   useEffect(() => {
     async function load() {
       try {
@@ -50,14 +60,26 @@ export default function DashboardPage() {
           getChallenges(), getUsers(), getParticipation(), getActions(), getLeaderboard(10), getGroups(),
         ]);
 
+        setAllChallenges(challenges);
+
+        // ─── THE FILTER ───
+        const filteredParticipation = selectedChallengeIds.length > 0
+          ? participation.filter(p => selectedChallengeIds.includes(p.challengeId))
+          : participation;
+
         // Basic counts
         const activeChallenges = challenges.filter((c) => c.status === 'Active').length;
-        const totalParticipation = participation.length;
+        const totalParticipation = filteredParticipation.length; // FIXED
         const activeUsers = users.filter((u) => u.status === 'Active').length;
-        const totalPoints = leaderboard.reduce((sum, e) => sum + e.points, 0);
+        
+        // Calculate points dynamically based on the filter
+        const totalPoints = filteredParticipation.reduce((sum, p) => { // FIXED
+          const action = actions.find((a) => a.id === p.actionId);
+          return sum + (action?.points || 0);
+        }, 0);
 
         // Derived stat values
-        const usersWithActions = new Set(participation.map((p) => p.userId));
+        const usersWithActions = new Set(filteredParticipation.map((p) => p.userId)); // FIXED
         const completionRate = activeUsers > 0
           ? Math.round((usersWithActions.size / activeUsers) * 100)
           : 0;
@@ -71,7 +93,7 @@ export default function DashboardPage() {
 
         // Category data
         const byCategory = {};
-        participation.forEach((p) => {
+        filteredParticipation.forEach((p) => { // FIXED
           const action = actions.find((a) => a.id === p.actionId);
           if (action) byCategory[action.category] = (byCategory[action.category] || 0) + 1;
         });
@@ -107,15 +129,48 @@ export default function DashboardPage() {
           actions: c.participationCount,
         }));
 
-        // Monthly engagement trend
-        const byMonth = {};
-        participation.forEach((p) => {
-          const month = p.completedAt.slice(0, 7);
-          byMonth[month] = (byMonth[month] || 0) + 1;
-        });
-        const trendData = Object.entries(byMonth)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([month, count]) => ({ month, actions: count }));
+        // Comparison Mode Data
+        let comparisonData = [];
+        if (selectedChallengeIds.length > 1) {
+          const validParticipation = participation.filter(p => selectedChallengeIds.includes(p.challengeId));
+          const challengeMap = new Map();
+          selectedChallengeIds.forEach(id => {
+            const ch = challenges.find(c => c.id === id);
+            if (ch) challengeMap.set(id, { name: ch.name, startDate: ch.startDate ? new Date(ch.startDate.slice(0, 10)) : null });
+          });
+
+          // Step 1: Pre-calculate relative days and find maxDay
+          const processedRecords = [];
+          let maxDay = 0;
+          
+          validParticipation.forEach((p) => {
+            const chInfo = challengeMap.get(p.challengeId);
+            if (!chInfo || !chInfo.startDate || !p.completedAt) return;
+            
+            const completedDate = new Date(p.completedAt.slice(0, 10));
+            const diffTime = completedDate.getTime() - chInfo.startDate.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+            
+            if (diffDays >= 0) {
+              processedRecords.push({ diffDays, challengeName: chInfo.name });
+              if (diffDays > maxDay) maxDay = diffDays;
+            }
+          });
+
+          // Step 2: Initialize day array strictly from zero to maxDay
+          for (let i = 0; i <= maxDay; i++) {
+            const dayObj = { relativeDay: i };
+            challengeMap.forEach((chInfo) => {
+              dayObj[chInfo.name] = 0;
+            });
+            comparisonData.push(dayObj);
+          }
+
+          // Step 3: Populate the counts
+          processedRecords.forEach(record => {
+            comparisonData[record.diffDays][record.challengeName] += 1;
+          });
+        }
 
         // Challenge status breakdown (donut)
         const statusCounts = {};
@@ -151,7 +206,7 @@ export default function DashboardPage() {
         const groupPerformanceData = groups.map((g) => {
           const groupUsers = users.filter((u) => u.groupId === g.id);
           const groupUserIds = new Set(groupUsers.map((u) => u.id));
-          const groupPart = participation.filter((p) => groupUserIds.has(p.userId));
+          const groupPart = filteredParticipation.filter((p) => groupUserIds.has(p.userId)); // FIXED
           const groupPoints = groupPart.reduce((sum, p) => {
             const action = actions.find((a) => a.id === p.actionId);
             return sum + (action?.points || 0);
@@ -169,7 +224,7 @@ export default function DashboardPage() {
           .map((c) => {
             const cActions = actions.filter((a) => (c.actionIds || []).includes(a.id));
             const totalPossible = cActions.length * Math.max(c.participantCount || 1, 1);
-            const completed = participation.filter((p) => p.challengeId === c.id).length;
+            const completed = filteredParticipation.filter((p) => p.challengeId === c.id).length; // FIXED
             const rate = totalPossible > 0 ? Math.round((completed / totalPossible) * 100) : 0;
             return {
               name: c.name.length > 20 ? c.name.slice(0, 20) + '\u2026' : c.name,
@@ -179,7 +234,7 @@ export default function DashboardPage() {
 
         // Points distribution histogram
         const pointsByUser = {};
-        participation.forEach((p) => {
+        filteredParticipation.forEach((p) => { // FIXED
           const action = actions.find((a) => a.id === p.actionId);
           if (action) pointsByUser[p.userId] = (pointsByUser[p.userId] || 0) + action.points;
         });
@@ -199,7 +254,7 @@ export default function DashboardPage() {
 
         // Most active users
         const actionsByUser = {};
-        participation.forEach((p) => {
+        filteredParticipation.forEach((p) => { // FIXED
           actionsByUser[p.userId] = (actionsByUser[p.userId] || 0) + 1;
         });
         const mostActive = Object.entries(actionsByUser)
@@ -211,7 +266,7 @@ export default function DashboardPage() {
           .slice(0, 10);
 
         // Recent activity feed
-        const recentActivity = [...participation]
+        const recentActivity = [...filteredParticipation] // FIXED
           .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
           .slice(0, 15)
           .map((p) => {
@@ -241,17 +296,18 @@ export default function DashboardPage() {
         setStats({
           activeChallenges, totalParticipation, activeUsers, totalPoints,
           completionRate, avgPointsPerUser, newUsersThisMonth, topCategory,
-          challengeSummary, categoryData, participationByEvent, trendData,
+          challengeSummary, categoryData, participationByEvent, comparisonData,
           challengeStatusData, pointsByChallengeData, userGrowthData,
           groupPerformanceData, completionRatesData, pointsDistributionData,
           leaderboard, mostActive, recentActivity, upcomingChallenges,
+          rawParticipation: participation, rawActions: actions,
         });
       } catch (err) {
         setError(err.message || 'Failed to load dashboard data');
       }
     }
     load();
-  }, []);
+  }, [selectedChallengeIds]);
 
   // ─── Widget Renderer ──────────────────────────────────
   const renderWidget = (id) => {
@@ -261,7 +317,6 @@ export default function DashboardPage() {
       'table-challenge-summary': ChallengeSummaryWidget,
       'chart-category-pie': CategoryPieWidget,
       'chart-participation-bar': ParticipationBarWidget,
-      'chart-engagement-trend': EngagementTrendWidget,
       'list-leaderboard': LeaderboardWidget,
       'table-most-active': MostActiveUsersWidget,
       'chart-challenge-status': ChallengeStatusWidget,
@@ -294,6 +349,13 @@ export default function DashboardPage() {
     setSnackbar('Dashboard reset to default layout');
   };
 
+  const handleToggleChallenge = (id) => {
+  setSelectedChallengeIds((prev) =>
+    prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+  );
+};
+
+const handleClearFilters = () => setSelectedChallengeIds([]);
   // ─── Render ───────────────────────────────────────────
   if (!stats) {
     return (
@@ -364,25 +426,65 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      {/* ── Widget Grid ── */}
-      <DashboardGrid
-        visible={visible}
-        layouts={layouts}
-        isEditing={isEditing}
-        onLayoutChange={onLayoutChange}
-        onRemoveWidget={toggleWidget}
-        renderWidget={renderWidget}
-      />
+      {selectedChallengeIds.length > 1 && isComparisonModeActive && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <strong>Comparison Mode Active:</strong> Data is currently normalized to "Days Since Launch" for accurate head-to-head comparison.
+        </Alert>
+      )}
+
+      {/* ── Contextual Quick Toggle ── */}
+      {selectedChallengeIds.length > 1 && (
+        <Paper sx={{ mb: 2, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'background.paper' }}>
+          <Typography fontWeight={600}>
+            Comparing {selectedChallengeIds.length} Selected Challenges
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isComparisonModeActive}
+                onChange={(e) => setIsComparisonModeActive(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Comparison Mode"
+            sx={{ m: 0 }}
+          />
+        </Paper>
+      )}
+
+      {/* ── Widget Grid / Comparison Mode ── */}
+      {selectedChallengeIds.length > 1 && isComparisonModeActive ? (
+        <ComparisonMode
+          stats={stats}
+          challenges={allChallenges}
+          selectedChallengeIds={selectedChallengeIds}
+        />
+      ) : (
+        <DashboardGrid
+          visible={visible}
+          layouts={layouts}
+          isEditing={isEditing}
+          onLayoutChange={onLayoutChange}
+          onRemoveWidget={toggleWidget}
+          renderWidget={renderWidget}
+        />
+      )}
 
       {/* ── Widget Catalog Drawer ── */}
       <WidgetCatalog
-        open={catalogOpen}
-        onClose={() => setCatalogOpen(false)}
-        visible={visible}
-        onToggle={toggleWidget}
-        onApplyPreset={handleApplyPreset}
-        onReset={handleReset}
-      />
+  open={catalogOpen}
+  onClose={() => setCatalogOpen(false)}
+  visible={visible}
+  onToggle={toggleWidget}
+  onApplyPreset={handleApplyPreset}
+  onReset={handleReset}
+  challenges={allChallenges}
+  selectedChallengeIds={selectedChallengeIds}
+  onToggleChallenge={handleToggleChallenge}
+  onClearFilters={handleClearFilters}
+  isComparisonModeActive={isComparisonModeActive}
+  setIsComparisonModeActive={setIsComparisonModeActive}
+/>
 
       {/* ── Feedback Snackbar ── */}
       <Snackbar

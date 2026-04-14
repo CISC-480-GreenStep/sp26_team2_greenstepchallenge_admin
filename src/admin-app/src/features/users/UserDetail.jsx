@@ -39,10 +39,12 @@ export default function UserDetail() {
   const [groups, setGroups] = useState([]);
   const [points, setPoints] = useState({ total: 0, breakdown: [] });
   const [participationExpanded, setParticipationExpanded] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const uid = Number(id);
+    setLoading(true);
     Promise.all([
       getUserById(uid),
       getActivityLogsByUser(uid),
@@ -61,10 +63,13 @@ export default function UserDetail() {
       setGroups(g);
     }).catch((err) => {
       setError(err.message || 'Failed to load user details');
+    }).finally(() => {
+      setLoading(false);
     });
   }, [id]);
 
-  if (!user) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (error && !user) return <Box sx={{ py: 4 }}><Alert severity="error">{error}</Alert></Box>;
 
   const challengeName = (cid) => challenges.find((c) => c.id === cid)?.name || 'Unknown';
   const actionName = (aid) => actions.find((a) => a.id === aid)?.name || 'Unknown';

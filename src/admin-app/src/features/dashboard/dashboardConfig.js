@@ -18,7 +18,6 @@ export const WIDGETS = [
   // ─── Charts & Visualizations ──────────────────────────
   { id: 'chart-category-pie', title: 'Actions by Category', description: 'Pie chart of action distribution across categories', category: 'charts', defaultW: 5, defaultH: 7, minW: 3, minH: 5 },
   { id: 'chart-participation-bar', title: 'Participation by Challenge', description: 'Bar chart comparing participants and completions per challenge', category: 'charts', defaultW: 6, defaultH: 7, minW: 3, minH: 5 },
-  { id: 'chart-engagement-trend', title: 'Monthly Engagement Trend', description: 'Line chart of action completions over time', category: 'charts', defaultW: 6, defaultH: 7, minW: 3, minH: 5 },
   { id: 'chart-challenge-status', title: 'Challenge Status Breakdown', description: 'Donut chart of challenge counts by status', category: 'charts', defaultW: 4, defaultH: 7, minW: 3, minH: 5 },
   { id: 'chart-points-by-challenge', title: 'Points by Challenge', description: 'Earned vs maximum points per challenge', category: 'charts', defaultW: 6, defaultH: 7, minW: 3, minH: 5 },
   { id: 'chart-user-growth', title: 'User Registration Timeline', description: 'Cumulative user growth over time', category: 'charts', defaultW: 6, defaultH: 7, minW: 3, minH: 5 },
@@ -44,7 +43,6 @@ export const DEFAULT_VISIBLE = [
   'table-challenge-summary',
   'chart-category-pie',
   'chart-participation-bar',
-  'chart-engagement-trend',
   'list-leaderboard',
   'table-most-active',
 ];
@@ -95,7 +93,6 @@ const LG_DEFAULT = [
   { i: 'table-challenge-summary', x: 0, y: 2, w: 7, h: 8, minW: 4, minH: 5 },
   { i: 'chart-category-pie', x: 7, y: 2, w: 5, h: 8, minW: 3, minH: 5 },
   { i: 'chart-participation-bar', x: 0, y: 10, w: 6, h: 7, minW: 4, minH: 5 },
-  { i: 'chart-engagement-trend', x: 6, y: 10, w: 6, h: 7, minW: 4, minH: 5 },
   { i: 'list-leaderboard', x: 0, y: 17, w: 6, h: 8, minW: 4, minH: 5 },
   { i: 'table-most-active', x: 6, y: 17, w: 6, h: 8, minW: 4, minH: 5 },
 ];
@@ -142,7 +139,7 @@ export const LAYOUT_PRESETS = [
     name: 'Analytics Deep Dive',
     description: 'All charts and data visualizations',
     visible: [
-      'chart-category-pie', 'chart-participation-bar', 'chart-engagement-trend',
+      'chart-category-pie', 'chart-participation-bar',
       'chart-challenge-status', 'chart-points-by-challenge', 'chart-user-growth',
       'chart-group-performance', 'chart-completion-rates', 'chart-points-distribution',
     ],
@@ -152,14 +149,13 @@ export const LAYOUT_PRESETS = [
         { i: 'chart-challenge-status', x: 4, y: 0, w: 4, h: 7, minW: 3, minH: 5 },
         { i: 'chart-points-distribution', x: 8, y: 0, w: 4, h: 7, minW: 3, minH: 5 },
         { i: 'chart-participation-bar', x: 0, y: 7, w: 6, h: 7, minW: 4, minH: 5 },
-        { i: 'chart-engagement-trend', x: 6, y: 7, w: 6, h: 7, minW: 4, minH: 5 },
         { i: 'chart-points-by-challenge', x: 0, y: 14, w: 6, h: 7, minW: 4, minH: 5 },
         { i: 'chart-user-growth', x: 6, y: 14, w: 6, h: 7, minW: 4, minH: 5 },
         { i: 'chart-group-performance', x: 0, y: 21, w: 6, h: 7, minW: 4, minH: 5 },
         { i: 'chart-completion-rates', x: 6, y: 21, w: 6, h: 7, minW: 4, minH: 5 },
       ],
       [
-        'chart-category-pie', 'chart-participation-bar', 'chart-engagement-trend',
+        'chart-category-pie', 'chart-participation-bar',
         'chart-challenge-status', 'chart-points-by-challenge', 'chart-user-growth',
         'chart-group-performance', 'chart-completion-rates', 'chart-points-distribution',
       ],

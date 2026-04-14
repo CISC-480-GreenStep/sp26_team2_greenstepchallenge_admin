@@ -23,13 +23,11 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   getUsers,
   deactivateUser,
   activateUser,
-  deleteUser,
   logActivity,
   ROLES,
   USER_STATUSES,
@@ -56,8 +54,6 @@ export default function UsersPage() {
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
 
   const { user, hasRole } = useAuth();
@@ -112,14 +108,6 @@ export default function UsersPage() {
     );
     setPendingAction(null);
     setConfirmOpen(false);
-    load();
-  };
-
-  const handleDeleteUser = async () => {
-    if (!pendingDelete) return;
-    await deleteUser(pendingDelete.id, pendingDelete.email);
-    setPendingDelete(null);
-    setDeleteConfirmOpen(false);
     load();
   };
 
@@ -279,18 +267,6 @@ export default function UsersPage() {
                           <CheckCircleIcon fontSize="small" />
                         )}
                       </IconButton>
-                      {isSuperAdmin && (
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => {
-                            setPendingDelete(u);
-                            setDeleteConfirmOpen(true);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      )}
                     </>
                   )}
                 </TableCell>
@@ -332,16 +308,6 @@ export default function UsersPage() {
         }}
       />
 
-      <ConfirmDialog
-        open={deleteConfirmOpen}
-        title="Delete User"
-        message={`Are you sure you want to permanently delete ${pendingDelete?.name}? This will remove their account and allow them to be invited again. This action cannot be undone.`}
-        onConfirm={handleDeleteUser}
-        onCancel={() => {
-          setDeleteConfirmOpen(false);
-          setPendingDelete(null);
-        }}
-      />
     </Box>
   );
 }

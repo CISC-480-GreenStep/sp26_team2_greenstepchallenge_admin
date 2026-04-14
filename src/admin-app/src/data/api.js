@@ -79,15 +79,10 @@ export async function activateUser(id) {
   return updateUser(id, { status: USER_STATUSES.ACTIVE });
 }
 
-export async function deleteUser(id, email) {
-  const res = await fetch('/.netlify/functions/delete-user', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, email }),
-  });
-  const result = await res.json();
-  if (!res.ok) throw new Error(result.error || 'Failed to delete user');
-  return result;
+/** Check if a user with this email already exists */
+export async function getUserByEmail(email) {
+  const { data } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+  return data;
 }
 
 // ─── Challenges ─────────────────────────────────────

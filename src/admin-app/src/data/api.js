@@ -206,6 +206,15 @@ export async function getActivityLogsByUser(userId) {
   return unwrap(await supabase.from('activity_logs').select('*').eq('userId', userId).order('timestamp', { ascending: false }));
 }
 
+export async function getActivityLogs() {
+  return unwrap(await supabase.from('activity_logs').select('*').order('timestamp', { ascending: false }));
+}
+
+/** Log an admin action. Call this after any mutating operation. */
+export async function logActivity(userId, action, details) {
+  return unwrap(await supabase.from('activity_logs').insert({ userId, action, details }).select().single());
+}
+
 // ─── Groups / Departments ───────────────────────────
 export async function getGroups() {
   return unwrap(await supabase.from('departments').select('*').order('id'));

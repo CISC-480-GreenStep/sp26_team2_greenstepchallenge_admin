@@ -19,7 +19,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { getGroups, getUsers, getChallenges, deleteGroup } from "../../data/api";
+import { getGroups, getUsers, getChallenges, deleteGroup, logActivity } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 
@@ -32,7 +32,7 @@ export default function GroupsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
+  const { user, hasRole } = useAuth();
   const canManage = hasRole("Admin");
 
   const load = async () => {
@@ -57,7 +57,9 @@ export default function GroupsPage() {
 
   const handleDelete = async () => {
     if (pendingDelete) {
+      const g = groups.find((gr) => gr.id === pendingDelete);
       await deleteGroup(pendingDelete);
+      await logActivity(user?.id, 'Deleted group', `Deleted ${g?.name || 'group'}`);
       setPendingDelete(null);
       setConfirmOpen(false);
       load();

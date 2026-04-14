@@ -286,7 +286,7 @@ export default function UserDetail() {
                   <TableRow key={l.id}>
                     <TableCell>{l.action}</TableCell>
                     <TableCell>{l.details}</TableCell>
-                    <TableCell>{l.timestamp}</TableCell>
+                    <TableCell>{new Date(l.timestamp).toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
                 {logs.length === 0 && (

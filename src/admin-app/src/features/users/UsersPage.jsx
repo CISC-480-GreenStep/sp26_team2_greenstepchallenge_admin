@@ -30,6 +30,7 @@ import {
   deactivateUser,
   activateUser,
   deleteUser,
+  logActivity,
   ROLES,
   USER_STATUSES,
   getGroups,
@@ -98,11 +99,17 @@ export default function UsersPage() {
 
   const handleToggleStatus = async () => {
     if (!pendingAction) return;
-    if (pendingAction.status === USER_STATUSES.ACTIVE) {
+    const wasActive = pendingAction.status === USER_STATUSES.ACTIVE;
+    if (wasActive) {
       await deactivateUser(pendingAction.id);
     } else {
       await activateUser(pendingAction.id);
     }
+    await logActivity(
+      user.id,
+      wasActive ? 'Deactivated user' : 'Activated user',
+      `${wasActive ? 'Deactivated' : 'Activated'} ${pendingAction.name}`
+    );
     setPendingAction(null);
     setConfirmOpen(false);
     load();

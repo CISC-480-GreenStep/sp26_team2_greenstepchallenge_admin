@@ -37,6 +37,7 @@ import {
   deleteAction,
   getGroups,
   getPresets,
+  logActivity,
 } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
 
@@ -112,6 +113,7 @@ export default function ChallengeForm() {
     const payload = { ...form, groupId: form.groupId || null };
     if (isEdit) {
       await updateChallenge(Number(id), payload);
+      await logActivity(user.id, 'Updated challenge', `Updated ${payload.name}`);
     } else {
       const newChallenge = await createChallenge({ ...payload, createdBy: user.id, actionIds: [], participants: [], joinBy: null });
       if (presetActions.length > 0) {
@@ -122,6 +124,7 @@ export default function ChallengeForm() {
         }
         await updateChallenge(newChallenge.id, { actionIds: newActionIds });
       }
+      await logActivity(user.id, 'Created challenge', `Created ${payload.name}`);
     }
     navigate("/challenges");
   };

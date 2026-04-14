@@ -11,7 +11,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { getChallenges, archiveChallenge, deleteChallenge, CHALLENGE_STATUSES, getGroups, getParticipantCounts } from '../../data/api';
+import { getChallenges, archiveChallenge, deleteChallenge, logActivity, CHALLENGE_STATUSES, getGroups, getParticipantCounts } from '../../data/api';
 import { useAuth } from '../auth/AuthContext';
 import CSVExport from '../../components/shared/CSVExport';
 import ConfirmDialog from '../../components/shared/ConfirmDialog';
@@ -69,13 +69,17 @@ export default function ChallengesPage() {
   });
 
   const handleArchive = async (id) => {
+    const c = challenges.find((ch) => ch.id === id);
     await archiveChallenge(id);
+    await logActivity(user?.id, 'Archived challenge', `Archived ${c?.name || 'challenge'}`);
     load();
   };
 
   const handleDelete = async () => {
     if (pendingDelete) {
+      const c = challenges.find((ch) => ch.id === pendingDelete);
       await deleteChallenge(pendingDelete);
+      await logActivity(user?.id, 'Deleted challenge', `Deleted ${c?.name || 'challenge'}`);
       setPendingDelete(null);
       setConfirmOpen(false);
       load();

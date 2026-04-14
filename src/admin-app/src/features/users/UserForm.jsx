@@ -4,7 +4,8 @@ import {
   Box, Typography, TextField, MenuItem, Button, Stack, Paper, Grid,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getUserById, createUser, updateUser, ROLES, USER_STATUSES, getGroups } from '../../data/api';
+import { getUserById, createUser, updateUser, logActivity, ROLES, USER_STATUSES, getGroups } from '../../data/api';
+import { useAuth } from '../auth/AuthContext';
 
 const EMPTY = {
   name: '',
@@ -18,6 +19,7 @@ export default function UserForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [form, setForm] = useState(EMPTY);
   const [groups, setGroups] = useState([]);
 
@@ -38,8 +40,10 @@ export default function UserForm() {
     const payload = { ...form, groupId: form.groupId || null };
     if (isEdit) {
       await updateUser(Number(id), payload);
+      await logActivity(currentUser?.id, 'Updated user', `Updated ${payload.name}`);
     } else {
       await createUser(payload);
+      await logActivity(currentUser?.id, 'Created user', `Created ${payload.name} (${payload.role})`);
     }
     navigate('/users');
   };

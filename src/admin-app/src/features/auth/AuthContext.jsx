@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { supabase } from '../../data/supabase';
 import { ROLES } from '../../data/api';
 
@@ -7,6 +7,10 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Track the auth email separately so we can load the DB user outside
+  // the onAuthStateChange callback (avoids deadlocks during token refresh)
+  const [authEmail, setAuthEmail] = useState(null);
+  const initialLoad = useRef(true);
 
   // Look up the app user row by email to get role, name, etc.
   async function loadAppUser(email) {
@@ -19,12 +23,29 @@ export function AuthProvider({ children }) {
     return data;
   }
 
+  // Load app user whenever authEmail changes
+  useEffect(() => {
+    if (authEmail === null && !initialLoad.current) {
+      // Auth email was cleared (sign out)
+      setUser(null);
+      return;
+    }
+    if (!authEmail) return;
+
+    let cancelled = false;
+    loadAppUser(authEmail).then((appUser) => {
+      if (!cancelled) setUser(appUser);
+    });
+    return () => { cancelled = true; };
+  }, [authEmail]);
+
   useEffect(() => {
     // Restore session on mount
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user?.email) {
         const appUser = await loadAppUser(session.user.email);
         setUser(appUser);
+        setAuthEmail(session.user.email);
       } else {
         // Restore dev login session if present
         const devEmail = localStorage.getItem('gsc_dev_user');
@@ -33,18 +54,21 @@ export function AuthProvider({ children }) {
           if (appUser) setUser(appUser);
         }
       }
+      initialLoad.current = false;
       setLoading(false);
     });
 
-    // Listen for auth changes (login, logout, token refresh)
+    // Listen for auth changes — keep this callback sync to avoid
+    // deadlocks with the Supabase auth state machine during token refresh.
+    // The DB lookup happens in the authEmail useEffect above.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (event === 'SIGNED_IN' && session?.user?.email) {
-          const appUser = await loadAppUser(session.user.email);
-          setUser(appUser);
+          setAuthEmail(session.user.email);
         } else if (event === 'SIGNED_OUT') {
-          setUser(null);
+          setAuthEmail(null);
         }
+        // TOKEN_REFRESHED: no action needed, session is still valid
       },
     );
 

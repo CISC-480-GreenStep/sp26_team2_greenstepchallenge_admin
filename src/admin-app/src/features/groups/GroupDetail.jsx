@@ -53,6 +53,7 @@ export default function GroupDetail() {
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [pendingRemoveUser, setPendingRemoveUser] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const load = async () => {
@@ -68,6 +69,8 @@ export default function GroupDetail() {
       setChallenges(c);
     } catch (err) {
       setError(err.message || 'Failed to load group details');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +78,8 @@ export default function GroupDetail() {
     load();
   }, [id]);
 
-  if (!group) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (error && !group) return <Box sx={{ py: 4 }}><Alert severity="error">{error}</Alert></Box>;
 
   const members = users.filter((u) => u.groupId === group.id);
   const groupChallenges = challenges.filter((c) => c.groupId === group.id);

@@ -57,7 +57,7 @@ export async function getUserById(id) {
 }
 
 export async function createUser(data) {
-  const res = await fetch('/api/invite-user', {
+  const res = await fetch('/.netlify/functions/invite-user', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

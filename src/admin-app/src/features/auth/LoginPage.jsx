@@ -50,7 +50,7 @@ export default function LoginPage() {
 
           {sent ? (
             <Alert severity="success">
-              Check your email for a magic link to sign in. You can close this tab.
+              Check your email for a magic link to sign in. If you don't see it, check your junk/spam folder. You can close this tab.
             </Alert>
           ) : (
             <form onSubmit={handleSubmit}>

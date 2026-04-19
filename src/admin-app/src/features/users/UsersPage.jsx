@@ -1,49 +1,50 @@
-import { useEffect, useState } from "react";
+/**
+ * UsersPage -- list of all users with role/group filters, CSV export,
+ * and admin actions (edit, activate/deactivate).
+ *
+ * Responsibilities (intentionally thin):
+ *   - Load users + groups in parallel; surface loading and error UI.
+ *   - Own filter state (search, role, group); compute the filtered
+ *     view; resolve column-permission flags from the auth context.
+ *   - Own the activate/deactivate confirmation dialog and its
+ *     activity-log side effect.
+ *   - Delegate filter chrome to UsersFilterBar and the data grid to
+ *     UsersTable.
+ */
+
+import { useCallback, useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import AddIcon from "@mui/icons-material/Add";
-import BlockIcon from "@mui/icons-material/Block";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
-  Box,
-  Typography,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  IconButton,
-  TextField,
-  MenuItem,
-  Stack,
-  CircularProgress,
   Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
 } from "@mui/material";
 
-import EntityLink from "../../components/EntityLink";
+import UsersFilterBar from "./components/UsersFilterBar";
+import UsersTable from "./components/UsersTable";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import CSVExport from "../../components/shared/CSVExport";
 import {
-  getUsers,
-  deactivateUser,
-  activateUser,
-  logActivity,
   ROLES,
   USER_STATUSES,
+  activateUser,
+  deactivateUser,
   getGroups,
+  getUsers,
+  logActivity,
 } from "../../data/api";
 import { can } from "../../lib/permissions";
 import { useAuth } from "../auth/AuthContext";
 
 export default function UsersPage() {
-  //reads 'group ID' from URL
+  // Pre-seed the group filter from the URL so links from GroupDetail
+  // ("show all members") deep-link straight into a filtered list.
   const queryParams = new URLSearchParams(window.location.search);
   const initialGroupFilter = queryParams.get("groupId") || "All";
 
@@ -57,19 +58,23 @@ export default function UsersPage() {
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const { user, hasRole } = useAuth();
   const userRole = user?.role || ROLES.GENERAL_USER;
   const canManage = hasRole("Admin");
   const isSuperAdmin = hasRole("SuperAdmin");
-  const showEmail = can(userRole, "VIEW_USER_EMAIL");
-  const showRole = can(userRole, "VIEW_USER_ROLE");
-  const showGroup = can(userRole, "VIEW_USER_GROUP");
-  const showStatus = can(userRole, "VIEW_USER_STATUS");
-  const showLastActive = can(userRole, "VIEW_USER_LAST_ACTIVE");
 
-  const load = async () => {
+  // Column-visibility flags driven by the permissions matrix.
+  const cols = {
+    email: can(userRole, "VIEW_USER_EMAIL"),
+    role: can(userRole, "VIEW_USER_ROLE"),
+    group: can(userRole, "VIEW_USER_GROUP"),
+    status: can(userRole, "VIEW_USER_STATUS"),
+    lastActive: can(userRole, "VIEW_USER_LAST_ACTIVE"),
+  };
+
+  const load = useCallback(async () => {
     try {
       const [u, g] = await Promise.all([getUsers(), getGroups()]);
       setUsers(u);
@@ -79,21 +84,28 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
-    load();
   }, []);
+
+  useEffect(() => {
+     
+    load();
+  }, [load]);
 
   const groupName = (gid) => groups.find((g) => g.id === gid)?.name || "";
 
   const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
     const matchesSearch =
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
     const matchesRole = roleFilter === "All" || u.role === roleFilter;
     const matchesGroup = groupFilter === "All" || u.groupId === Number(groupFilter);
     return matchesSearch && matchesRole && matchesGroup;
   });
+
+  const requestToggleStatus = (target) => {
+    setPendingAction(target);
+    setConfirmOpen(true);
+  };
 
   const handleToggleStatus = async () => {
     if (!pendingAction) return;
@@ -113,12 +125,13 @@ export default function UsersPage() {
     load();
   };
 
-  if (loading)
+  if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
       </Box>
     );
+  }
 
   return (
     <Box>
@@ -127,6 +140,7 @@ export default function UsersPage() {
           {error}
         </Alert>
       )}
+
       <Box
         sx={{
           display: "flex",
@@ -158,144 +172,32 @@ export default function UsersPage() {
         </Stack>
       </Box>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
-        <TextField
-          size="small"
-          label="Search users"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 220 }}
-        />
-        <TextField
-          size="small"
-          select
-          label="Role"
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
-        >
-          <MenuItem value="All">All</MenuItem>
-          {Object.values(ROLES).map((r) => (
-            <MenuItem key={r} value={r}>
-              {r}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          size="small"
-          select
-          label="Group"
-          value={groupFilter}
-          onChange={(e) => setGroupFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
-        >
-          <MenuItem value="All">All Groups</MenuItem>
-          {groups.map((g) => (
-            <MenuItem key={g.id} value={g.id}>
-              {g.name}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
+      <UsersFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        roleFilter={roleFilter}
+        onRoleChange={setRoleFilter}
+        groupFilter={groupFilter}
+        onGroupChange={setGroupFilter}
+        groups={groups}
+      />
 
-      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              {showEmail && <TableCell>Email</TableCell>}
-              {showRole && <TableCell>Role</TableCell>}
-              {showGroup && <TableCell>Group</TableCell>}
-              {showStatus && <TableCell>Status</TableCell>}
-              {showLastActive && <TableCell>Last Active</TableCell>}
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filtered.map((u) => (
-              <TableRow
-                key={u.id}
-                hover
-                sx={{ cursor: "pointer" }}
-                onClick={() => navigate(`/users/${u.id}`)}
-              >
-                <TableCell>{u.name}</TableCell>
-                {showEmail && <TableCell>{u.email}</TableCell>}
-                {showRole && (
-                  <TableCell>
-                    <Chip label={u.role} size="small" variant="outlined" />
-                  </TableCell>
-                )}
-                {showGroup && (
-                  <TableCell>
-                    <EntityLink type="groups" id={u.groupId}>
-                      {groupName(u.groupId) || "—"}
-                    </EntityLink>
-                  </TableCell>
-                )}
-                {showStatus && (
-                  <TableCell>
-                    <Chip
-                      label={u.status}
-                      size="small"
-                      color={u.status === USER_STATUSES.ACTIVE ? "success" : "default"}
-                    />
-                  </TableCell>
-                )}
-                {showLastActive && <TableCell>{u.lastActive || "—"}</TableCell>}
-                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                  <IconButton size="small" onClick={() => navigate(`/users/${u.id}`)}>
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
-                  {canManage && (
-                    <>
-                      <IconButton size="small" onClick={() => navigate(`/users/${u.id}/edit`)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color={u.status === USER_STATUSES.ACTIVE ? "error" : "success"}
-                        onClick={() => {
-                          setPendingAction(u);
-                          setConfirmOpen(true);
-                        }}
-                      >
-                        {u.status === USER_STATUSES.ACTIVE ? (
-                          <BlockIcon fontSize="small" />
-                        ) : (
-                          <CheckCircleIcon fontSize="small" />
-                        )}
-                      </IconButton>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtered.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={
-                    2 +
-                    (showEmail ? 1 : 0) +
-                    (showRole ? 1 : 0) +
-                    (showGroup ? 1 : 0) +
-                    (showStatus ? 1 : 0) +
-                    (showLastActive ? 1 : 0)
-                  }
-                  align="center"
-                >
-                  No users found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <UsersTable
+        users={filtered}
+        groupName={groupName}
+        cols={cols}
+        canManage={canManage}
+        onToggleStatus={requestToggleStatus}
+      />
 
       <ConfirmDialog
         open={confirmOpen}
-        title={pendingAction?.status === USER_STATUSES.ACTIVE ? "Deactivate User" : "Activate User"}
-        message={`Are you sure you want to ${pendingAction?.status === USER_STATUSES.ACTIVE ? "deactivate" : "activate"} ${pendingAction?.name}?`}
+        title={
+          pendingAction?.status === USER_STATUSES.ACTIVE ? "Deactivate User" : "Activate User"
+        }
+        message={`Are you sure you want to ${
+          pendingAction?.status === USER_STATUSES.ACTIVE ? "deactivate" : "activate"
+        } ${pendingAction?.name}?`}
         onConfirm={handleToggleStatus}
         onCancel={() => {
           setConfirmOpen(false);

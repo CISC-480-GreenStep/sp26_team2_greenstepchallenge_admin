@@ -113,6 +113,12 @@ Click the **"Reset Demo Data"** button on the login page to clear all changes an
 
 ---
 
+## Coding Standards
+
+All contributors follow [`CODING_GUIDELINES.md`](CODING_GUIDELINES.md) for naming, imports, comments, branch and commit conventions, the tiered file-size policy, and the cohesive comment standard.
+
+---
+
 ## Project Structure
 
 ```

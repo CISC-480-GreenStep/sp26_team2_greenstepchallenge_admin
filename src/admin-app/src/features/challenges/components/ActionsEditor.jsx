@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 
 import {
-  CATEGORIES,
+  ACTIONS,
   createAction,
   deleteAction,
   getChallengeById,
@@ -46,7 +46,7 @@ import {
 const EMPTY_ACTION = {
   name: "",
   description: "",
-  category: CATEGORIES[0],
+  category: ACTIONS[0],
   points: 5,
 };
 
@@ -182,7 +182,7 @@ export default function ActionsEditor({ challengeId, actions, onChanged }) {
               onChange={(e) => setActionForm((p) => ({ ...p, category: e.target.value }))}
               fullWidth
             >
-              {CATEGORIES.map((c) => (
+              {ACTIONS.map((c) => (
                 <MenuItem key={c} value={c}>
                   {c}
                 </MenuItem>

@@ -9,7 +9,7 @@
 
 import { Grid, MenuItem, TextField } from "@mui/material";
 
-import { CATEGORIES, CHALLENGE_STATUSES } from "../../../data/api";
+import { ACTIONS, CHALLENGE_STATUSES } from "../../../data/api";
 
 /**
  * @param {object} props
@@ -49,7 +49,7 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
           onChange={onChange("category")}
           fullWidth
         >
-          {CATEGORIES.map((c) => (
+          {ACTIONS.map((c) => (
             <MenuItem key={c} value={c}>
               {c}
             </MenuItem>

@@ -18,7 +18,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 
 import {
-  CATEGORIES,
+  ACTIONS,
   CHALLENGE_STATUSES,
   createAction,
   createChallenge,
@@ -37,7 +37,7 @@ import PresetPicker from "./components/PresetPicker";
 const EMPTY_FORM = {
   name: "",
   description: "",
-  category: CATEGORIES[0],
+  category: ACTIONS[0],
   theme: "#4CAF50",
   startDate: "",
   endDate: "",

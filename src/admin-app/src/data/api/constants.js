@@ -36,6 +36,3 @@ export const ACTIONS = [
   "Transportation",
   "Consumption & Waste",
 ];
-
-/** @deprecated Use {@link ACTIONS} instead. Slated for removal in v0.8. */
-export const CATEGORIES = ACTIONS;

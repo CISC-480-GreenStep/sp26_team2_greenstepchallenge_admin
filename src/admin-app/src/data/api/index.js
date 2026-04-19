@@ -1,5 +1,6 @@
 /**
- * Public API surface for the data layer.
+ * @file index.js
+ * @summary Public API surface for the data layer.
  *
  * Every component imports from `data/api`, never from a sub-module
  * (and never from `data/supabase` directly). This barrel keeps the

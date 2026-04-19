@@ -1,5 +1,6 @@
 /**
- * PointsHistoryTable -- two-card "Global Points + Points per Challenge"
+ * @file PointsHistoryTable.jsx
+ * @summary PointsHistoryTable -- two-card "Global Points + Points per Challenge"
  * stat block on UserDetail. Mounted only when the viewer has
  * VIEW_USER_POINTS permission.
  *
@@ -97,8 +98,7 @@ export default function PointsHistoryTable({ points }) {
                   </TableHead>
                   <TableBody>
                     {points.breakdown.map((b) => {
-                      const pct =
-                        b.maxPoints > 0 ? Math.round((b.points / b.maxPoints) * 100) : 0;
+                      const pct = b.maxPoints > 0 ? Math.round((b.points / b.maxPoints) * 100) : 0;
                       return (
                         <TableRow key={b.challengeId}>
                           <TableCell>

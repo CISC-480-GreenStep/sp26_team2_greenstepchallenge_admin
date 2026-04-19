@@ -1,3 +1,8 @@
+/**
+ * @file ChallengeStatusWidget.jsx
+ * @summary Donut chart showing the count of challenges in each lifecycle status.
+ */
+
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 const STATUS_COLORS = {

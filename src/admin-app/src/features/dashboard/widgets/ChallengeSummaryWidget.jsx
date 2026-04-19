@@ -1,3 +1,8 @@
+/**
+ * @file ChallengeSummaryWidget.jsx
+ * @summary Compact table of all non-archived challenges with key metrics.
+ */
+
 import {
   Table,
   TableBody,

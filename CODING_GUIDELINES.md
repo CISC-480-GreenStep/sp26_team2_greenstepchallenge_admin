@@ -83,9 +83,11 @@ import AddIcon from "@mui/icons-material/Add";
 import { getUsers, createUser, ROLES } from "../../data/api";
 
 // 5. Internal components/utils
-import { useAuth } from "../auth/AuthContext";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { useAuth } from "../auth/useAuth";
+import { ConfirmDialog } from "../../components/shared/feedback";
 ```
+
+> Note (post-v0.7.1): `useAuth` lives in its own file (not `AuthContext.jsx`) to keep React Fast Refresh happy, and shared components are grouped by intent under `components/shared/{feedback,data,preview}` with barrel exports.
 
 ### Styling
 
@@ -150,7 +152,7 @@ Cohesion beats line count. A 320-line file with one tight responsibility is bett
 | 301–500 lines | Allowed when splitting would hurt readability (cohesive form, registry/config object that *is* the data, switch/router with many small cases) | PR description must justify |
 | > 500 lines | Hard ceiling | Add `/* eslint-disable max-lines */` plus a top-of-file comment naming the reason and linking a follow-up issue |
 
-**Exemptions (no cap):** auto-generated files, mock fixtures, configuration registries (e.g., `dashboardConfig.js`).
+**Exemptions (no cap):** auto-generated files, mock fixtures, configuration registries (e.g., `features/dashboard/config/widgets.js`). The exemption is granted in `eslint.config.js` so it stays explicit and reviewable.
 
 Enforced by ESLint `max-lines` (`warn` at 300, `error` at 500).
 
@@ -292,14 +294,17 @@ WIP                                  # not descriptive
 
 ## 5. Project-Specific Rules
 
-### Rule: All data access goes through `api.js`
+### Rule: All data access goes through `data/api`
 
-**Intent:** Single source of truth for data operations. If we ever change backends (e.g., swap Supabase for a custom API), we only change one file.
+**Intent:** Single source of truth for data operations. The `data/api/` folder holds one module per entity (`users`, `challenges`, `actions`, `participation`, `groups`, `presets`, `templates`, `activityLogs`, `leaderboard`) plus shared `constants` and `helpers`. A barrel `index.js` re-exports everything so callers always import from the package root, never from a specific module file. If we ever change backends, the entity modules are the only thing that has to change.
 
 **Example:**
 ```jsx
-// CORRECT -- import from api.js
-import { getUsers, createUser } from "../../data/api";
+// CORRECT -- import from the data/api barrel
+import { getUsers, createUser, ROLES } from "../../data/api";
+
+// WRONG -- reaching past the barrel into a specific module
+import { getUsers } from "../../data/api/users";
 
 // WRONG -- importing supabase directly in a component
 import { supabase } from "../../data/supabase";
@@ -337,19 +342,47 @@ await createUser(payload);
 
 ### Rule: Feature-folder organization
 
-**Intent:** Keep related code together. Each feature has its own folder under `features/` containing all its pages and components.
+**Intent:** Keep related code together. Each feature has its own folder under `features/` containing all its pages, the per-page sub-components it uses (under `components/`), and any feature-scoped hooks (under `hooks/`). Cross-feature reusable pieces live in `components/shared/` (grouped by intent) and `lib/`.
 
 ```
 features/
   users/
-    UsersPage.jsx        # list view
-    UserDetail.jsx       # detail view
-    UserForm.jsx         # create/edit form
+    UsersPage.jsx                  # list view
+    UserDetail.jsx                 # detail view
+    UserForm.jsx                   # create/edit form
+    components/
+      UsersFilterBar.jsx, UsersTable.jsx,
+      PointsHistoryTable.jsx,
+      ParticipationHistoryTable.jsx,
+      UserActivityLogList.jsx
   challenges/
-    ChallengesPage.jsx
-    ChallengeDetail.jsx
-    ChallengeForm.jsx
+    ChallengesPage.jsx, ChallengeDetail.jsx, ChallengeForm.jsx
+    components/
+      ChallengesToolbar.jsx, ChallengesFilterBar.jsx, ChallengesTable.jsx,
+      ActionFormDialog.jsx, ActionsEditor.jsx,
+      ChallengeFieldsSection.jsx, ChallengeLeaderboard.jsx,
+      ParticipantsTable.jsx, ParticipationLog.jsx, PresetPicker.jsx
+  presets/
+    PresetsPage.jsx, PresetForm.jsx
+    components/
+      PresetFieldsSection.jsx, PresetActionsEditor.jsx
+  dashboard/
+    DashboardPage.jsx, DashboardGrid.jsx, DashboardWidget.jsx,
+    WidgetCatalog.jsx, ComparisonMode.jsx
+    config/   widgets.js, layouts.js, index.js
+    components/   DashboardToolbar.jsx, widgetRenderer.jsx,
+                  comparison/ (5 chart sub-components + ComparisonCard)
+    hooks/    useDashboardLayout.js, useDashboardStats.js, useComparisonData.js
+    widgets/  22 widget components
 ```
+
+**Naming intent:**
+
+- A page (`*Page.jsx`) renders a top-level route and orchestrates state.
+- A `*Form.jsx` is a create/edit screen.
+- A `*Detail.jsx` is a single-record view.
+- Anything under `<feature>/components/` is a presentational/UI piece used only by that feature.
+- Anything under `<feature>/hooks/` is feature-scoped state/data logic.
 
 ### Rule: Permission checks use the `can()` helper
 

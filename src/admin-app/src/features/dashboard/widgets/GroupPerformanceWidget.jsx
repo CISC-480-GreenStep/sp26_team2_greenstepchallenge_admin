@@ -1,3 +1,8 @@
+/**
+ * @file GroupPerformanceWidget.jsx
+ * @summary Bar chart comparing average points per user across groups.
+ */
+
 import {
   ResponsiveContainer,
   BarChart,

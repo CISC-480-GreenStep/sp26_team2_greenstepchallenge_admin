@@ -1,5 +1,6 @@
 /**
- * ParticipationLog -- the per-completion event log on ChallengeDetail.
+ * @file ParticipationLog.jsx
+ * @summary ParticipationLog -- the per-completion event log on ChallengeDetail.
  *
  * Shows one row per `participation` row (user, action, date, notes)
  * plus a CSV export button. Pure presentational; the parent supplies

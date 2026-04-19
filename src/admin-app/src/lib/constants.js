@@ -1,5 +1,6 @@
 /**
- * Shared visual constants for the admin console.
+ * @file constants.js
+ * @summary Shared visual constants for the admin console.
  *
  * Kept here (not in MUI's theme) because they are used directly in
  * inline styles and Recharts series, where pulling from theme tokens
@@ -26,14 +27,7 @@ export const CHART_COLORS = [
  * silently change the colors users associate with specific challenges
  * in side-by-side comparisons.
  */
-export const COMPARISON_COLORS = [
-  "#2196F3",
-  "#FF9800",
-  "#4CAF50",
-  "#F44336",
-  "#9C27B0",
-  "#00BCD4",
-];
+export const COMPARISON_COLORS = ["#2196F3", "#FF9800", "#4CAF50", "#F44336", "#9C27B0", "#00BCD4"];
 
 /** Companion palette used for the per-bar fill in the "Average Actions" chart. */
 export const COMPARISON_AVG_COLORS = [

@@ -1,5 +1,6 @@
 /**
- * UsersFilterBar -- search + role + group filters for the Users page.
+ * @file UsersFilterBar.jsx
+ * @summary UsersFilterBar -- search + role + group filters for the Users page.
  *
  * Pure controlled component: the parent owns the state, this only
  * renders inputs and propagates changes via callbacks.

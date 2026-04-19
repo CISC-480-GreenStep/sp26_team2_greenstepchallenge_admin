@@ -12,9 +12,9 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.7.0 — Code Cleanup and Refactor
+### Current Version: v0.7.1 — Phase 2 Cleanup (Reorganization)
 
-**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; coding standards restored and enforced via Prettier + ESLint.
+**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; auth context decomposed for React Fast Refresh. Every source file now carries a `@file` / `@summary` docblock. Coding standards enforced via Prettier + ESLint.
 
 ### What's Built
 
@@ -133,28 +133,42 @@ sp26_team2_greenstepchallenge_admin/
         ├── public/
         ├── src/
         │   ├── components/
-        │   │   ├── layout/      ← Sidebar, TopBar, AdminLayout
-        │   │   ├── shared/      ← CSVExport, ConfirmDialog, StatCard
-        │   │   ├── EntityLink.jsx     ← Reusable clickable entity link (user/challenge/group)
-        │   │   └── MobilePreview.jsx  ← Phone-frame challenge preview
+        │   │   ├── layout/      ← AdminLayout, Sidebar, TopBar
+        │   │   └── shared/      ← Reusable cross-feature widgets, grouped by intent
+        │   │       ├── feedback/  ← ConfirmDialog (modal confirmations)
+        │   │       ├── data/      ← StatCard, CSVExport, EntityLink
+        │   │       ├── preview/   ← MobilePreview (phone-frame challenge preview)
+        │   │       └── index.js   ← Barrel re-exports for one-line imports
         │   ├── features/
-        │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
+        │   │   ├── auth/        ← Split for React Fast Refresh:
+        │   │   │   ├── AuthContext.jsx       ← AuthProvider component only
+        │   │   │   ├── authContextValue.js   ← Raw context object
+        │   │   │   ├── useAuth.js            ← Consumer hook
+        │   │   │   ├── LoginPage.jsx, AuthCallback.jsx, RequireAuth.jsx
         │   │   ├── dashboard/   ← Customizable drag-and-drop dashboard
-        │   │   │   ├── DashboardPage.jsx       ← Thin orchestrator (~180 lines)
+        │   │   │   ├── DashboardPage.jsx       ← Thin orchestrator
         │   │   │   ├── DashboardGrid.jsx       ← ResponsiveGridLayout wrapper
-        │   │   │   ├── DashboardWidget.jsx     ← Card frame with drag handle + remove
+        │   │   │   ├── DashboardWidget.jsx     ← Card frame (drag handle + remove)
         │   │   │   ├── WidgetCatalog.jsx       ← Drawer for widget library + presets
-        │   │   │   ├── ComparisonMode.jsx      ← Multi-challenge compare view
-        │   │   │   ├── dashboardConfig.js      ← Widget registry, layouts, presets
+        │   │   │   ├── ComparisonMode.jsx      ← Multi-challenge compare orchestrator
+        │   │   │   ├── config/                 ← Split dashboard config:
+        │   │   │   │   ├── widgets.js             ← Widget registry + categories
+        │   │   │   │   ├── layouts.js             ← Auto/preset layout builders
+        │   │   │   │   └── index.js               ← Barrel re-exports
         │   │   │   ├── components/             ← DashboardToolbar, widgetRenderer
+        │   │   │   ├── components/comparison/  ← Per-chart pieces of ComparisonMode
         │   │   │   ├── hooks/useDashboardLayout.js ← Layout state + localStorage
         │   │   │   ├── hooks/useDashboardStats.js  ← Data load + aggregation pipeline
+        │   │   │   ├── hooks/useComparisonData.js  ← Comparison aggregations
         │   │   │   └── widgets/                ← 22 widget components (stat, chart, table)
         │   │   ├── challenges/  ← ChallengesPage, ChallengeForm, ChallengeDetail
-        │   │   │   └── components/  ← ActionsEditor, ChallengeFieldsSection,
+        │   │   │   └── components/  ← ChallengesToolbar, ChallengesFilterBar,
+        │   │   │                       ChallengesTable, ActionFormDialog,
+        │   │   │                       ActionsEditor, ChallengeFieldsSection,
         │   │   │                       ChallengeLeaderboard, ParticipantsTable,
         │   │   │                       ParticipationLog, PresetPicker
-        │   │   ├── presets/     ← PresetsPage, PresetForm (challenge templates)
+        │   │   ├── presets/     ← PresetsPage, PresetForm
+        │   │   │   └── components/  ← PresetFieldsSection, PresetActionsEditor
         │   │   ├── groups/      ← GroupsPage, GroupForm, GroupDetail
         │   │   │   └── components/  ← MembersTable, GroupChallengesTable
         │   │   ├── users/       ← UsersPage, UserForm, UserDetail
@@ -169,11 +183,13 @@ sp26_team2_greenstepchallenge_admin/
         │   │   │                   plus a barrel index.js — components import from `data/api`
         │   │   └── supabase.js  ← Supabase client singleton
         │   ├── lib/
-        │   │   ├── constants.js ← Shared color palettes and status mappings
+        │   │   ├── constants.js ← Shared color palettes (incl. comparison) + status maps
         │   │   └── permissions.js ← Role-based view/edit rules
         │   ├── App.jsx
         │   └── main.jsx
         ├── .env.example
+        ├── eslint.config.js     ← Flat config: imports, max-lines, prettier passthrough
+        ├── .prettierrc.json
         ├── package.json
         └── vite.config.js
 ```
@@ -241,6 +257,24 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.7.1 — Phase 2 Cleanup: Reorganization and Decomposition (Apr 19, 2026)
+
+Builds on v0.7.0 (PR #43, same umbrella branch). Behavior unchanged; the goal was to push past "comments only" into structural cleanup the team had flagged in code review.
+
+- **Auth context decomposed for React Fast Refresh** — `AuthContext.jsx` was exporting both the `AuthProvider` component and the `useAuth` hook, which broke HMR. Split into three files:
+  - `authContextValue.js` — raw `createContext` object only.
+  - `useAuth.js` — consumer hook only.
+  - `AuthContext.jsx` — `AuthProvider` component only, with `login`/`devLogin`/`logout`/`hasRole` wrapped in `useCallback` and a properly-keyed `useMemo` value.
+  All 11 import sites were updated to `from "../auth/useAuth"`.
+- **`ComparisonMode` decomposed (391 → 83 lines)** — extracted four chart components (`RelativeEngagementChart`, `CategoryBreakdownChart`, `TotalsBarChart`, `AverageActionsChart`) plus `ComparisonSummaryTable`, the shared `ComparisonCard` wrapper, and a `useComparisonData` hook that owns all the aggregation. Color palettes consolidated into `lib/constants.js` as `COMPARISON_COLORS` / `COMPARISON_AVG_COLORS`.
+- **`ChallengesPage` decomposed (322 → 170 lines)** — extracted `ChallengesToolbar`, `ChallengesFilterBar`, `ChallengesTable`; `load` wrapped in `useCallback`.
+- **`PresetForm` decomposed (309 → 108 lines)** — extracted `PresetFieldsSection` and `PresetActionsEditor`. The duplicated add/edit dialog markup in `PresetForm` and `ActionsEditor` was lifted into a shared `ActionFormDialog`, which both now consume.
+- **Dashboard config split** — the >300-line `dashboardConfig.js` became `config/widgets.js` (registry, categories, defaults) + `config/layouts.js` (auto/preset/responsive layout builders), with a barrel `config/index.js` so import paths stayed `from "../config"`. ESLint's `max-lines` override now points at `config/widgets.js` (declarative data).
+- **Shared components reorganized** — flat `components/shared/*` is now grouped by intent: `feedback/` (ConfirmDialog), `data/` (StatCard, CSVExport, EntityLink, including the previously-loose `EntityLink`), `preview/` (MobilePreview). Each subfolder has a barrel `index.js`, plus a top-level `components/shared/index.js`. All 18 import sites were updated.
+- **Cohesive comments — completion pass** — every `.js` / `.jsx` source file in `src/` now has a `@file` + `@summary` docblock. Layout, dashboard widgets, hooks, untouched feature pages, root files (`main.jsx`, `App.jsx`), and the Supabase client all received headers. (Verified by lint and a script: 0 files missing.)
+- **`ReportsPage` `useMemo` deps fixed** — `userName` / `challengeName` / `actionName` / `actionCategory` are now `useCallback`s with proper deps; `tableData` and `chartData` memos updated to depend on them so they don't go stale on a fresh `users` / `challenges` / `actions` reload.
+- **Lint + format clean** — `npm run lint` / `npm run format:check` / `npm run build` all pass; the only remaining warning is the intentional, justified `max-lines` warning on `useDashboardStats.js` (kept cohesive on purpose; covered in its file-header docblock).
 
 ### v0.7.0 — Code Cleanup and Refactor (Apr 19, 2026)
 

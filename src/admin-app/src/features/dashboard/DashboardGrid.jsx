@@ -1,3 +1,9 @@
+/**
+ * @file DashboardGrid.jsx
+ * @summary Responsive react-grid-layout wrapper that renders the visible
+ * widgets and forwards drag/resize/remove events back up to DashboardPage.
+ */
+
 import { useContainerWidth, ResponsiveGridLayout, verticalCompactor } from "react-grid-layout";
 
 import "react-grid-layout/css/styles.css";

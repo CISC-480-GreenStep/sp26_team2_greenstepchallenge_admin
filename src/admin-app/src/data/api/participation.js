@@ -1,5 +1,6 @@
 /**
- * Participation API -- read the `participation` table.
+ * @file participation.js
+ * @summary Participation API -- read the `participation` table.
  *
  * One row per (user, challenge, action) completion event. There are no
  * write helpers here yet because the admin console only reads

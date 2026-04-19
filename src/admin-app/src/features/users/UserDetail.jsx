@@ -1,5 +1,6 @@
 /**
- * UserDetail -- single-user page showing the header summary, optional
+ * @file UserDetail.jsx
+ * @summary UserDetail -- single-user page showing the header summary, optional
  * points history, participation log, and admin activity log.
  *
  * Responsibilities (intentionally thin):

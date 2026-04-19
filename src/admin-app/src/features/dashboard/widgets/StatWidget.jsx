@@ -1,3 +1,12 @@
+/**
+ * @file StatWidget.jsx
+ * @summary Single-metric KPI tile.
+ *
+ * Looks up its visual config (label, icon, color) by widget id, then
+ * renders the matching stat value from the dashboard stats payload.
+ * Used by all `stat-*` entries in the widget catalog.
+ */
+
 import CategoryIcon from "@mui/icons-material/Category";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EnergySavingsLeafIcon from "@mui/icons-material/EnergySavingsLeaf";

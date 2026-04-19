@@ -1,3 +1,11 @@
+/**
+ * @file PresetsPage.jsx
+ * @summary List of saved challenge presets (reusable templates).
+ *
+ * Presets are picked from `<PresetPicker>` in `<ChallengeForm>` create
+ * mode to pre-fill all fields plus a staged set of action templates.
+ */
+
 import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";

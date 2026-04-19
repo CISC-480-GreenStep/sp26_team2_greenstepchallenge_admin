@@ -1,5 +1,6 @@
 /**
- * UserActivityLogList -- "Admin Activity Log" section on UserDetail.
+ * @file UserActivityLogList.jsx
+ * @summary UserActivityLogList -- "Admin Activity Log" section on UserDetail.
  *
  * Lists system actions like "Created challenge", "Exported report".
  * Mounted only when the viewer has VIEW_USER_ACTIVITY_LOG permission;
@@ -48,8 +49,8 @@ export default function UserActivityLogList({ logs, userName }) {
             Admin Activity Log ({logs.length})
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            System actions like created challenge, exported report &mdash; admins only;
-            GeneralUsers typically have none
+            System actions like created challenge, exported report &mdash; admins only; GeneralUsers
+            typically have none
           </Typography>
         </Box>
         <CSVExport data={logs} filename={filename} />

@@ -1,3 +1,13 @@
+/**
+ * @file TopBar.jsx
+ * @summary App header with the menu toggle, current user, and sign-out.
+ *
+ * Sits above the main content area, offset by `DRAWER_WIDTH` on `md+`
+ * so it doesn't collide with the permanent sidebar. The hamburger menu
+ * only appears on small screens (it's the only way to open the temporary
+ * drawer there).
+ */
+
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Toolbar, IconButton, Typography, Chip, Button, Box } from "@mui/material";

@@ -1,3 +1,13 @@
+/**
+ * @file UserForm.jsx
+ * @summary Create / edit screen for a single user.
+ *
+ * "New User" goes through the invite-user serverless function (see
+ * `data/api/users.js`) so a Supabase Auth user and magic-link invite
+ * are created alongside the profile row. Edit mode just patches the
+ * profile.
+ */
+
 import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";

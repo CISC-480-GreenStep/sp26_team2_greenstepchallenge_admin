@@ -33,14 +33,7 @@ import { ACTIONS } from "../../../data/api";
  * @param {() => void} props.onCancel
  * @param {() => void} props.onSave
  */
-export default function ActionFormDialog({
-  open,
-  isEdit,
-  actionForm,
-  onChange,
-  onCancel,
-  onSave,
-}) {
+export default function ActionFormDialog({ open, isEdit, actionForm, onChange, onCancel, onSave }) {
   const patch = (key, value) => onChange({ ...actionForm, [key]: value });
 
   return (

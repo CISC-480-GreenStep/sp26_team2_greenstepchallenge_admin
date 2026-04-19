@@ -78,8 +78,7 @@ export function useComparisonData(stats, selectedChallenges) {
     const avgActionsData = selectedChallenges.map((c) => {
       const cPart = rawParticipation.filter((p) => p.challengeId === c.id);
       const uniqueUsers = new Set(cPart.map((p) => p.userId)).size;
-      const averageActions =
-        uniqueUsers > 0 ? Number((cPart.length / uniqueUsers).toFixed(1)) : 0;
+      const averageActions = uniqueUsers > 0 ? Number((cPart.length / uniqueUsers).toFixed(1)) : 0;
       return { name: displayName(c), averageActions };
     });
 

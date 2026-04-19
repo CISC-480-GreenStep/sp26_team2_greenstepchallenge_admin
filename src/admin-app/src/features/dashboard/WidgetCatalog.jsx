@@ -1,3 +1,9 @@
+/**
+ * @file WidgetCatalog.jsx
+ * @summary Side drawer that lets admins toggle which widgets are visible
+ * on the dashboard and apply named layout presets.
+ */
+
 import { useState } from "react";
 
 import CloseIcon from "@mui/icons-material/Close";

@@ -1,5 +1,6 @@
 /**
- * DashboardPage -- the customizable widget grid landing page.
+ * @file DashboardPage.jsx
+ * @summary DashboardPage -- the customizable widget grid landing page.
  *
  * Responsibilities (intentionally thin):
  *   - Hold UI-only state (catalog drawer open, snackbar, comparison toggle).

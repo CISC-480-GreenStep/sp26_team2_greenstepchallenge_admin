@@ -37,11 +37,7 @@ export default function ChallengesToolbar({
         gap: 1.5,
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight={700}
-        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
-      >
+      <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
         Challenges
       </Typography>
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

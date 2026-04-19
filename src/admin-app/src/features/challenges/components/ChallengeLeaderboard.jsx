@@ -1,5 +1,6 @@
 /**
- * ChallengeLeaderboard -- the top-scorers card on ChallengeDetail.
+ * @file ChallengeLeaderboard.jsx
+ * @summary ChallengeLeaderboard -- the top-scorers card on ChallengeDetail.
  *
  * Renders one tile per leaderboard entry with rank chip, points,
  * progress vs. challenge max, and action count. Hidden entirely when

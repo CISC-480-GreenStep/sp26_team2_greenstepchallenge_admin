@@ -1,7 +1,10 @@
 /**
- * Centralized permission rules for the admin console.
- * Change these values to adjust who can see and do what.
- * Role hierarchy: GeneralUser < Admin < SuperAdmin
+ * @file permissions.js
+ * @summary Centralized permission rules for the admin console.
+ *
+ * Change values in `PERMS` to adjust who can see and do what; callers
+ * read through `can(role, permKey)` so the role-comparison logic stays
+ * in one place. Role hierarchy: GeneralUser < Admin < SuperAdmin.
  */
 
 import { ROLES } from "../data/api";

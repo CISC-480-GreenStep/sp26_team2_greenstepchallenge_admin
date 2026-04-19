@@ -1,3 +1,13 @@
+/**
+ * @file main.jsx
+ * @summary Application entry point.
+ *
+ * Bootstraps React 18 (`createRoot`) and wraps the app in three providers:
+ *   - `<StrictMode>` for dev-only checks.
+ *   - `<ThemeProvider>` with the GreenStep palette and typography.
+ *   - `<AuthProvider>` so every route has access to the current user.
+ */
+
 import { StrictMode } from "react";
 
 import { createRoot } from "react-dom/client";

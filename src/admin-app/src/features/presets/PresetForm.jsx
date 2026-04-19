@@ -19,7 +19,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 
-
 import PresetActionsEditor from "./components/PresetActionsEditor";
 import PresetFieldsSection from "./components/PresetFieldsSection";
 import { ACTIONS, createPreset, getPresetById, updatePreset } from "../../data/api";

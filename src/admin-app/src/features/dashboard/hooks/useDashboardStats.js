@@ -1,5 +1,6 @@
 /**
- * useDashboardStats -- loads every dataset the dashboard needs and
+ * @file useDashboardStats.js
+ * @summary useDashboardStats -- loads every dataset the dashboard needs and
  * derives the aggregated `stats` object consumed by all 22 widgets.
  *
  * Why a hook instead of inline state in DashboardPage:
@@ -92,7 +93,15 @@ export default function useDashboardStats(selectedChallengeIds) {
  * single `stats` object every widget reads from. Pulled out of the
  * effect so it stays unit-testable.
  */
-function buildStats({ challenges, users, participation, actions, leaderboard, groups, selectedChallengeIds }) {
+function buildStats({
+  challenges,
+  users,
+  participation,
+  actions,
+  leaderboard,
+  groups,
+  selectedChallengeIds,
+}) {
   const filteredParticipation =
     selectedChallengeIds.length > 0
       ? participation.filter((p) => selectedChallengeIds.includes(p.challengeId))

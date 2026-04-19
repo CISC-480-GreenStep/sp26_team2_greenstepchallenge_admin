@@ -1,5 +1,6 @@
 /**
- * Activity Logs API -- read/write the `activity_logs` table.
+ * @file activityLogs.js
+ * @summary Activity Logs API -- read/write the `activity_logs` table.
  *
  * Every mutating admin operation should `logActivity(...)` after it
  * succeeds. The logs power UserDetail's history timeline and the

@@ -1,3 +1,17 @@
+/**
+ * @file App.jsx
+ * @summary Top-level route table.
+ *
+ * Public routes:
+ *   - `/login`             magic-link / dev login screen.
+ *   - `/auth/callback`     Supabase OAuth redirect target.
+ *
+ * Everything else lives behind `<RequireAuth>` + `<AdminLayout>` and
+ * routes that perform mutations are additionally wrapped in
+ * `<RequireAuth minRole=...>` so role checks happen at the route layer
+ * rather than inside each page.
+ */
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AdminLayout from "./components/layout/AdminLayout";

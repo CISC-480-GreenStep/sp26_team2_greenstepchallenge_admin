@@ -1,5 +1,6 @@
 /**
- * Users API -- read/write the `users` table.
+ * @file users.js
+ * @summary Users API -- read/write the `users` table.
  *
  * Note: createUser does NOT insert directly. It calls the
  * `/.netlify/functions/invite-user` (or Vercel equivalent) serverless

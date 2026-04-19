@@ -1,5 +1,6 @@
 /**
- * MembersTable -- "Members" section on GroupDetail.
+ * @file MembersTable.jsx
+ * @summary MembersTable -- "Members" section on GroupDetail.
  *
  * Renders the section header (with "Add Member" button) and the
  * members table. Pure presentational; the parent owns the data,

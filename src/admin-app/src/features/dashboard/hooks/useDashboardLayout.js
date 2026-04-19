@@ -1,5 +1,6 @@
 /**
- * useDashboardLayout -- owns the editable dashboard grid state.
+ * @file useDashboardLayout.js
+ * @summary useDashboardLayout -- owns the editable dashboard grid state.
  *
  * Responsibilities:
  *   - Hydrate visible widgets and per-breakpoint layouts from
@@ -61,10 +62,7 @@ function ensureLayoutEntries(layouts, widgetIds) {
     const cols = BREAKPOINT_COLS[bp] || 12;
     const newEntries = autoLayout(toAdd, cols);
     const maxY = updated[bp].reduce((max, item) => Math.max(max, item.y + item.h), 0);
-    updated[bp] = [
-      ...updated[bp],
-      ...newEntries.map((entry) => ({ ...entry, y: entry.y + maxY })),
-    ];
+    updated[bp] = [...updated[bp], ...newEntries.map((entry) => ({ ...entry, y: entry.y + maxY }))];
   }
   return updated;
 }

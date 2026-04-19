@@ -1,5 +1,6 @@
 /**
- * widgetRenderer -- maps a widget id to the React component that renders
+ * @file widgetRenderer.jsx
+ * @summary widgetRenderer -- maps a widget id to the React component that renders
  * it, given the aggregated `stats` object.
  *
  * Pulled out of DashboardPage so the registry is easy to extend without

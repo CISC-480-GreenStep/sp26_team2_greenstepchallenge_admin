@@ -1,5 +1,6 @@
 /**
- * ChallengeForm -- create or edit a challenge.
+ * @file ChallengeForm.jsx
+ * @summary ChallengeForm -- create or edit a challenge.
  *
  * Renders three sub-views, all under one route:
  *   - PresetPicker: only on create, lets the user pre-fill from a template
@@ -171,11 +172,7 @@ export default function ChallengeForm() {
       </Paper>
 
       {isEdit && (
-        <ActionsEditor
-          challengeId={Number(id)}
-          actions={actions}
-          onChanged={reloadActions}
-        />
+        <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />
       )}
     </Box>
   );

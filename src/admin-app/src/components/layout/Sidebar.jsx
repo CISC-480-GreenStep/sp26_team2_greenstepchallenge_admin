@@ -1,3 +1,15 @@
+/**
+ * @file Sidebar.jsx
+ * @summary Primary nav drawer.
+ *
+ * Renders a permanent drawer on `md+` screens and a temporary drawer on
+ * mobile (toggled from `<TopBar>`). Highlights the current route based
+ * on `useLocation`.
+ *
+ * Exports `DRAWER_WIDTH` so `<AdminLayout>` can reserve the same gutter
+ * width on the main content area.
+ */
+
 import { useLocation, useNavigate } from "react-router-dom";
 
 import AssessmentIcon from "@mui/icons-material/Assessment";

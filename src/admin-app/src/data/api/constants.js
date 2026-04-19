@@ -1,5 +1,6 @@
 /**
- * Domain enums shared across the app.
+ * @file constants.js
+ * @summary Domain enums shared across the app.
  *
  * Strings here mirror the values stored in Postgres. Treat them as
  * append-only -- adding new values is safe, renaming existing ones

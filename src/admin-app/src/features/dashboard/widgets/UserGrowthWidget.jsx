@@ -1,3 +1,8 @@
+/**
+ * @file UserGrowthWidget.jsx
+ * @summary Cumulative user growth over time as an area chart.
+ */
+
 import {
   ResponsiveContainer,
   AreaChart,

@@ -1,5 +1,6 @@
 /**
- * Groups API -- read/write the `departments` table.
+ * @file groups.js
+ * @summary Groups API -- read/write the `departments` table.
  *
  * The Postgres table is named `departments` for historical reasons;
  * the UI consistently calls them "Groups". The mapping happens here so

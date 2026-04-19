@@ -1,5 +1,6 @@
 /**
- * Templates API -- read/write the `templates` table.
+ * @file templates.js
+ * @summary Templates API -- read/write the `templates` table.
  *
  * Templates predate presets and are still queryable from the API but
  * have no UI yet (see issue #7). Kept here so the data layer stays

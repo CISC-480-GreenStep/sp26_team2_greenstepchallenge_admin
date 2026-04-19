@@ -1,5 +1,6 @@
 /**
- * ChallengeFieldsSection -- the grid of TextFields shared by both the
+ * @file ChallengeFieldsSection.jsx
+ * @summary ChallengeFieldsSection -- the grid of TextFields shared by both the
  * create and edit flows of ChallengeForm.
  *
  * Pure presentational. The parent owns `form` state and supplies a

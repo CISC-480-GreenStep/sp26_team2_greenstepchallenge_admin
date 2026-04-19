@@ -1,5 +1,6 @@
 /**
- * PresetPicker -- "Quick Start: Select a Template" panel shown only on
+ * @file PresetPicker.jsx
+ * @summary PresetPicker -- "Quick Start: Select a Template" panel shown only on
  * the create flow. Picking a preset pre-fills the challenge fields and
  * stages a list of action templates to create on submit.
  *

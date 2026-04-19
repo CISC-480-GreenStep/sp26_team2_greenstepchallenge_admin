@@ -1,3 +1,8 @@
+/**
+ * @file CategoryPieWidget.jsx
+ * @summary Dashboard pie chart of action counts grouped by category.
+ */
+
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 import { CHART_COLORS } from "../../../lib/constants";

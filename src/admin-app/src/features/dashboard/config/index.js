@@ -8,16 +8,6 @@
  * `layouts.js`. Replaces the previous monolithic `dashboardConfig.js`.
  */
 
-export {
-  WIDGET_CATEGORIES,
-  WIDGETS,
-  WIDGET_MAP,
-  DEFAULT_VISIBLE,
-} from "./widgets";
+export { WIDGET_CATEGORIES, WIDGETS, WIDGET_MAP, DEFAULT_VISIBLE } from "./widgets";
 
-export {
-  autoLayout,
-  buildResponsiveLayouts,
-  DEFAULT_LAYOUTS,
-  LAYOUT_PRESETS,
-} from "./layouts";
+export { autoLayout, buildResponsiveLayouts, DEFAULT_LAYOUTS, LAYOUT_PRESETS } from "./layouts";

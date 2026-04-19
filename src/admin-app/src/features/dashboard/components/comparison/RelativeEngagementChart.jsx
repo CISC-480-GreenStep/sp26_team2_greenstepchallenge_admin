@@ -22,7 +22,6 @@ import { useTheme } from "@mui/material";
 import ComparisonCard from "./ComparisonCard";
 import { COMPARISON_COLORS } from "../../../../lib/constants";
 
-
 /** Truncate long tick labels so axis ticks don't overlap on small screens. */
 function truncateTick(value) {
   return String(value).length > 25 ? String(value).substring(0, 25) + "..." : value;

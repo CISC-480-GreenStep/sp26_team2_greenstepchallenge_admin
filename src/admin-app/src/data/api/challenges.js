@@ -1,5 +1,6 @@
 /**
- * Challenges API -- read/write the `challenges` table plus its
+ * @file challenges.js
+ * @summary Challenges API -- read/write the `challenges` table plus its
  * `challenge_actions` and `challenge_participants` join tables.
  *
  * Every read flattens the join rows back onto the parent challenge as

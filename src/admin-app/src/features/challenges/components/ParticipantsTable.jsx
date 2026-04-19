@@ -1,5 +1,6 @@
 /**
- * ParticipantsTable -- "Participants" table on ChallengeDetail.
+ * @file ParticipantsTable.jsx
+ * @summary ParticipantsTable -- "Participants" table on ChallengeDetail.
  *
  * Shows one row per user who has logged at least one action in the
  * challenge, sorted by points descending. Pure presentational; the
@@ -20,7 +21,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
 
 /**
  * @param {object} props

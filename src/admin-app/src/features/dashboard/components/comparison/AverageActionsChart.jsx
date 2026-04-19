@@ -22,7 +22,6 @@ import {
 import ComparisonCard from "./ComparisonCard";
 import { COMPARISON_AVG_COLORS } from "../../../../lib/constants";
 
-
 function truncateTick(value) {
   return String(value).length > 20 ? String(value).substring(0, 20) + "..." : value;
 }

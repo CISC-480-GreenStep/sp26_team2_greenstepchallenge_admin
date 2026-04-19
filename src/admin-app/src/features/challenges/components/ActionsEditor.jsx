@@ -1,5 +1,6 @@
 /**
- * ActionsEditor -- the edit-mode-only "Actions" table on ChallengeForm
+ * @file ActionsEditor.jsx
+ * @summary ActionsEditor -- the edit-mode-only "Actions" table on ChallengeForm
  * with its add/edit dialog.
  *
  * This component owns its own dialog state because it's the only
@@ -37,7 +38,6 @@ import {
   updateAction,
   updateChallenge,
 } from "../../../data/api";
-
 
 const EMPTY_ACTION = {
   name: "",

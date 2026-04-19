@@ -1,3 +1,8 @@
+/**
+ * @file RecentActivityWidget.jsx
+ * @summary Feed of the most recent participation events with relative timestamps.
+ */
+
 import { Box, Typography, Chip, Stack } from "@mui/material";
 
 import { EntityLink } from "../../../components/shared/data";

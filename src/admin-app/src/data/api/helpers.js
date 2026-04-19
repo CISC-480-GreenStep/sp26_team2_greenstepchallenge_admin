@@ -1,5 +1,6 @@
 /**
- * Internal helpers used by every entity module.
+ * @file helpers.js
+ * @summary Internal helpers used by every entity module.
  *
  * Kept separate so feature modules can stay focused on one table each
  * and so we can swap the error-handling strategy in one place.

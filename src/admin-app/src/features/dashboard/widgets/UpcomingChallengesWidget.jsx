@@ -1,3 +1,8 @@
+/**
+ * @file UpcomingChallengesWidget.jsx
+ * @summary List of challenges scheduled to start in the near future.
+ */
+
 import { Box, Typography, Chip, Stack } from "@mui/material";
 
 import { EntityLink } from "../../../components/shared/data";

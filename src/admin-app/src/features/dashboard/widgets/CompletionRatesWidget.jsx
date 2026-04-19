@@ -1,3 +1,8 @@
+/**
+ * @file CompletionRatesWidget.jsx
+ * @summary Horizontal bar chart of per-challenge completion percentages.
+ */
+
 import {
   ResponsiveContainer,
   BarChart,

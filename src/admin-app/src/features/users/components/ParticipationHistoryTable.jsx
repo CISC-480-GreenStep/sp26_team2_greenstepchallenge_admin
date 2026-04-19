@@ -1,5 +1,6 @@
 /**
- * ParticipationHistoryTable -- "Participation" section on UserDetail.
+ * @file ParticipationHistoryTable.jsx
+ * @summary ParticipationHistoryTable -- "Participation" section on UserDetail.
  * Lists every sustainability action the user has logged (the same
  * data that drives challenge leaderboards).
  *
@@ -73,8 +74,8 @@ export default function ParticipationHistoryTable({
             Participation ({participation.length})
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Sustainability actions completed in challenges &mdash; this is what shows on
-            challenge leaderboards
+            Sustainability actions completed in challenges &mdash; this is what shows on challenge
+            leaderboards
           </Typography>
         </Box>
         <CSVExport data={csvRows} filename={filename} />
@@ -119,11 +120,7 @@ export default function ParticipationHistoryTable({
             {participation.length > PREVIEW_LIMIT && (
               <TableRow>
                 <TableCell colSpan={4} align="center" sx={{ py: 1.5 }}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setExpanded((v) => !v)}
-                  >
+                  <Button size="small" variant="outlined" onClick={() => setExpanded((v) => !v)}>
                     {expanded
                       ? "Show less"
                       : `View more (${participation.length - PREVIEW_LIMIT} more)`}

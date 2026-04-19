@@ -1,3 +1,11 @@
+/**
+ * @file GroupsPage.jsx
+ * @summary List page for all groups (Postgres `departments`).
+ *
+ * Provides search, member-count column, CSV export, and links to the
+ * detail / edit / new-group flows.
+ */
+
 import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";

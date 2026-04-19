@@ -1,5 +1,6 @@
 /**
- * GroupDetail -- single-group page showing the group header card,
+ * @file GroupDetail.jsx
+ * @summary GroupDetail -- single-group page showing the group header card,
  * its members table, and the (optional) list of challenges scoped
  * to the group.
  *
@@ -204,14 +205,7 @@ export default function GroupDetail() {
  * actions (Admin-only). Inlined because it has no other consumer
  * and pulling it out would only add a one-call indirection.
  */
-function GroupHeaderCard({
-  group,
-  memberCount,
-  challengeCount,
-  canManage,
-  onEdit,
-  onDelete,
-}) {
+function GroupHeaderCard({ group, memberCount, challengeCount, canManage, onEdit, onDelete }) {
   return (
     <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
       <Box

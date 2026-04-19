@@ -1,5 +1,6 @@
 /**
- * UsersTable -- the users data grid on UsersPage.
+ * @file UsersTable.jsx
+ * @summary UsersTable -- the users data grid on UsersPage.
  *
  * Column visibility is permission-driven and computed by the parent
  * (showEmail/showRole/...). Pure presentational; row clicks and
@@ -53,8 +54,12 @@ export default function UsersTable({ users, groupName, cols, canManage, onToggle
   // colSpan for the empty-state row: name + actions = 2, plus one
   // per visible permissioned column.
   const emptyColSpan =
-    2 + (cols.email ? 1 : 0) + (cols.role ? 1 : 0) + (cols.group ? 1 : 0) +
-    (cols.status ? 1 : 0) + (cols.lastActive ? 1 : 0);
+    2 +
+    (cols.email ? 1 : 0) +
+    (cols.role ? 1 : 0) +
+    (cols.group ? 1 : 0) +
+    (cols.status ? 1 : 0) +
+    (cols.lastActive ? 1 : 0);
 
   return (
     <TableContainer component={Paper} sx={{ overflowX: "auto" }}>

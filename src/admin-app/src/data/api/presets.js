@@ -1,5 +1,6 @@
 /**
- * Presets API -- read/write the `presets` table plus its
+ * @file presets.js
+ * @summary Presets API -- read/write the `presets` table plus its
  * `preset_actions` child table.
  *
  * A preset is a reusable challenge template. Each read flattens the

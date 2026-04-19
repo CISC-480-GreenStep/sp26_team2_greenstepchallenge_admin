@@ -1,3 +1,13 @@
+/**
+ * @file LoginPage.jsx
+ * @summary Sign-in screen with magic-link + dev-login fallback.
+ *
+ * The "real" login flow uses Supabase magic links (email OTP). The
+ * "Dev Login" button bypasses Supabase Auth and looks the user up by
+ * email directly -- intended for local development and team demos
+ * before the production Auth flow is fully provisioned.
+ */
+
 import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";

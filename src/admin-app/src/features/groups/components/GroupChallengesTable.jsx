@@ -1,5 +1,6 @@
 /**
- * GroupChallengesTable -- "Challenges in this Group" section on
+ * @file GroupChallengesTable.jsx
+ * @summary GroupChallengesTable -- "Challenges in this Group" section on
  * GroupDetail. Hidden by the parent when the group has no challenges.
  *
  * Pure presentational; no data fetching or mutation.

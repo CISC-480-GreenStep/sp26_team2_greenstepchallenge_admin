@@ -1,3 +1,8 @@
+/**
+ * @file PointsByChallengeWidget.jsx
+ * @summary Bar chart comparing total points earned per challenge.
+ */
+
 import {
   ResponsiveContainer,
   BarChart,

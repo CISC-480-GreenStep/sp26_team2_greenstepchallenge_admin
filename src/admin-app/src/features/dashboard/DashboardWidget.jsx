@@ -1,3 +1,9 @@
+/**
+ * @file DashboardWidget.jsx
+ * @summary Card chrome (title bar + drag handle + remove button) wrapped
+ * around every widget rendered into the dashboard grid.
+ */
+
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { Card, Box, Typography, IconButton, Tooltip } from "@mui/material";

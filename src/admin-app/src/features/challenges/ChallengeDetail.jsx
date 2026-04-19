@@ -1,5 +1,6 @@
 /**
- * ChallengeDetail -- read-only view of a single challenge with its
+ * @file ChallengeDetail.jsx
+ * @summary ChallengeDetail -- read-only view of a single challenge with its
  * participants, leaderboard, action catalog, and per-completion log.
  *
  * Responsibilities (intentionally thin):
@@ -34,7 +35,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
 
 import ChallengeLeaderboard from "./components/ChallengeLeaderboard";
 import ParticipantsTable from "./components/ParticipantsTable";

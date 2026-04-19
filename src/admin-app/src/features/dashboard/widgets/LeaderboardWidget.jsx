@@ -1,3 +1,8 @@
+/**
+ * @file LeaderboardWidget.jsx
+ * @summary Top participants by total points, with medal accents for the top 3.
+ */
+
 import { Box, Typography, Chip, LinearProgress, Stack } from "@mui/material";
 
 import { EntityLink } from "../../../components/shared/data";

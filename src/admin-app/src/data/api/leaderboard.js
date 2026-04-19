@@ -1,5 +1,6 @@
 /**
- * Leaderboard / points-aggregation queries.
+ * @file leaderboard.js
+ * @summary Leaderboard / points-aggregation queries.
  *
  * These functions cross multiple tables (participation + actions +
  * users + challenges) so they don't fit cleanly under any single entity

@@ -1,3 +1,8 @@
+/**
+ * @file ParticipationBarWidget.jsx
+ * @summary Bar chart of participants and total actions per challenge.
+ */
+
 import {
   ResponsiveContainer,
   BarChart,

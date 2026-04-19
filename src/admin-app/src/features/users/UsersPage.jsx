@@ -1,5 +1,6 @@
 /**
- * UsersPage -- list of all users with role/group filters, CSV export,
+ * @file UsersPage.jsx
+ * @summary UsersPage -- list of all users with role/group filters, CSV export,
  * and admin actions (edit, activate/deactivate).
  *
  * Responsibilities (intentionally thin):
@@ -17,14 +18,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AddIcon from "@mui/icons-material/Add";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 
 import UsersFilterBar from "./components/UsersFilterBar";
 import UsersTable from "./components/UsersTable";
@@ -87,7 +81,6 @@ export default function UsersPage() {
   }, []);
 
   useEffect(() => {
-     
     load();
   }, [load]);
 
@@ -95,8 +88,7 @@ export default function UsersPage() {
 
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
-    const matchesSearch =
-      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+    const matchesSearch = u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
     const matchesRole = roleFilter === "All" || u.role === roleFilter;
     const matchesGroup = groupFilter === "All" || u.groupId === Number(groupFilter);
     return matchesSearch && matchesRole && matchesGroup;
@@ -192,9 +184,7 @@ export default function UsersPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title={
-          pendingAction?.status === USER_STATUSES.ACTIVE ? "Deactivate User" : "Activate User"
-        }
+        title={pendingAction?.status === USER_STATUSES.ACTIVE ? "Deactivate User" : "Activate User"}
         message={`Are you sure you want to ${
           pendingAction?.status === USER_STATUSES.ACTIVE ? "deactivate" : "activate"
         } ${pendingAction?.name}?`}

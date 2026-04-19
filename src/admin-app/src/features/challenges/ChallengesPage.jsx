@@ -32,7 +32,6 @@ import {
 } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 
-
 export default function ChallengesPage() {
   const [searchParams] = useSearchParams();
   const initialGroupFilter = searchParams.get("groupId") || "All";

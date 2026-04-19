@@ -1,5 +1,6 @@
 /**
- * DashboardToolbar -- the title row + edit/save/cancel/customize controls
+ * @file DashboardToolbar.jsx
+ * @summary DashboardToolbar -- the title row + edit/save/cancel/customize controls
  * shown above the widget grid.
  *
  * Pulled out of DashboardPage so the page can stay focused on data
@@ -63,10 +64,7 @@ export default function DashboardToolbar({
           </Button>
         </Stack>
       ) : (
-        <Tooltip
-          title="Rearrange, resize, and choose which widgets appear on your dashboard"
-          arrow
-        >
+        <Tooltip title="Rearrange, resize, and choose which widgets appear on your dashboard" arrow>
           <Button
             size="small"
             variant="outlined"

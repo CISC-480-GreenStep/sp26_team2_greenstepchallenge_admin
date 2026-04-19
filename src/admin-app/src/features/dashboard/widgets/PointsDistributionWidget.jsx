@@ -1,3 +1,8 @@
+/**
+ * @file PointsDistributionWidget.jsx
+ * @summary Histogram of users bucketed by total points earned.
+ */
+
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 export default function PointsDistributionWidget({ data }) {

@@ -1,3 +1,11 @@
+/**
+ * @file GroupForm.jsx
+ * @summary Create / edit screen for a single group (Postgres `departments`).
+ *
+ * Used for both the "New Group" and "Edit Group" flows; switches mode
+ * based on the presence of `:id` in the URL.
+ */
+
 import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";

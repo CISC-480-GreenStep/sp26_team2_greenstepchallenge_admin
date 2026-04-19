@@ -1,3 +1,8 @@
+/**
+ * @file MostActiveUsersWidget.jsx
+ * @summary Table of users with the highest action counts in the current period.
+ */
+
 import {
   Table,
   TableBody,

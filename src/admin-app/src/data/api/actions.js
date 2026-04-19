@@ -1,5 +1,6 @@
 /**
- * Actions API -- read/write the `actions` table.
+ * @file actions.js
+ * @summary Actions API -- read/write the `actions` table.
  *
  * Actions live in their own catalog. A challenge references actions via
  * the `challenge_actions` join table (managed in `./challenges.js`).

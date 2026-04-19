@@ -1,46 +1,37 @@
-import { useEffect, useState } from "react";
+/**
+ * @file ChallengesPage.jsx
+ * @summary Top-level Challenges list page.
+ *
+ * Owns:
+ *   - data loading (`getChallenges` + `getGroups` + `getParticipantCounts`),
+ *   - filter state (search, status, group),
+ *   - permission resolution via `useAuth().hasRole`,
+ *   - mutation handlers (archive, delete) and the confirm dialog state.
+ *
+ * Delegates all rendering to `ChallengesToolbar`, `ChallengesFilterBar`,
+ * and `ChallengesTable`.
+ */
+
+import { useCallback, useEffect, useState } from "react";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import AddIcon from "@mui/icons-material/Add";
-import ArchiveIcon from "@mui/icons-material/Archive";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import {
-  Box,
-  Typography,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  IconButton,
-  TextField,
-  MenuItem,
-  Stack,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { Box, CircularProgress, Alert } from "@mui/material";
 
+import ChallengesFilterBar from "./components/ChallengesFilterBar";
+import ChallengesTable from "./components/ChallengesTable";
+import ChallengesToolbar from "./components/ChallengesToolbar";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
-import CSVExport from "../../components/shared/CSVExport";
 import {
-  getChallenges,
   archiveChallenge,
   deleteChallenge,
-  logActivity,
-  CHALLENGE_STATUSES,
+  getChallenges,
   getGroups,
   getParticipantCounts,
+  logActivity,
 } from "../../data/api";
-import { STATUS_COLOR } from "../../lib/constants";
 import { useAuth } from "../auth/useAuth";
+
 
 export default function ChallengesPage() {
   const [searchParams] = useSearchParams();
@@ -56,11 +47,14 @@ export default function ChallengesPage() {
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+
   const navigate = useNavigate();
   const { user, hasRole } = useAuth();
   const canEdit = hasRole("Admin");
 
-  const load = async () => {
+  // Stable so post-mutation handlers can refresh without re-triggering the
+  // mount effect.
+  const load = useCallback(async () => {
     try {
       const [c, g, counts] = await Promise.all([
         getChallenges(),
@@ -75,10 +69,13 @@ export default function ChallengesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  // Sync with deep-link `?groupId=` updates from elsewhere in the app.
   useEffect(() => {
     const gid = searchParams.get("groupId");
     if (gid) setGroupFilter(gid);
@@ -101,22 +98,22 @@ export default function ChallengesPage() {
   };
 
   const handleDelete = async () => {
-    if (pendingDelete) {
-      const c = challenges.find((ch) => ch.id === pendingDelete);
-      await deleteChallenge(pendingDelete);
-      await logActivity(user?.id, "Deleted challenge", `Deleted ${c?.name || "challenge"}`);
-      setPendingDelete(null);
-      setConfirmOpen(false);
-      load();
-    }
+    if (!pendingDelete) return;
+    const c = challenges.find((ch) => ch.id === pendingDelete);
+    await deleteChallenge(pendingDelete);
+    await logActivity(user?.id, "Deleted challenge", `Deleted ${c?.name || "challenge"}`);
+    setPendingDelete(null);
+    setConfirmOpen(false);
+    load();
   };
 
-  if (loading)
+  if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
       </Box>
     );
+  }
 
   return (
     <Box>
@@ -125,187 +122,38 @@ export default function ChallengesPage() {
           {error}
         </Alert>
       )}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-          flexWrap: "wrap",
-          gap: 1.5,
+
+      <ChallengesToolbar
+        exportData={filtered}
+        canEdit={canEdit}
+        onManagePresets={() => navigate("/presets")}
+        onNewChallenge={() => navigate("/challenges/new")}
+      />
+
+      <ChallengesFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        groupFilter={groupFilter}
+        onGroupChange={setGroupFilter}
+        groups={groups}
+      />
+
+      <ChallengesTable
+        challenges={filtered}
+        participantCounts={participantCounts}
+        groupName={groupName}
+        canEdit={canEdit}
+        onView={(id) => navigate(`/challenges/${id}`)}
+        onEdit={(id) => navigate(`/challenges/${id}/edit`)}
+        onArchive={handleArchive}
+        onRequestDelete={(id) => {
+          setPendingDelete(id);
+          setConfirmOpen(true);
         }}
-      >
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
-        >
-          Challenges
-        </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <CSVExport data={filtered} filename="challenges.csv" />
-          {canEdit && (
-            <>
-              <Button
-                variant="outlined"
-                startIcon={<BookmarkIcon />}
-                onClick={() => navigate("/presets")}
-              >
-                Manage Presets
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => navigate("/challenges/new")}
-              >
-                New Challenge
-              </Button>
-            </>
-          )}
-        </Stack>
-      </Box>
-
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
-        <TextField
-          size="small"
-          label="Search challenges"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 220 }}
-        />
-        <TextField
-          size="small"
-          select
-          label="Status"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="All">All</MenuItem>
-          {Object.values(CHALLENGE_STATUSES).map((s) => (
-            <MenuItem key={s} value={s}>
-              {s}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          size="small"
-          select
-          label="Group"
-          value={groupFilter}
-          onChange={(e) => setGroupFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
-        >
-          <MenuItem value="All">All Groups</MenuItem>
-          {groups.map((g) => (
-            <MenuItem key={g.id} value={g.id}>
-              {g.name}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
-
-      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Group</TableCell>
-              <TableCell>Start</TableCell>
-              <TableCell>End</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Participants</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filtered.map((challenge) => (
-              <TableRow key={challenge.id} hover>
-                <TableCell>
-                  <Button
-                    size="small"
-                    sx={{ p: 0, minWidth: "auto", textTransform: "none", fontWeight: 600 }}
-                    onClick={() => navigate(`/challenges/${challenge.id}`)}
-                  >
-                    {challenge.name}
-                  </Button>
-                </TableCell>
-                <TableCell>{challenge.category}</TableCell>
-                <TableCell>
-                  {challenge.groupId ? (
-                    <Button
-                      size="small"
-                      sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
-                      onClick={() => navigate(`/groups/${challenge.groupId}`)}
-                    >
-                      {groupName(challenge.groupId) || "—"}
-                    </Button>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
-                <TableCell>{challenge.startDate}</TableCell>
-                <TableCell>{challenge.endDate}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={challenge.status}
-                    size="small"
-                    color={STATUS_COLOR[challenge.status] || "default"}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Button
-                    size="small"
-                    variant="text"
-                    sx={{ fontWeight: 600 }}
-                    onClick={() => navigate(`/challenges/${challenge.id}`)}
-                  >
-                    {participantCounts[challenge.id] ?? challenge.participantCount ?? 0}
-                  </Button>
-                </TableCell>
-                <TableCell align="right">
-                  <IconButton size="small" onClick={() => navigate(`/challenges/${challenge.id}`)}>
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
-                  {canEdit && (
-                    <>
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/challenges/${challenge.id}/edit`)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      {challenge.status !== "Archived" && (
-                        <IconButton size="small" onClick={() => handleArchive(challenge.id)}>
-                          <ArchiveIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          setPendingDelete(challenge.id);
-                          setConfirmOpen(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No challenges found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        onNavigateGroup={(gid) => navigate(`/groups/${gid}`)}
+      />
 
       <ConfirmDialog
         open={confirmOpen}

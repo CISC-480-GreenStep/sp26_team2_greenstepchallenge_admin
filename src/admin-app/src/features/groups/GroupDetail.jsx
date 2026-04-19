@@ -38,7 +38,7 @@ import GroupChallengesTable from "./components/GroupChallengesTable";
 import MembersTable from "./components/MembersTable";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import { deleteGroup, getChallenges, getGroupById, getUsers, updateUser } from "../../data/api";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 export default function GroupDetail() {
   const { id } = useParams();

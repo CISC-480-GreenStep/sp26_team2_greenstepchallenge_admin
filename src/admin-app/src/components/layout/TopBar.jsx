@@ -3,7 +3,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Toolbar, IconButton, Typography, Chip, Button, Box } from "@mui/material";
 
 import { DRAWER_WIDTH } from "./Sidebar";
-import { useAuth } from "../../features/auth/AuthContext";
+import { useAuth } from "../../features/auth/useAuth";
 
 export default function TopBar({ onMenuToggle }) {
   const { user, logout } = useAuth();

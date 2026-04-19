@@ -29,7 +29,7 @@ import {
   logActivity,
   updateChallenge,
 } from "../../data/api";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import PresetPicker from "./components/PresetPicker";

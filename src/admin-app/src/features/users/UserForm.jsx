@@ -26,7 +26,7 @@ import {
   USER_STATUSES,
   getGroups,
 } from "../../data/api";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 const EMPTY = {
   name: "",

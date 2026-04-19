@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Box, Card, CardContent, TextField, Button, Typography, Alert, Stack } from "@mui/material";
 
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 
 export default function LoginPage() {
   const { login, devLogin } = useAuth();

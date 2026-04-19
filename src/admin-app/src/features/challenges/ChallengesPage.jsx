@@ -40,7 +40,7 @@ import {
   getParticipantCounts,
 } from "../../data/api";
 import { STATUS_COLOR } from "../../lib/constants";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 export default function ChallengesPage() {
   const [searchParams] = useSearchParams();

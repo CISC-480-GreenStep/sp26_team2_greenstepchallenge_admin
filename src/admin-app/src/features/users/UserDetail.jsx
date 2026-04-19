@@ -44,7 +44,7 @@ import {
   updateUser,
 } from "../../data/api";
 import { can } from "../../lib/permissions";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 export default function UserDetail() {
   const { id } = useParams();

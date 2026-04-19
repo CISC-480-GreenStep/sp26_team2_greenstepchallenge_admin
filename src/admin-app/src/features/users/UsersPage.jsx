@@ -40,7 +40,7 @@ import {
   logActivity,
 } from "../../data/api";
 import { can } from "../../lib/permissions";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 export default function UsersPage() {
   // Pre-seed the group filter from the URL so links from GroupDetail

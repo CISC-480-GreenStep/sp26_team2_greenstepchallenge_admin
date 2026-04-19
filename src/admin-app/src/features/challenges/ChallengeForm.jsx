@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
   Typography,
@@ -21,10 +27,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import {
   getChallengeById,
   createChallenge,
@@ -68,7 +71,7 @@ export default function ChallengeForm() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [presets, setPresets] = useState([]);
-  const [selectedPresetId, setSelectedPresetId] = useState('');
+  const [selectedPresetId, setSelectedPresetId] = useState("");
   const [presetActions, setPresetActions] = useState([]);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [editingAction, setEditingAction] = useState(null);
@@ -105,17 +108,22 @@ export default function ChallengeForm() {
     }
   };
 
-  const handleChange = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = { ...form, groupId: form.groupId || null };
     if (isEdit) {
       await updateChallenge(Number(id), payload);
-      await logActivity(user.id, 'Updated challenge', `Updated ${payload.name}`);
+      await logActivity(user.id, "Updated challenge", `Updated ${payload.name}`);
     } else {
-      const newChallenge = await createChallenge({ ...payload, createdBy: user.id, actionIds: [], participants: [], joinBy: null });
+      const newChallenge = await createChallenge({
+        ...payload,
+        createdBy: user.id,
+        actionIds: [],
+        participants: [],
+        joinBy: null,
+      });
       if (presetActions.length > 0) {
         const newActionIds = [];
         for (const tmpl of presetActions) {
@@ -124,7 +132,7 @@ export default function ChallengeForm() {
         }
         await updateChallenge(newChallenge.id, { actionIds: newActionIds });
       }
-      await logActivity(user.id, 'Created challenge', `Created ${payload.name}`);
+      await logActivity(user.id, "Created challenge", `Created ${payload.name}`);
     }
     navigate("/challenges");
   };
@@ -158,7 +166,9 @@ export default function ChallengeForm() {
       // Add the new action's ID to this challenge's actionIds
       const challenge = await getChallengeById(Number(id));
       if (challenge) {
-        await updateChallenge(Number(id), { actionIds: [...(challenge.actionIds || []), newAction.id] });
+        await updateChallenge(Number(id), {
+          actionIds: [...(challenge.actionIds || []), newAction.id],
+        });
       }
     }
     setActionDialogOpen(false);
@@ -170,7 +180,9 @@ export default function ChallengeForm() {
     // Remove from challenge's actionIds
     const challenge = await getChallengeById(Number(id));
     if (challenge) {
-      await updateChallenge(Number(id), { actionIds: (challenge.actionIds || []).filter((aid) => aid !== actionId) });
+      await updateChallenge(Number(id), {
+        actionIds: (challenge.actionIds || []).filter((aid) => aid !== actionId),
+      });
     }
     loadActions();
   };
@@ -181,7 +193,12 @@ export default function ChallengeForm() {
         Back
       </Button>
 
-      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+      <Typography
+        variant="h5"
+        fontWeight={700}
+        mb={3}
+        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+      >
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>
 
@@ -190,10 +207,7 @@ export default function ChallengeForm() {
           <Grid container spacing={2}>
             {!isEdit && presets.length > 0 && (
               <Grid size={{ xs: 12 }}>
-                <Paper
-                  variant="outlined"
-                  sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}
-                >
+                <Paper variant="outlined" sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}>
                   <Typography variant="subtitle2" color="primary" gutterBottom>
                     Quick Start: Select a Template
                   </Typography>
@@ -323,7 +337,7 @@ export default function ChallengeForm() {
               <Typography variant="caption" color="text.secondary" display="block" mb={1}>
                 These actions will be created automatically when you submit.
               </Typography>
-              <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
+              <TableContainer component={Paper} variant="outlined" sx={{ overflowX: "auto" }}>
                 <Table size="small" sx={{ minWidth: 400 }}>
                   <TableHead>
                     <TableRow>
@@ -359,20 +373,11 @@ export default function ChallengeForm() {
 
       {isEdit && (
         <Box>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="h6" fontWeight={600}>
               Actions ({actions.length})
             </Typography>
-            <Button
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={openNewAction}
-            >
+            <Button size="small" startIcon={<AddIcon />} onClick={openNewAction}>
               Add Action
             </Button>
           </Stack>
@@ -393,10 +398,7 @@ export default function ChallengeForm() {
                     <TableCell>{a.category}</TableCell>
                     <TableCell align="right">{a.points}</TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => openEditAction(a)}
-                      >
+                      <IconButton size="small" onClick={() => openEditAction(a)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
@@ -428,26 +430,20 @@ export default function ChallengeForm() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          {editingAction ? "Edit Action" : "Add Action"}
-        </DialogTitle>
+        <DialogTitle>{editingAction ? "Edit Action" : "Add Action"}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
             <TextField
               label="Action Name"
               value={actionForm.name}
-              onChange={(e) =>
-                setActionForm((p) => ({ ...p, name: e.target.value }))
-              }
+              onChange={(e) => setActionForm((p) => ({ ...p, name: e.target.value }))}
               required
               fullWidth
             />
             <TextField
               label="Description"
               value={actionForm.description}
-              onChange={(e) =>
-                setActionForm((p) => ({ ...p, description: e.target.value }))
-              }
+              onChange={(e) => setActionForm((p) => ({ ...p, description: e.target.value }))}
               multiline
               rows={2}
               fullWidth
@@ -456,9 +452,7 @@ export default function ChallengeForm() {
               label="Category"
               select
               value={actionForm.category}
-              onChange={(e) =>
-                setActionForm((p) => ({ ...p, category: e.target.value }))
-              }
+              onChange={(e) => setActionForm((p) => ({ ...p, category: e.target.value }))}
               fullWidth
             >
               {CATEGORIES.map((c) => (
@@ -471,9 +465,7 @@ export default function ChallengeForm() {
               label="Points"
               type="number"
               value={actionForm.points}
-              onChange={(e) =>
-                setActionForm((p) => ({ ...p, points: Number(e.target.value) }))
-              }
+              onChange={(e) => setActionForm((p) => ({ ...p, points: Number(e.target.value) }))}
               fullWidth
               inputProps={{ min: 1 }}
             />

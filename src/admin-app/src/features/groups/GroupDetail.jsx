@@ -1,5 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+
+import { useParams, useNavigate } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EventIcon from "@mui/icons-material/Event";
+import GroupsIcon from "@mui/icons-material/Groups";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import {
   Box,
   Typography,
@@ -21,35 +30,23 @@ import {
   Stack,
   CircularProgress,
   Alert,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import GroupsIcon from '@mui/icons-material/Groups';
-import EventIcon from '@mui/icons-material/Event';
-import {
-  getGroupById,
-  getUsers,
-  getChallenges,
-  updateUser,
-  deleteGroup,
-} from '../../data/api';
-import { useAuth } from '../auth/AuthContext';
-import ConfirmDialog from '../../components/shared/ConfirmDialog';
+} from "@mui/material";
+
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { getGroupById, getUsers, getChallenges, updateUser, deleteGroup } from "../../data/api";
+import { useAuth } from "../auth/AuthContext";
 
 export default function GroupDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
-  const canManage = hasRole('Admin');
+  const canManage = hasRole("Admin");
 
   const [group, setGroup] = useState(null);
   const [users, setUsers] = useState([]);
   const [challenges, setChallenges] = useState([]);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [pendingRemoveUser, setPendingRemoveUser] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
@@ -58,16 +55,12 @@ export default function GroupDetail() {
   const load = async () => {
     try {
       const gid = Number(id);
-      const [g, u, c] = await Promise.all([
-        getGroupById(gid),
-        getUsers(),
-        getChallenges(),
-      ]);
+      const [g, u, c] = await Promise.all([getGroupById(gid), getUsers(), getChallenges()]);
       setGroup(g);
       setUsers(u);
       setChallenges(c);
     } catch (err) {
-      setError(err.message || 'Failed to load group details');
+      setError(err.message || "Failed to load group details");
     }
   };
 
@@ -75,7 +68,12 @@ export default function GroupDetail() {
     load();
   }, [id]);
 
-  if (!group) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (!group)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   const members = users.filter((u) => u.groupId === group.id);
   const groupChallenges = challenges.filter((c) => c.groupId === group.id);
@@ -84,7 +82,7 @@ export default function GroupDetail() {
   const handleAddMember = async () => {
     if (!selectedUserId) return;
     await updateUser(Number(selectedUserId), { groupId: group.id });
-    setSelectedUserId('');
+    setSelectedUserId("");
     setAddDialogOpen(false);
     load();
   };
@@ -100,28 +98,28 @@ export default function GroupDetail() {
   const handleDeleteGroup = async () => {
     await deleteGroup(group.id);
     setConfirmDeleteOpen(false);
-    navigate('/groups');
+    navigate("/groups");
   };
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
-      >
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
         Back
       </Button>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             gap: 1.5,
             mb: 2,
-            flexWrap: 'wrap',
+            flexWrap: "wrap",
           }}
         >
           <Box
@@ -129,11 +127,11 @@ export default function GroupDetail() {
               width: 40,
               height: 40,
               borderRadius: 1,
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
+              bgcolor: "primary.main",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
             }}
           >
             <GroupsIcon />
@@ -142,12 +140,12 @@ export default function GroupDetail() {
             <Typography
               variant="h5"
               fontWeight={700}
-              sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' } }}
+              sx={{ fontSize: { xs: "1.15rem", sm: "1.5rem" } }}
             >
               {group.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {group.description || 'No description'}
+              {group.description || "No description"}
             </Typography>
           </Box>
           {canManage && (
@@ -173,9 +171,9 @@ export default function GroupDetail() {
           )}
         </Box>
         <Typography variant="body2" color="text.secondary">
-          {members.length} member{members.length !== 1 ? 's' : ''} ·{' '}
-          {groupChallenges.length} challenge
-          {groupChallenges.length !== 1 ? 's' : ''} · Created {group.createdAt}
+          {members.length} member{members.length !== 1 ? "s" : ""} · {groupChallenges.length}{" "}
+          challenge
+          {groupChallenges.length !== 1 ? "s" : ""} · Created {group.createdAt}
         </Typography>
       </Paper>
 
@@ -204,7 +202,7 @@ export default function GroupDetail() {
             </Button>
           )}
         </Stack>
-        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
           <Table size="small" sx={{ minWidth: 400 }}>
             <TableHead>
               <TableRow>
@@ -221,7 +219,7 @@ export default function GroupDetail() {
                   <TableCell>
                     <Button
                       size="small"
-                      sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                      sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
                       onClick={() => navigate(`/users/${u.id}`)}
                     >
                       {u.name}
@@ -249,11 +247,7 @@ export default function GroupDetail() {
               ))}
               {members.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={canManage ? 5 : 4}
-                    align="center"
-                    sx={{ py: 3 }}
-                  >
+                  <TableCell colSpan={canManage ? 5 : 4} align="center" sx={{ py: 3 }}>
                     <Typography color="text.secondary">
                       No members yet. Add members to get started.
                     </Typography>
@@ -271,7 +265,7 @@ export default function GroupDetail() {
           <Typography variant="h6" fontWeight={600} mb={1}>
             Challenges in this Group
           </Typography>
-          <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
             <Table size="small" sx={{ minWidth: 400 }}>
               <TableHead>
                 <TableRow>
@@ -287,7 +281,7 @@ export default function GroupDetail() {
                     <TableCell>
                       <Button
                         size="small"
-                        sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                        sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
                         onClick={() => navigate(`/challenges/${e.id}`)}
                       >
                         {e.name}
@@ -296,10 +290,7 @@ export default function GroupDetail() {
                     <TableCell>{e.status}</TableCell>
                     <TableCell>{e.startDate}</TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/challenges/${e.id}`)}
-                      >
+                      <IconButton size="small" onClick={() => navigate(`/challenges/${e.id}`)}>
                         <EventIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -333,11 +324,7 @@ export default function GroupDetail() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAddMember}
-            disabled={!selectedUserId}
-          >
+          <Button variant="contained" onClick={handleAddMember} disabled={!selectedUserId}>
             Add
           </Button>
         </DialogActions>

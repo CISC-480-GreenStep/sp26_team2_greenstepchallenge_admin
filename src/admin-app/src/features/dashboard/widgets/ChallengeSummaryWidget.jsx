@@ -1,13 +1,20 @@
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, Box,
-} from '@mui/material';
-import { STATUS_COLOR } from '../../../lib/constants';
-import EntityLink from '../../../components/EntityLink';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Box,
+} from "@mui/material";
+
+import EntityLink from "../../../components/EntityLink";
+import { STATUS_COLOR } from "../../../lib/constants";
 
 export default function ChallengeSummaryWidget({ data }) {
   return (
-    <TableContainer sx={{ height: '100%' }}>
+    <TableContainer sx={{ height: "100%" }}>
       <Table size="small" stickyHeader>
         <TableHead>
           <TableRow>
@@ -24,13 +31,23 @@ export default function ChallengeSummaryWidget({ data }) {
           {data.challengeSummary.map((c) => (
             <TableRow key={c.id}>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: c.theme, flexShrink: 0 }} />
-                  <EntityLink type="challenges" id={c.id}>{c.name}</EntityLink>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: c.theme,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <EntityLink type="challenges" id={c.id}>
+                    {c.name}
+                  </EntityLink>
                 </Box>
               </TableCell>
               <TableCell>
-                <Chip label={c.status} size="small" color={STATUS_COLOR[c.status] || 'default'} />
+                <Chip label={c.status} size="small" color={STATUS_COLOR[c.status] || "default"} />
               </TableCell>
               <TableCell align="right">{c.actionCount}</TableCell>
               <TableCell align="right">{c.participationCount}</TableCell>

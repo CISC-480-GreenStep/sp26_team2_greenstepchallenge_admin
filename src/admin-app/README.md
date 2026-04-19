@@ -15,12 +15,12 @@ Opens at **http://localhost:5173**. No backend needed — runs entirely with moc
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with HMR |
-| `npm run build` | Production build to `dist/` |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint |
+| Command           | Description                       |
+| ----------------- | --------------------------------- |
+| `npm run dev`     | Start development server with HMR |
+| `npm run build`   | Production build to `dist/`       |
+| `npm run preview` | Preview production build locally  |
+| `npm run lint`    | Run ESLint                        |
 
 ## Full Documentation
 

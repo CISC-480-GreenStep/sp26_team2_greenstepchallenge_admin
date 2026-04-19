@@ -1,16 +1,32 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
-  Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, IconButton, Chip, Stack, CircularProgress, Alert,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getPresets, deletePreset } from '../../data/api';
-import { useAuth } from '../auth/AuthContext';
-import ConfirmDialog from '../../components/shared/ConfirmDialog';
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Chip,
+  Stack,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { getPresets, deletePreset } from "../../data/api";
+import { useAuth } from "../auth/AuthContext";
 
 export default function PresetsPage() {
   const [presets, setPresets] = useState([]);
@@ -20,18 +36,20 @@ export default function PresetsPage() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
   const { hasRole } = useAuth();
-  const canManage = hasRole('Admin');
+  const canManage = hasRole("Admin");
 
   const load = async () => {
     try {
       setPresets(await getPresets());
     } catch (err) {
-      setError(err.message || 'Failed to load presets');
+      setError(err.message || "Failed to load presets");
     } finally {
       setLoading(false);
     }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleDelete = async () => {
     if (pendingDelete) {
@@ -42,21 +60,47 @@ export default function PresetsPage() {
     }
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
         Back
       </Button>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+        >
           Challenge Presets
         </Typography>
         {canManage && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/presets/new')}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate("/presets/new")}
+          >
             New Preset
           </Button>
         )}
@@ -66,7 +110,7 @@ export default function PresetsPage() {
         Reusable templates for quickly creating new challenges with pre-configured actions.
       </Typography>
 
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow>
@@ -84,7 +128,7 @@ export default function PresetsPage() {
                 <TableCell>
                   <Button
                     size="small"
-                    sx={{ p: 0, minWidth: 'auto', textTransform: 'none', fontWeight: 600 }}
+                    sx={{ p: 0, minWidth: "auto", textTransform: "none", fontWeight: 600 }}
                     onClick={() => navigate(`/presets/${p.id}/edit`)}
                   >
                     {p.name}
@@ -94,8 +138,16 @@ export default function PresetsPage() {
                   <Chip label={p.category} size="small" variant="outlined" />
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: p.theme, flexShrink: 0 }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        bgcolor: p.theme,
+                        flexShrink: 0,
+                      }}
+                    />
                     <Typography variant="caption">{p.theme}</Typography>
                   </Box>
                 </TableCell>
@@ -109,7 +161,10 @@ export default function PresetsPage() {
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => { setPendingDelete(p.id); setConfirmOpen(true); }}
+                      onClick={() => {
+                        setPendingDelete(p.id);
+                        setConfirmOpen(true);
+                      }}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -133,7 +188,10 @@ export default function PresetsPage() {
         title="Delete Preset"
         message="Are you sure you want to delete this preset? This cannot be undone."
         onConfirm={handleDelete}
-        onCancel={() => { setConfirmOpen(false); setPendingDelete(null); }}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingDelete(null);
+        }}
       />
     </Box>
   );

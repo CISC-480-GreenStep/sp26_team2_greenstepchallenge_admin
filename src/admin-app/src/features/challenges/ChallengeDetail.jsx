@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
-import {
+
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Dialog, DialogContent ,
   Box,
   Typography,
   Paper,
@@ -20,8 +25,10 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+
+import EntityLink from "../../components/EntityLink";
+import MobilePreview from "../../components/MobilePreview";
+import CSVExport from "../../components/shared/CSVExport";
 import {
   getChallengeById,
   getActionsByChallenge,
@@ -30,12 +37,6 @@ import {
   getGroups,
   getChallengeLeaderboard,
 } from "../../data/api";
-import CSVExport from "../../components/shared/CSVExport";
-import EntityLink from "../../components/EntityLink";
-
-import { Dialog, DialogContent } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import MobilePreview from "../../components/MobilePreview";
 
 export default function ChallengeDetail() {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -58,23 +59,29 @@ export default function ChallengeDetail() {
       getUsers(),
       getGroups(),
       getChallengeLeaderboard(cid),
-    ]).then(([c, a, p, u, g, lb]) => {
-      setChallenge(c);
-      setActions(a);
-      setParticipation(p);
-      setUsers(u);
-      setGroups(g);
-      setLeaderboard(lb);
-    }).catch((err) => {
-      setError(err.message || 'Failed to load challenge details');
-    });
+    ])
+      .then(([c, a, p, u, g, lb]) => {
+        setChallenge(c);
+        setActions(a);
+        setParticipation(p);
+        setUsers(u);
+        setGroups(g);
+        setLeaderboard(lb);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load challenge details");
+      });
   }, [id]);
 
-  if (!challenge) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (!challenge)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   const userName = (uid) => users.find((u) => u.id === uid)?.name || "Unknown";
-  const actionName = (aid) =>
-    actions.find((a) => a.id === aid)?.name || "Unknown";
+  const actionName = (aid) => actions.find((a) => a.id === aid)?.name || "Unknown";
   const groupName = (gid) => groups.find((g) => g.id === gid)?.name || "—";
 
   const participationExport = participation.map((p) => ({
@@ -94,18 +101,16 @@ export default function ChallengeDetail() {
     participantMap[uid].count += 1;
     participantMap[uid].points += action?.points || 0;
   });
-  const participants = Object.values(participantMap).sort(
-    (a, b) => b.points - a.points
-  );
+  const participants = Object.values(participantMap).sort((a, b) => b.points - a.points);
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
-      >
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
         Back
       </Button>
 
@@ -226,9 +231,7 @@ export default function ChallengeDetail() {
               {participants.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
-                    <Typography color="text.secondary">
-                      No participants yet
-                    </Typography>
+                    <Typography color="text.secondary">No participants yet</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -249,9 +252,7 @@ export default function ChallengeDetail() {
             <Grid container spacing={2}>
               {leaderboard.map((entry, i) => {
                 const pct =
-                  entry.maxPoints > 0
-                    ? Math.round((entry.points / entry.maxPoints) * 100)
-                    : 0;
+                  entry.maxPoints > 0 ? Math.round((entry.points / entry.maxPoints) * 100) : 0;
                 return (
                   <Grid key={entry.userId} size={{ xs: 12, sm: 6, md: 4 }}>
                     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -263,18 +264,14 @@ export default function ChallengeDetail() {
                           mb: 1,
                         }}
                       >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Chip
                             label={`#${i + 1}`}
                             size="small"
                             sx={
                               i < 3
                                 ? {
-                                    bgcolor: ["#FFD700", "#C0C0C0", "#CD7F32"][
-                                      i
-                                    ],
+                                    bgcolor: ["#FFD700", "#C0C0C0", "#CD7F32"][i],
                                     color: "#fff",
                                     fontWeight: 700,
                                   }
@@ -282,7 +279,9 @@ export default function ChallengeDetail() {
                             }
                           />
                           <Typography variant="body2" fontWeight={600}>
-                            <EntityLink type="users" id={entry.userId}>{entry.name}</EntityLink>
+                            <EntityLink type="users" id={entry.userId}>
+                              {entry.name}
+                            </EntityLink>
                           </Typography>
                         </Box>
                         <Typography variant="body2" fontWeight={700}>
@@ -296,8 +295,7 @@ export default function ChallengeDetail() {
                       />
                       <Typography variant="caption" color="text.secondary">
                         {entry.actionCount} action
-                        {entry.actionCount !== 1 ? "s" : ""} completed &middot;{" "}
-                        {pct}% of max
+                        {entry.actionCount !== 1 ? "s" : ""} completed &middot; {pct}% of max
                       </Typography>
                     </Paper>
                   </Grid>
@@ -340,11 +338,7 @@ export default function ChallengeDetail() {
         flexWrap="wrap"
         gap={1}
       >
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
-        >
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>
           Participation Log ({participation.length})
         </Typography>
         <CSVExport
@@ -366,7 +360,9 @@ export default function ChallengeDetail() {
             {participation.map((p) => (
               <TableRow key={p.id}>
                 <TableCell>
-                  <EntityLink type="users" id={p.userId}>{userName(p.userId)}</EntityLink>
+                  <EntityLink type="users" id={p.userId}>
+                    {userName(p.userId)}
+                  </EntityLink>
                 </TableCell>
                 <TableCell>{actionName(p.actionId)}</TableCell>
                 <TableCell>{p.completedAt}</TableCell>

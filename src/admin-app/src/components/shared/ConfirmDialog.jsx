@@ -1,6 +1,11 @@
 import {
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button,
-} from '@mui/material';
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 export default function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
   return (

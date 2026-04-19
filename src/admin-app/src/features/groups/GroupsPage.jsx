@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
   Typography,
@@ -16,12 +21,10 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import { getGroups, getUsers, getChallenges, deleteGroup, logActivity } from "../../data/api";
 import { useAuth } from "../auth/AuthContext";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState([]);
@@ -42,7 +45,7 @@ export default function GroupsPage() {
       setUsers(u);
       setChallenges(c);
     } catch (err) {
-      setError(err.message || 'Failed to load groups');
+      setError(err.message || "Failed to load groups");
     } finally {
       setLoading(false);
     }
@@ -52,25 +55,33 @@ export default function GroupsPage() {
   }, []);
 
   const memberCount = (gid) => users.filter((u) => u.groupId === gid).length;
-  const challengeCount = (gid) =>
-    challenges.filter((c) => c.groupId === gid).length;
+  const challengeCount = (gid) => challenges.filter((c) => c.groupId === gid).length;
 
   const handleDelete = async () => {
     if (pendingDelete) {
       const g = groups.find((gr) => gr.id === pendingDelete);
       await deleteGroup(pendingDelete);
-      await logActivity(user?.id, 'Deleted group', `Deleted ${g?.name || 'group'}`);
+      await logActivity(user?.id, "Deleted group", `Deleted ${g?.name || "group"}`);
       setPendingDelete(null);
       setConfirmOpen(false);
       load();
     }
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -117,7 +128,7 @@ export default function GroupsPage() {
                 <TableCell>
                   <Button
                     size="small"
-                    sx={{ p: 0, minWidth: 'auto', textTransform: 'none', fontWeight: 600 }}
+                    sx={{ p: 0, minWidth: "auto", textTransform: "none", fontWeight: 600 }}
                     onClick={() => navigate(`/groups/${g.id}`)}
                   >
                     {g.name}
@@ -151,10 +162,7 @@ export default function GroupsPage() {
                 <TableCell>{g.createdAt}</TableCell>
                 {canManage && (
                   <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => navigate(`/groups/${g.id}/edit`)}
-                    >
+                    <IconButton size="small" onClick={() => navigate(`/groups/${g.id}/edit`)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton

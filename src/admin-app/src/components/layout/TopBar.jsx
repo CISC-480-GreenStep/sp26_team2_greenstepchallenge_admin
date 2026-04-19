@@ -1,10 +1,9 @@
-import {
-  AppBar, Toolbar, IconButton, Typography, Chip, Button, Box,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useAuth } from '../../features/auth/AuthContext';
-import { DRAWER_WIDTH } from './Sidebar';
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import { AppBar, Toolbar, IconButton, Typography, Chip, Button, Box } from "@mui/material";
+
+import { DRAWER_WIDTH } from "./Sidebar";
+import { useAuth } from "../../features/auth/AuthContext";
 
 export default function TopBar({ onMenuToggle }) {
   const { user, logout } = useAuth();
@@ -24,7 +23,7 @@ export default function TopBar({ onMenuToggle }) {
           edge="start"
           onClick={onMenuToggle}
           aria-label="Open navigation menu"
-          sx={{ mr: 2, display: { md: 'none' } }}
+          sx={{ mr: 2, display: { md: "none" } }}
         >
           <MenuIcon />
         </IconButton>
@@ -33,13 +32,26 @@ export default function TopBar({ onMenuToggle }) {
           Admin Console
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 } }}>
-          <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1.5 } }}>
+          <Typography variant="body2" sx={{ display: { xs: "none", sm: "block" } }}>
             {user?.name}
           </Typography>
-          <Chip label={user?.role} size="small" color="primary" variant="outlined" sx={{ display: { xs: 'none', sm: 'flex' } }} />
-          <Button size="small" startIcon={<LogoutIcon />} onClick={logout} sx={{ minWidth: { xs: 'auto', sm: 64 } }}>
-            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Logout</Box>
+          <Chip
+            label={user?.role}
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ display: { xs: "none", sm: "flex" } }}
+          />
+          <Button
+            size="small"
+            startIcon={<LogoutIcon />}
+            onClick={logout}
+            sx={{ minWidth: { xs: "auto", sm: 64 } }}
+          >
+            <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+              Logout
+            </Box>
           </Button>
         </Box>
       </Toolbar>

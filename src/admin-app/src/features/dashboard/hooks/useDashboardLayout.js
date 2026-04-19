@@ -1,7 +1,14 @@
-import { useState, useCallback } from 'react';
-import { DEFAULT_VISIBLE, DEFAULT_LAYOUTS, LAYOUT_PRESETS, WIDGET_MAP, autoLayout } from '../dashboardConfig';
+import { useState, useCallback } from "react";
 
-const STORAGE_KEY = 'greenstep_dashboard_layout';
+import {
+  DEFAULT_VISIBLE,
+  DEFAULT_LAYOUTS,
+  LAYOUT_PRESETS,
+  WIDGET_MAP,
+  autoLayout,
+} from "../dashboardConfig";
+
+const STORAGE_KEY = "greenstep_dashboard_layout";
 
 function loadSaved() {
   try {

@@ -1,3 +1,4 @@
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import {
   Box,
   Typography,
@@ -8,7 +9,6 @@ import {
   ListItemIcon,
   Chip,
 } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 export default function MobilePreview({ challenge, actions }) {
   if (!challenge) return null;
@@ -45,10 +45,7 @@ export default function MobilePreview({ challenge, actions }) {
             textAlign: "center",
           }}
         >
-          <Typography
-            variant="caption"
-            sx={{ opacity: 0.8, textTransform: "uppercase" }}
-          >
+          <Typography variant="caption" sx={{ opacity: 0.8, textTransform: "uppercase" }}>
             Current Challenge
           </Typography>
           <Typography variant="h6" fontWeight={700}>
@@ -67,10 +64,7 @@ export default function MobilePreview({ challenge, actions }) {
           </Typography>
           <List size="small">
             {actions.map((action) => (
-              <ListItem
-                key={action.id}
-                sx={{ bgcolor: "#f5f5f5", borderRadius: 2, mb: 1 }}
-              >
+              <ListItem key={action.id} sx={{ bgcolor: "#f5f5f5", borderRadius: 2, mb: 1 }}>
                 <ListItemIcon sx={{ minWidth: 35 }}>
                   <CheckCircleOutlineIcon fontSize="small" color="disabled" />
                 </ListItemIcon>
@@ -94,9 +88,7 @@ export default function MobilePreview({ challenge, actions }) {
             alignItems: "center",
           }}
         >
-          <Box
-            sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: "#ddd" }}
-          />
+          <Box sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: "#ddd" }} />
           <Box
             sx={{
               width: 20,
@@ -105,9 +97,7 @@ export default function MobilePreview({ challenge, actions }) {
               bgcolor: challenge.theme,
             }}
           />
-          <Box
-            sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: "#ddd" }}
-          />
+          <Box sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: "#ddd" }} />
         </Box>
       </Paper>
     </Box>

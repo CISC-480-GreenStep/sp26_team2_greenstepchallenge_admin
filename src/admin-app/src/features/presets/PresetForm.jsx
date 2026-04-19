@@ -28,17 +28,17 @@ import {
   DialogActions,
 } from "@mui/material";
 
-import { getPresetById, createPreset, updatePreset, CATEGORIES } from "../../data/api";
+import { getPresetById, createPreset, updatePreset, ACTIONS } from "../../data/api";
 
 const EMPTY_FORM = {
   name: "",
   description: "",
-  category: CATEGORIES[0],
+  category: ACTIONS[0],
   theme: "#4CAF50",
   status: "Upcoming",
 };
 
-const EMPTY_ACTION = { name: "", description: "", category: CATEGORIES[0], points: 5 };
+const EMPTY_ACTION = { name: "", description: "", category: ACTIONS[0], points: 5 };
 
 export default function PresetForm() {
   const { id } = useParams();
@@ -155,7 +155,7 @@ export default function PresetForm() {
                 onChange={handleChange("category")}
                 fullWidth
               >
-                {CATEGORIES.map((c) => (
+                {ACTIONS.map((c) => (
                   <MenuItem key={c} value={c}>
                     {c}
                   </MenuItem>
@@ -281,7 +281,7 @@ export default function PresetForm() {
               onChange={(e) => setActionForm((p) => ({ ...p, category: e.target.value }))}
               fullWidth
             >
-              {CATEGORIES.map((c) => (
+              {ACTIONS.map((c) => (
                 <MenuItem key={c} value={c}>
                   {c}
                 </MenuItem>

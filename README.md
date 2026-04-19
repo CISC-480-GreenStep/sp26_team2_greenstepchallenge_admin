@@ -12,9 +12,9 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.6.1 — Responsive Dashboard Optimization
+### Current Version: v0.7.0 — Code Cleanup and Refactor
 
-**Status:** Frontend MVP with mock data + localStorage persistence. No backend or database connected yet.
+**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; coding standards restored and enforced via Prettier + ESLint.
 
 ### What's Built
 
@@ -51,7 +51,8 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 | Charts     | Recharts                           |
 | Dashboard Grid | react-grid-layout v2 (drag-and-drop) |
 | Routing    | React Router v7                    |
-| Data       | Mock data (from real MPCA files) + localStorage |
+| Data       | Supabase (Postgres + Auth)         |
+| Quality    | ESLint + Prettier (import order, max-lines, format-on-save) |
 
 ### Planned (not yet implemented)
 
@@ -139,21 +140,34 @@ sp26_team2_greenstepchallenge_admin/
         │   ├── features/
         │   │   ├── auth/        ← AuthContext, LoginPage, RequireAuth
         │   │   ├── dashboard/   ← Customizable drag-and-drop dashboard
-        │   │   │   ├── DashboardPage.jsx    ← Data loading, edit mode, widget renderer
-        │   │   │   ├── DashboardGrid.jsx    ← ResponsiveGridLayout wrapper
-        │   │   │   ├── DashboardWidget.jsx  ← Card frame with drag handle + remove
-        │   │   │   ├── WidgetCatalog.jsx    ← Drawer for widget library + presets
-        │   │   │   ├── dashboardConfig.js   ← Widget registry, layouts, presets
+        │   │   │   ├── DashboardPage.jsx       ← Thin orchestrator (~180 lines)
+        │   │   │   ├── DashboardGrid.jsx       ← ResponsiveGridLayout wrapper
+        │   │   │   ├── DashboardWidget.jsx     ← Card frame with drag handle + remove
+        │   │   │   ├── WidgetCatalog.jsx       ← Drawer for widget library + presets
+        │   │   │   ├── ComparisonMode.jsx      ← Multi-challenge compare view
+        │   │   │   ├── dashboardConfig.js      ← Widget registry, layouts, presets
+        │   │   │   ├── components/             ← DashboardToolbar, widgetRenderer
         │   │   │   ├── hooks/useDashboardLayout.js ← Layout state + localStorage
-        │   │   │   └── widgets/             ← 15 widget components (stat, chart, table)
+        │   │   │   ├── hooks/useDashboardStats.js  ← Data load + aggregation pipeline
+        │   │   │   └── widgets/                ← 22 widget components (stat, chart, table)
         │   │   ├── challenges/  ← ChallengesPage, ChallengeForm, ChallengeDetail
+        │   │   │   └── components/  ← ActionsEditor, ChallengeFieldsSection,
+        │   │   │                       ChallengeLeaderboard, ParticipantsTable,
+        │   │   │                       ParticipationLog, PresetPicker
         │   │   ├── presets/     ← PresetsPage, PresetForm (challenge templates)
         │   │   ├── groups/      ← GroupsPage, GroupForm, GroupDetail
+        │   │   │   └── components/  ← MembersTable, GroupChallengesTable
         │   │   ├── users/       ← UsersPage, UserForm, UserDetail
+        │   │   │   └── components/  ← UsersFilterBar, UsersTable,
+        │   │   │                       PointsHistoryTable,
+        │   │   │                       ParticipationHistoryTable, UserActivityLogList
         │   │   └── reports/     ← ReportsPage (filters + CSV export)
         │   ├── data/
-        │   │   ├── mock/        ← Fake data fixtures (challenges, users, actions, participation, groups, activityLogs, presets)
-        │   │   └── api.js       ← API abstraction layer (localStorage-backed)
+        │   │   ├── api/         ← Per-entity modules (users, challenges, actions,
+        │   │   │                   participation, groups, presets, templates,
+        │   │   │                   activityLogs, leaderboard, constants, helpers)
+        │   │   │                   plus a barrel index.js — components import from `data/api`
+        │   │   └── supabase.js  ← Supabase client singleton
         │   ├── lib/
         │   │   ├── constants.js ← Shared color palettes and status mappings
         │   │   └── permissions.js ← Role-based view/edit rules
@@ -208,7 +222,7 @@ All logged-in users can see everyone and click any user to view full details. Pe
 General Sustainability, Food, Water, Energy, Transportation, Consumption & Waste
 
 ### Data Sources
-Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's Challenge scoring templates, 2022 & 2024 Earth Month trackers, and a sustainability challenge mock draft). The original files have been removed from the repo since all relevant data is now embedded in the JavaScript mock files under `src/admin-app/src/data/mock/`.
+Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's Challenge scoring templates, 2022 & 2024 Earth Month trackers, and a sustainability challenge mock draft). The seeded rows now live in Supabase; the original mock JS fixtures under `src/admin-app/src/data/mock/` were removed in v0.7.0 once Supabase became the system of record.
 
 ---
 
@@ -227,6 +241,24 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.7.0 — Code Cleanup and Refactor (Apr 19, 2026)
+
+Closes #42 (Code Cleanup and Refactor). Behavior unchanged; the goal was to make the codebase easy for the team to extend. Landed as ten stacked PRs into a single umbrella branch.
+
+- **Coding standards restored** — `CODING_GUIDELINES.md` is the single source of truth for naming, imports, comments, branch + commit conventions, the tiered file-size policy (≤300 fine / 301–500 with justification / >500 hard ceiling), and the cohesive comment standard. README now links to it.
+- **Tooling baseline** — Prettier added (`.prettierrc.json`, `.prettierignore`, `format` / `format:check` scripts); ESLint tightened with `eslint-plugin-import` (5-group import order), `eslint-config-prettier`, `max-lines` (warn 300 / error 500), `no-console: warn`. New scripts: `lint:fix`, `format`, `format:check`.
+- **Data layer modularized** — the 426-line `data/api.js` was split into per-entity modules under `data/api/`: `users`, `challenges`, `actions`, `participation`, `groups`, `presets`, `templates`, `activityLogs`, `leaderboard`, plus `constants` and `helpers`. A barrel `index.js` keeps every existing import (`from "../../data/api"`) working.
+- **Page decomposition** (six features, six PRs):
+  - `DashboardPage.jsx`: 509 → 178 lines. Extracted `useDashboardStats` (data load + aggregation pipeline), `DashboardToolbar`, and `widgetRenderer`.
+  - `ChallengeForm.jsx`: 491 → 182 lines. Extracted `PresetPicker`, `ChallengeFieldsSection`, `ActionsEditor`.
+  - `ChallengeDetail.jsx`: 402 → 268 lines. Extracted `ParticipantsTable`, `ChallengeLeaderboard`, `ParticipationLog`.
+  - `GroupDetail.jsx`: 355 → 275 lines. Extracted `MembersTable`, `GroupChallengesTable`.
+  - `UsersPage.jsx`: 307 → 209 lines. Extracted `UsersFilterBar`, `UsersTable`.
+  - `UserDetail.jsx`: 446 → 242 lines. Extracted `PointsHistoryTable`, `ParticipationHistoryTable`, `UserActivityLogList`.
+- **Cohesive comments pass** — every `data/api/*` module, both dashboard hooks, and `lib/constants.js` got file-header docblocks and JSDoc on exports; narration-only comments removed in favor of "why-not-what" intent comments.
+- **Dead code removal** — deleted the unused `src/data/mock/` fixtures (Supabase has been the data source since v0.6.x); migrated remaining call-sites from the deprecated `CATEGORIES` alias to `ACTIONS`; removed the alias.
+- **Bug fixes surfaced by stricter lint** — destructured missing `user` in `ChallengesPage.jsx`, removed an unused local in `ComparisonMode.jsx`, lifted `setIsComparisonModeActive(false)` out of an effect into the toggle/clear handlers in `DashboardPage.jsx`.
 
 ### v0.6.1 — Responsive Dashboard Optimization (Mar 24, 2026)
 - **Full responsive testing** — headless browser testing across 9 viewport sizes: desktop (1920, 1440, 1280), tablet landscape (1024), tablet portrait (768), and mobile (430, 390, 375, 360)

@@ -1,8 +1,15 @@
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, Typography,
-} from '@mui/material';
-import EntityLink from '../../../components/EntityLink';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Typography,
+} from "@mui/material";
+
+import EntityLink from "../../../components/EntityLink";
 
 export default function MostActiveUsersWidget({ data }) {
   if (data.mostActive.length === 0) {
@@ -14,7 +21,7 @@ export default function MostActiveUsersWidget({ data }) {
   }
 
   return (
-    <TableContainer sx={{ height: '100%' }}>
+    <TableContainer sx={{ height: "100%" }}>
       <Table size="small" stickyHeader>
         <TableHead>
           <TableRow>
@@ -28,7 +35,9 @@ export default function MostActiveUsersWidget({ data }) {
             <TableRow key={entry.userId}>
               <TableCell>{i + 1}</TableCell>
               <TableCell>
-                <EntityLink type="users" id={entry.userId}>{entry.name}</EntityLink>
+                <EntityLink type="users" id={entry.userId}>
+                  {entry.name}
+                </EntityLink>
               </TableCell>
               <TableCell align="right">
                 <Chip label={entry.actionCount} size="small" color="primary" variant="outlined" />

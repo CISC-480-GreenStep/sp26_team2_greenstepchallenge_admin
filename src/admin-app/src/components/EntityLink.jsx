@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+
 import Link from "@mui/material/Link";
 
 export default function EntityLink({ type, id, children }) {

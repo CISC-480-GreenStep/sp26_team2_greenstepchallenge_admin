@@ -4,7 +4,7 @@
  * Role hierarchy: GeneralUser < Admin < SuperAdmin
  */
 
-import { ROLES } from '../data/api';
+import { ROLES } from "../data/api";
 
 const ROLE_ORDER = { [ROLES.GENERAL_USER]: 0, [ROLES.ADMIN]: 1, [ROLES.SUPER_ADMIN]: 2 };
 
@@ -63,7 +63,6 @@ export const PERMS = {
 
   /** Who can activate/deactivate users */
   ACTIVATE_DEACTIVATE_USER: ROLES.ADMIN,
-
 
   // ─── Future: scope to specific users (e.g. GeneralUser sees only same group) ───
   // When needed, add: canViewUser(userId, viewerUserId, viewerRole, viewerGroupId)

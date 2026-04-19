@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
   Typography,
@@ -19,11 +26,10 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import BlockIcon from "@mui/icons-material/Block";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+
+import EntityLink from "../../components/EntityLink";
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import CSVExport from "../../components/shared/CSVExport";
 import {
   getUsers,
   deactivateUser,
@@ -33,11 +39,8 @@ import {
   USER_STATUSES,
   getGroups,
 } from "../../data/api";
-import { useAuth } from "../auth/AuthContext";
 import { can } from "../../lib/permissions";
-import CSVExport from "../../components/shared/CSVExport";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
-import EntityLink from "../../components/EntityLink";
+import { useAuth } from "../auth/AuthContext";
 
 export default function UsersPage() {
   //reads 'group ID' from URL
@@ -72,7 +75,7 @@ export default function UsersPage() {
       setUsers(u);
       setGroups(g);
     } catch (err) {
-      setError(err.message || 'Failed to load users');
+      setError(err.message || "Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -88,8 +91,7 @@ export default function UsersPage() {
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
     const matchesRole = roleFilter === "All" || u.role === roleFilter;
-    const matchesGroup =
-      groupFilter === "All" || u.groupId === Number(groupFilter);
+    const matchesGroup = groupFilter === "All" || u.groupId === Number(groupFilter);
     return matchesSearch && matchesRole && matchesGroup;
   });
 
@@ -103,19 +105,28 @@ export default function UsersPage() {
     }
     await logActivity(
       user.id,
-      wasActive ? 'Deactivated user' : 'Activated user',
-      `${wasActive ? 'Deactivated' : 'Activated'} ${pendingAction.name}`
+      wasActive ? "Deactivated user" : "Activated user",
+      `${wasActive ? "Deactivated" : "Activated"} ${pendingAction.name}`,
     );
     setPendingAction(null);
     setConfirmOpen(false);
     load();
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -227,35 +238,23 @@ export default function UsersPage() {
                     <Chip
                       label={u.status}
                       size="small"
-                      color={
-                        u.status === USER_STATUSES.ACTIVE ? "success" : "default"
-                      }
+                      color={u.status === USER_STATUSES.ACTIVE ? "success" : "default"}
                     />
                   </TableCell>
                 )}
-                  {showLastActive && <TableCell>{u.lastActive || "—"}</TableCell>}
+                {showLastActive && <TableCell>{u.lastActive || "—"}</TableCell>}
                 <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                  <IconButton
-                    size="small"
-                    onClick={() => navigate(`/users/${u.id}`)}
-                  >
+                  <IconButton size="small" onClick={() => navigate(`/users/${u.id}`)}>
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
                   {canManage && (
                     <>
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/users/${u.id}/edit`)}
-                      >
+                      <IconButton size="small" onClick={() => navigate(`/users/${u.id}/edit`)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
-                        color={
-                          u.status === USER_STATUSES.ACTIVE
-                            ? "error"
-                            : "success"
-                        }
+                        color={u.status === USER_STATUSES.ACTIVE ? "error" : "success"}
                         onClick={() => {
                           setPendingAction(u);
                           setConfirmOpen(true);
@@ -295,11 +294,7 @@ export default function UsersPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title={
-          pendingAction?.status === USER_STATUSES.ACTIVE
-            ? "Deactivate User"
-            : "Activate User"
-        }
+        title={pendingAction?.status === USER_STATUSES.ACTIVE ? "Deactivate User" : "Activate User"}
         message={`Are you sure you want to ${pendingAction?.status === USER_STATUSES.ACTIVE ? "deactivate" : "activate"} ${pendingAction?.name}?`}
         onConfirm={handleToggleStatus}
         onCancel={() => {
@@ -307,7 +302,6 @@ export default function UsersPage() {
           setPendingAction(null);
         }}
       />
-
     </Box>
   );
 }

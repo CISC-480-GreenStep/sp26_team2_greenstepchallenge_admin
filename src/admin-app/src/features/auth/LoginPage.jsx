@@ -1,21 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Box, Card, CardContent, TextField, Button, Typography, Alert, Stack,
-} from '@mui/material';
-import { useAuth } from './AuthContext';
+import { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import { Box, Card, CardContent, TextField, Button, Typography, Alert, Stack } from "@mui/material";
+
+import { useAuth } from "./AuthContext";
 
 export default function LoginPage() {
   const { login, devLogin } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setSubmitting(true);
     const result = await login(email);
     setSubmitting(false);
@@ -29,15 +30,15 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'grey.100',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "grey.100",
         px: 2,
       }}
     >
-      <Card sx={{ width: '100%', maxWidth: 420 }}>
+      <Card sx={{ width: "100%", maxWidth: 420 }}>
         <CardContent>
           <Typography variant="h5" fontWeight={700} textAlign="center" gutterBottom>
             GreenStep Admin
@@ -46,7 +47,11 @@ export default function LoginPage() {
             Sign in with your email
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
           {sent ? (
             <Alert severity="success">
@@ -71,7 +76,7 @@ export default function LoginPage() {
                   fullWidth
                   disabled={submitting}
                 >
-                  {submitting ? 'Sending...' : 'Send Magic Link'}
+                  {submitting ? "Sending..." : "Send Magic Link"}
                 </Button>
               </Stack>
             </form>
@@ -83,8 +88,8 @@ export default function LoginPage() {
               size="small"
               fullWidth
               onClick={async () => {
-                const result = await devLogin('kristin.mroz@mpca.mn.gov');
-                if (result.success) navigate('/');
+                const result = await devLogin("kristin.mroz@mpca.mn.gov");
+                if (result.success) navigate("/");
               }}
             >
               Quick Login as Kristin (SuperAdmin)

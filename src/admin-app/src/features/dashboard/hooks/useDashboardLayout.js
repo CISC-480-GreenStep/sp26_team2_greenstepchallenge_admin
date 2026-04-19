@@ -1,15 +1,33 @@
-import { useState, useCallback } from "react";
+/**
+ * useDashboardLayout -- owns the editable dashboard grid state.
+ *
+ * Responsibilities:
+ *   - Hydrate visible widgets and per-breakpoint layouts from
+ *     localStorage (or defaults when nothing is saved or parsing fails).
+ *   - Track edit mode + a snapshot so Cancel can revert in-flight changes.
+ *   - Persist to localStorage on Save; clear it on Reset to Default.
+ *   - Expose toggleWidget / applyPreset that keep the layouts object in
+ *     sync when widget visibility changes -- newly-shown widgets get
+ *     auto-placed below the existing grid for every breakpoint so they
+ *     never overlap.
+ *
+ * State is local-only; sharing layouts between users would require
+ * pushing visible/layouts into Supabase keyed by user_id.
+ */
 
-import {
-  DEFAULT_VISIBLE,
-  DEFAULT_LAYOUTS,
-  LAYOUT_PRESETS,
-  WIDGET_MAP,
-  autoLayout,
-} from "../dashboardConfig";
+import { useCallback, useState } from "react";
+
+import { DEFAULT_LAYOUTS, DEFAULT_VISIBLE, LAYOUT_PRESETS, autoLayout } from "../dashboardConfig";
 
 const STORAGE_KEY = "greenstep_dashboard_layout";
 
+const BREAKPOINT_COLS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
+
+/**
+ * Read the saved {visible, layouts} blob. Returns null on missing,
+ * malformed, or partially-shaped data so callers can fall back to
+ * defaults instead of crashing on a bad localStorage entry.
+ */
 function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -18,28 +36,35 @@ function loadSaved() {
       if (parsed.visible && parsed.layouts) return parsed;
     }
   } catch {
-    /* ignore corrupt data */
+    // Corrupt JSON -- fall through to defaults rather than crashing the page.
   }
   return null;
 }
 
+/**
+ * Make sure every widget in `widgetIds` has an entry in every
+ * breakpoint of `layouts`. Newly-added widgets are appended below the
+ * current bottom of the grid via autoLayout(), preventing overlap with
+ * existing tiles.
+ *
+ * Pure; returns a new object and never mutates the input.
+ */
 function ensureLayoutEntries(layouts, widgetIds) {
   const updated = { ...layouts };
-  const bpCols = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
 
   for (const bp of Object.keys(updated)) {
     if (!Array.isArray(updated[bp])) continue;
     const existing = new Set(updated[bp].map((item) => item.i));
     const toAdd = widgetIds.filter((id) => !existing.has(id));
-    if (toAdd.length > 0) {
-      const cols = bpCols[bp] || 12;
-      const newEntries = autoLayout(toAdd, cols);
-      const maxY = updated[bp].reduce((max, item) => Math.max(max, item.y + item.h), 0);
-      updated[bp] = [
-        ...updated[bp],
-        ...newEntries.map((entry) => ({ ...entry, y: entry.y + maxY })),
-      ];
-    }
+    if (toAdd.length === 0) continue;
+
+    const cols = BREAKPOINT_COLS[bp] || 12;
+    const newEntries = autoLayout(toAdd, cols);
+    const maxY = updated[bp].reduce((max, item) => Math.max(max, item.y + item.h), 0);
+    updated[bp] = [
+      ...updated[bp],
+      ...newEntries.map((entry) => ({ ...entry, y: entry.y + maxY })),
+    ];
   }
   return updated;
 }
@@ -82,6 +107,9 @@ export default function useDashboardLayout() {
     setLayouts(allLayouts);
   }, []);
 
+  // Toggling visibility also tops up the layouts object so the new
+  // widget gets a non-overlapping tile. We refuse to drop the last
+  // visible widget so the dashboard never renders empty.
   const toggleWidget = useCallback((widgetId) => {
     setVisible((prev) => {
       if (prev.includes(widgetId)) {

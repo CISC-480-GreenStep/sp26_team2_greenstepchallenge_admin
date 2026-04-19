@@ -1,39 +1,64 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import AddIcon from "@mui/icons-material/Add";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
-  Box, Typography, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Chip, IconButton, TextField, MenuItem,
-  Stack, CircularProgress, Alert,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { getChallenges, archiveChallenge, deleteChallenge, logActivity, CHALLENGE_STATUSES, getGroups, getParticipantCounts } from '../../data/api';
-import { useAuth } from '../auth/AuthContext';
-import CSVExport from '../../components/shared/CSVExport';
-import ConfirmDialog from '../../components/shared/ConfirmDialog';
-import { STATUS_COLOR } from '../../lib/constants';
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  TextField,
+  MenuItem,
+  Stack,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+
+import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import CSVExport from "../../components/shared/CSVExport";
+import {
+  getChallenges,
+  archiveChallenge,
+  deleteChallenge,
+  logActivity,
+  CHALLENGE_STATUSES,
+  getGroups,
+  getParticipantCounts,
+} from "../../data/api";
+import { STATUS_COLOR } from "../../lib/constants";
+import { useAuth } from "../auth/AuthContext";
 
 export default function ChallengesPage() {
   const [searchParams] = useSearchParams();
-  const initialGroupFilter = searchParams.get('groupId') || 'All';
+  const initialGroupFilter = searchParams.get("groupId") || "All";
 
   const [challenges, setChallenges] = useState([]);
   const [groups, setGroups] = useState([]);
   const [participantCounts, setParticipantCounts] = useState({});
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [groupFilter, setGroupFilter] = useState(initialGroupFilter);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
-  const canEdit = hasRole('Admin');
+  const { user, hasRole } = useAuth();
+  const canEdit = hasRole("Admin");
 
   const load = async () => {
     try {
@@ -46,7 +71,7 @@ export default function ChallengesPage() {
       setGroups(g);
       setParticipantCounts(counts);
     } catch (err) {
-      setError(err.message || 'Failed to load challenges');
+      setError(err.message || "Failed to load challenges");
     } finally {
       setLoading(false);
     }
@@ -55,23 +80,23 @@ export default function ChallengesPage() {
     load();
   }, []);
   useEffect(() => {
-    const gid = searchParams.get('groupId');
+    const gid = searchParams.get("groupId");
     if (gid) setGroupFilter(gid);
   }, [searchParams]);
 
-  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || '';
+  const groupName = (gid) => groups.find((g) => g.id === gid)?.name || "";
 
   const filtered = challenges.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
-    const matchesGroup = groupFilter === 'All' || c.groupId === Number(groupFilter);
+    const matchesStatus = statusFilter === "All" || c.status === statusFilter;
+    const matchesGroup = groupFilter === "All" || c.groupId === Number(groupFilter);
     return matchesSearch && matchesStatus && matchesGroup;
   });
 
   const handleArchive = async (id) => {
     const c = challenges.find((ch) => ch.id === id);
     await archiveChallenge(id);
-    await logActivity(user?.id, 'Archived challenge', `Archived ${c?.name || 'challenge'}`);
+    await logActivity(user?.id, "Archived challenge", `Archived ${c?.name || "challenge"}`);
     load();
   };
 
@@ -79,28 +104,60 @@ export default function ChallengesPage() {
     if (pendingDelete) {
       const c = challenges.find((ch) => ch.id === pendingDelete);
       await deleteChallenge(pendingDelete);
-      await logActivity(user?.id, 'Deleted challenge', `Deleted ${c?.name || 'challenge'}`);
+      await logActivity(user?.id, "Deleted challenge", `Deleted ${c?.name || "challenge"}`);
       setPendingDelete(null);
       setConfirmOpen(false);
       load();
     }
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Challenges</Typography>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+        >
+          Challenges
+        </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <CSVExport data={filtered} filename="challenges.csv" />
           {canEdit && (
             <>
-              <Button variant="outlined" startIcon={<BookmarkIcon />} onClick={() => navigate('/presets')}>
+              <Button
+                variant="outlined"
+                startIcon={<BookmarkIcon />}
+                onClick={() => navigate("/presets")}
+              >
                 Manage Presets
               </Button>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/challenges/new')}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate("/challenges/new")}
+              >
                 New Challenge
               </Button>
             </>
@@ -108,7 +165,7 @@ export default function ChallengesPage() {
         </Stack>
       </Box>
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
         <TextField
           size="small"
           label="Search challenges"
@@ -117,26 +174,38 @@ export default function ChallengesPage() {
           sx={{ minWidth: 220 }}
         />
         <TextField
-          size="small" select label="Status"
-          value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+          size="small"
+          select
+          label="Status"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
           sx={{ minWidth: 140 }}
         >
           <MenuItem value="All">All</MenuItem>
           {Object.values(CHALLENGE_STATUSES).map((s) => (
-            <MenuItem key={s} value={s}>{s}</MenuItem>
+            <MenuItem key={s} value={s}>
+              {s}
+            </MenuItem>
           ))}
         </TextField>
         <TextField
-          size="small" select label="Group"
-          value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)}
+          size="small"
+          select
+          label="Group"
+          value={groupFilter}
+          onChange={(e) => setGroupFilter(e.target.value)}
           sx={{ minWidth: 160 }}
         >
           <MenuItem value="All">All Groups</MenuItem>
-          {groups.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+          {groups.map((g) => (
+            <MenuItem key={g.id} value={g.id}>
+              {g.name}
+            </MenuItem>
+          ))}
         </TextField>
       </Stack>
 
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow>
@@ -156,7 +225,7 @@ export default function ChallengesPage() {
                 <TableCell>
                   <Button
                     size="small"
-                    sx={{ p: 0, minWidth: 'auto', textTransform: 'none', fontWeight: 600 }}
+                    sx={{ p: 0, minWidth: "auto", textTransform: "none", fontWeight: 600 }}
                     onClick={() => navigate(`/challenges/${challenge.id}`)}
                   >
                     {challenge.name}
@@ -167,19 +236,23 @@ export default function ChallengesPage() {
                   {challenge.groupId ? (
                     <Button
                       size="small"
-                      sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
+                      sx={{ p: 0, minWidth: "auto", textTransform: "none" }}
                       onClick={() => navigate(`/groups/${challenge.groupId}`)}
                     >
-                      {groupName(challenge.groupId) || '—'}
+                      {groupName(challenge.groupId) || "—"}
                     </Button>
                   ) : (
-                    '—'
+                    "—"
                   )}
                 </TableCell>
                 <TableCell>{challenge.startDate}</TableCell>
                 <TableCell>{challenge.endDate}</TableCell>
                 <TableCell>
-                  <Chip label={challenge.status} size="small" color={STATUS_COLOR[challenge.status] || 'default'} />
+                  <Chip
+                    label={challenge.status}
+                    size="small"
+                    color={STATUS_COLOR[challenge.status] || "default"}
+                  />
                 </TableCell>
                 <TableCell align="right">
                   <Button
@@ -197,15 +270,25 @@ export default function ChallengesPage() {
                   </IconButton>
                   {canEdit && (
                     <>
-                      <IconButton size="small" onClick={() => navigate(`/challenges/${challenge.id}/edit`)}>
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/challenges/${challenge.id}/edit`)}
+                      >
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      {challenge.status !== 'Archived' && (
+                      {challenge.status !== "Archived" && (
                         <IconButton size="small" onClick={() => handleArchive(challenge.id)}>
                           <ArchiveIcon fontSize="small" />
                         </IconButton>
                       )}
-                      <IconButton size="small" color="error" onClick={() => { setPendingDelete(challenge.id); setConfirmOpen(true); }}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setPendingDelete(challenge.id);
+                          setConfirmOpen(true);
+                        }}
+                      >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </>
@@ -215,7 +298,9 @@ export default function ChallengesPage() {
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} align="center">No challenges found</TableCell>
+                <TableCell colSpan={8} align="center">
+                  No challenges found
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -227,7 +312,10 @@ export default function ChallengesPage() {
         title="Delete Challenge"
         message="Are you sure you want to permanently delete this challenge? This cannot be undone."
         onConfirm={handleDelete}
-        onCancel={() => { setConfirmOpen(false); setPendingDelete(null); }}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingDelete(null);
+        }}
       />
     </Box>
   );

@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 
 export default function MostActiveUsersWidget({ data }) {
   if (data.mostActive.length === 0) {

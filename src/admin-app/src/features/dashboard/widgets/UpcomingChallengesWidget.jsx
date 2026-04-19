@@ -1,6 +1,6 @@
 import { Box, Typography, Chip, Stack } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 
 export default function UpcomingChallengesWidget({ data }) {
   if (!data.upcomingChallenges?.length) {

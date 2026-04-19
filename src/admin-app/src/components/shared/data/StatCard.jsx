@@ -1,5 +1,20 @@
-import { Card, CardContent, Typography, Box } from "@mui/material";
+/**
+ * @file StatCard.jsx
+ * @summary KPI tile used on the dashboard and other summary surfaces.
+ *
+ * A simple card with a label, large value, and an optional icon. Sizes
+ * scale down on small screens so multi-column stat rows still fit.
+ */
 
+import { Box, Card, CardContent, Typography } from "@mui/material";
+
+/**
+ * @param {object} props
+ * @param {string} props.title
+ * @param {React.ReactNode} props.value - Usually a number; `ReactNode` so callers can format it.
+ * @param {React.ReactNode} [props.icon]
+ * @param {string} [props.color] - MUI palette token for the icon color.
+ */
 export default function StatCard({ title, value, icon, color = "primary.main" }) {
   return (
     <Card sx={{ height: "100%" }}>

@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 
 const MEDAL_COLORS = ["#FFD700", "#C0C0C0", "#CD7F32"];
 

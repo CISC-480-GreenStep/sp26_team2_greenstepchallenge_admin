@@ -18,8 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
-import CSVExport from "../../../components/shared/CSVExport";
+import { CSVExport, EntityLink } from "../../../components/shared/data";
 
 /**
  * @param {object} props

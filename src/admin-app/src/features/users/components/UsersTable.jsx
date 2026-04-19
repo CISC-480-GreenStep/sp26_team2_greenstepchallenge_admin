@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 import { USER_STATUSES } from "../../../data/api";
 
 /**

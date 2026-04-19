@@ -1,15 +1,20 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Chip,
-} from "@mui/material";
+/**
+ * @file MobilePreview.jsx
+ * @summary Stylized phone-frame preview of a challenge as mobile users will see it.
+ *
+ * Used on the Challenge detail page so admins can spot-check copy, theme
+ * color, and the action list without opening the mobile app. Pure
+ * presentational — no data fetching, just renders what's passed in.
+ */
 
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { Box, List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from "@mui/material";
+
+/**
+ * @param {object} props
+ * @param {object | null} props.challenge - Challenge to render. Returns null when missing.
+ * @param {object[]} props.actions - Actions associated with the challenge.
+ */
 export default function MobilePreview({ challenge, actions }) {
   if (!challenge) return null;
 
@@ -18,7 +23,7 @@ export default function MobilePreview({ challenge, actions }) {
       sx={{
         width: 300,
         height: 600,
-        bgcolor: "#000", // Phone border
+        bgcolor: "#000", // Phone bezel
         borderRadius: "40px",
         p: 1.5,
         boxShadow: 10,
@@ -36,7 +41,7 @@ export default function MobilePreview({ challenge, actions }) {
           flexDirection: "column",
         }}
       >
-        {/* Mobile Header */}
+        {/* Mobile header: themed banner with the current challenge name. */}
         <Box
           sx={{
             bgcolor: challenge.theme || "#4CAF50",
@@ -53,7 +58,7 @@ export default function MobilePreview({ challenge, actions }) {
           </Typography>
         </Box>
 
-        {/* Mobile Body */}
+        {/* Body: description + action checklist (read-only preview). */}
         <Box sx={{ p: 2, flexGrow: 1, overflowY: "auto" }}>
           <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
             {challenge.description}
@@ -78,7 +83,7 @@ export default function MobilePreview({ challenge, actions }) {
           </List>
         </Box>
 
-        {/* Mobile Footer Tab Bar */}
+        {/* Faux tab bar so the preview reads as a phone shell. */}
         <Box
           sx={{
             height: 50,

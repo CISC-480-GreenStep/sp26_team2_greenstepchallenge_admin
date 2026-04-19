@@ -39,7 +39,7 @@ import {
 import ChallengeLeaderboard from "./components/ChallengeLeaderboard";
 import ParticipantsTable from "./components/ParticipantsTable";
 import ParticipationLog from "./components/ParticipationLog";
-import MobilePreview from "../../components/MobilePreview";
+import { MobilePreview } from "../../components/shared/preview";
 import {
   getActionsByChallenge,
   getChallengeById,

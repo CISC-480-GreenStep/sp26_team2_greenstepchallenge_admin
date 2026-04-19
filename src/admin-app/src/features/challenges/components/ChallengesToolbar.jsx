@@ -11,7 +11,7 @@ import AddIcon from "@mui/icons-material/Add";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { Box, Typography, Button, Stack } from "@mui/material";
 
-import CSVExport from "../../../components/shared/CSVExport";
+import { CSVExport } from "../../../components/shared/data";
 
 /**
  * @param {object} props

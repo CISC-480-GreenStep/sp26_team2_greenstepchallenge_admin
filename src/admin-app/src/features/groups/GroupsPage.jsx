@@ -22,7 +22,7 @@ import {
   Alert,
 } from "@mui/material";
 
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { ConfirmDialog } from "../../components/shared/feedback";
 import { getGroups, getUsers, getChallenges, deleteGroup, logActivity } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 

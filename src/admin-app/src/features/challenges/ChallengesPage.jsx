@@ -21,7 +21,7 @@ import { Box, CircularProgress, Alert } from "@mui/material";
 import ChallengesFilterBar from "./components/ChallengesFilterBar";
 import ChallengesTable from "./components/ChallengesTable";
 import ChallengesToolbar from "./components/ChallengesToolbar";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { ConfirmDialog } from "../../components/shared/feedback";
 import {
   archiveChallenge,
   deleteChallenge,

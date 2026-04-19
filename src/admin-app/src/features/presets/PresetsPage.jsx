@@ -24,7 +24,7 @@ import {
   Alert,
 } from "@mui/material";
 
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { ConfirmDialog } from "../../components/shared/feedback";
 import { getPresets, deletePreset } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 

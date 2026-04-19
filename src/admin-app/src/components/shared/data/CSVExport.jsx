@@ -1,9 +1,24 @@
+/**
+ * @file CSVExport.jsx
+ * @summary "Export CSV" button for any table-like array of plain objects.
+ *
+ * Converts `data` (array of `{ column: value }` rows) into a CSV string
+ * client-side, then triggers a browser download. Header row comes from
+ * the keys of the first object, so callers should pass already-shaped
+ * rows (no nested objects) and use stable, human-readable keys.
+ *
+ * Disabled (and renders the button as such) when `data` is empty so
+ * users can't export blank files.
+ */
+
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { Button } from "@mui/material";
 
 /**
- * Converts an array of objects to a CSV string and triggers a download.
- * Usage: <CSVExport data={rows} filename="events.csv" />
+ * @param {object} props
+ * @param {object[]} props.data - Rows to export. Object keys become column headers.
+ * @param {string} [props.filename]
+ * @param {string} [props.label]
  */
 export default function CSVExport({ data, filename = "export.csv", label = "Export CSV" }) {
   const handleExport = () => {
@@ -16,6 +31,8 @@ export default function CSVExport({ data, filename = "export.csv", label = "Expo
         headers
           .map((h) => {
             const val = row[h] ?? "";
+            // Escape embedded quotes per RFC 4180; wrap every cell to make
+            // commas, newlines, and leading whitespace safe.
             const escaped = String(val).replace(/"/g, '""');
             return `"${escaped}"`;
           })

@@ -1,6 +1,6 @@
 import { Box, Typography, Chip, LinearProgress, Stack } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 import { MEDAL_COLORS } from "../../../lib/constants";
 
 export default function LeaderboardWidget({ data }) {

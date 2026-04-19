@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import CSVExport from "../../../components/shared/CSVExport";
+import { CSVExport } from "../../../components/shared/data";
 
 /**
  * @param {object} props

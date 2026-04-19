@@ -28,8 +28,8 @@ import {
 
 import UsersFilterBar from "./components/UsersFilterBar";
 import UsersTable from "./components/UsersTable";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
-import CSVExport from "../../components/shared/CSVExport";
+import { CSVExport } from "../../components/shared/data";
+import { ConfirmDialog } from "../../components/shared/feedback";
 import {
   ROLES,
   USER_STATUSES,

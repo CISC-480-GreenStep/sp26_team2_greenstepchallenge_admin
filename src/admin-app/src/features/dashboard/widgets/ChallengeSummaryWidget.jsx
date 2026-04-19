@@ -9,7 +9,7 @@ import {
   Box,
 } from "@mui/material";
 
-import EntityLink from "../../../components/EntityLink";
+import { EntityLink } from "../../../components/shared/data";
 import { STATUS_COLOR } from "../../../lib/constants";
 
 export default function ChallengeSummaryWidget({ data }) {

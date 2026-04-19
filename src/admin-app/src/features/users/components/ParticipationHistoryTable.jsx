@@ -25,7 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import CSVExport from "../../../components/shared/CSVExport";
+import { CSVExport } from "../../../components/shared/data";
 
 const PREVIEW_LIMIT = 10;
 

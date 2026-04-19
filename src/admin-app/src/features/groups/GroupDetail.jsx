@@ -36,7 +36,7 @@ import {
 
 import GroupChallengesTable from "./components/GroupChallengesTable";
 import MembersTable from "./components/MembersTable";
-import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import { ConfirmDialog } from "../../components/shared/feedback";
 import { deleteGroup, getChallenges, getGroupById, getUsers, updateUser } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 

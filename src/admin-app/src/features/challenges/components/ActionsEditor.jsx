@@ -16,12 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
-  MenuItem,
   Paper,
   Stack,
   Table,
@@ -30,10 +25,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 
+import ActionFormDialog from "./ActionFormDialog";
 import {
   ACTIONS,
   createAction,
@@ -42,6 +37,7 @@ import {
   updateAction,
   updateChallenge,
 } from "../../../data/api";
+
 
 const EMPTY_ACTION = {
   name: "",
@@ -156,55 +152,14 @@ export default function ActionsEditor({ challengeId, actions, onChanged }) {
         </Table>
       </TableContainer>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingAction ? "Edit Action" : "Add Action"}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            <TextField
-              label="Action Name"
-              value={actionForm.name}
-              onChange={(e) => setActionForm((p) => ({ ...p, name: e.target.value }))}
-              required
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={actionForm.description}
-              onChange={(e) => setActionForm((p) => ({ ...p, description: e.target.value }))}
-              multiline
-              rows={2}
-              fullWidth
-            />
-            <TextField
-              label="Category"
-              select
-              value={actionForm.category}
-              onChange={(e) => setActionForm((p) => ({ ...p, category: e.target.value }))}
-              fullWidth
-            >
-              {ACTIONS.map((c) => (
-                <MenuItem key={c} value={c}>
-                  {c}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              label="Points"
-              type="number"
-              value={actionForm.points}
-              onChange={(e) => setActionForm((p) => ({ ...p, points: Number(e.target.value) }))}
-              fullWidth
-              inputProps={{ min: 1 }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>
-            {editingAction ? "Save" : "Add"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ActionFormDialog
+        open={dialogOpen}
+        isEdit={Boolean(editingAction)}
+        actionForm={actionForm}
+        onChange={setActionForm}
+        onCancel={() => setDialogOpen(false)}
+        onSave={handleSave}
+      />
     </Box>
   );
 }

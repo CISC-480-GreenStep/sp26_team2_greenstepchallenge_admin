@@ -18,6 +18,33 @@ export const CHART_COLORS = [
   "#F44336",
 ];
 
+/**
+ * Categorical palette used by the Dashboard's Comparison Mode charts.
+ *
+ * Kept distinct from `CHART_COLORS` so reordering the global palette
+ * (which would cycle differently across multi-series widgets) does not
+ * silently change the colors users associate with specific challenges
+ * in side-by-side comparisons.
+ */
+export const COMPARISON_COLORS = [
+  "#2196F3",
+  "#FF9800",
+  "#4CAF50",
+  "#F44336",
+  "#9C27B0",
+  "#00BCD4",
+];
+
+/** Companion palette used for the per-bar fill in the "Average Actions" chart. */
+export const COMPARISON_AVG_COLORS = [
+  "#2E7D32",
+  "#1976D2",
+  "#ED6C02",
+  "#9C27B0",
+  "#D32F2F",
+  "#0288D1",
+];
+
 /** Gold / silver / bronze, in that order. Used for top-3 leaderboard tiles. */
 export const MEDAL_COLORS = ["#FFD700", "#C0C0C0", "#CD7F32"];
 

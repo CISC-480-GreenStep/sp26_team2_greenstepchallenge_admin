@@ -21,7 +21,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 
-import { WIDGETS, WIDGET_CATEGORIES, LAYOUT_PRESETS } from "./dashboardConfig";
+import { WIDGETS, WIDGET_CATEGORIES, LAYOUT_PRESETS } from "./config";
 
 export default function WidgetCatalog({
   open,

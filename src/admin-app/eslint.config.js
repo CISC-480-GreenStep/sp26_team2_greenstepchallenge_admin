@@ -70,7 +70,9 @@ export default defineConfig([
     },
   },
   {
-    files: ["**/dashboardConfig.js", "**/data/mock/**", "api/**", "netlify/**"],
+    // Configuration / data-only files where line count is dominated by
+    // declarative content rather than logic.
+    files: ["**/dashboard/config/widgets.js", "**/data/mock/**", "api/**", "netlify/**"],
     rules: {
       "max-lines": "off",
     },

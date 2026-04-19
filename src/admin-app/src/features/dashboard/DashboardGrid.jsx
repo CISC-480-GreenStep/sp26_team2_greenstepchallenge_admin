@@ -4,7 +4,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { GlobalStyles, Box } from "@mui/material";
 
-import { WIDGET_MAP } from "./dashboardConfig";
+import { WIDGET_MAP } from "./config";
 import DashboardWidget from "./DashboardWidget";
 
 export default function DashboardGrid({

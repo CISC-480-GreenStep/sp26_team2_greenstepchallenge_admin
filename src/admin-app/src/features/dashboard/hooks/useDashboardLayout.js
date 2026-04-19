@@ -17,7 +17,7 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_LAYOUTS, DEFAULT_VISIBLE, LAYOUT_PRESETS, autoLayout } from "../dashboardConfig";
+import { DEFAULT_LAYOUTS, DEFAULT_VISIBLE, LAYOUT_PRESETS, autoLayout } from "../config";
 
 const STORAGE_KEY = "greenstep_dashboard_layout";
 

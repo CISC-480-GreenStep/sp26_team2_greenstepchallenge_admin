@@ -1,7 +1,20 @@
-import { Typography } from '@mui/material';
+/**
+ * @file GroupPerformanceWidget.jsx
+ * @summary Bar chart comparing average points per user across groups.
+ */
+
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+
+import { Typography } from "@mui/material";
 
 export default function GroupPerformanceWidget({ data }) {
   if (!data.groupPerformanceData?.length) {

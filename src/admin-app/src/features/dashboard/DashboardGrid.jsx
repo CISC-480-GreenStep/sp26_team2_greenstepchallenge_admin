@@ -1,9 +1,17 @@
-import { useContainerWidth, ResponsiveGridLayout, verticalCompactor } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import { GlobalStyles, Box } from '@mui/material';
-import DashboardWidget from './DashboardWidget';
-import { WIDGET_MAP } from './dashboardConfig';
+/**
+ * @file DashboardGrid.jsx
+ * @summary Responsive react-grid-layout wrapper that renders the visible
+ * widgets and forwards drag/resize/remove events back up to DashboardPage.
+ */
+
+import { useContainerWidth, ResponsiveGridLayout, verticalCompactor } from "react-grid-layout";
+
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import { GlobalStyles, Box } from "@mui/material";
+
+import { WIDGET_MAP } from "./config";
+import DashboardWidget from "./DashboardWidget";
 
 export default function DashboardGrid({
   visible,
@@ -21,12 +29,12 @@ export default function DashboardGrid({
         <>
           <GlobalStyles
             styles={{
-              '.react-grid-item > .react-resizable-handle::after': {
-                borderColor: 'rgba(0,0,0,0.25) !important',
+              ".react-grid-item > .react-resizable-handle::after": {
+                borderColor: "rgba(0,0,0,0.25) !important",
               },
-              '.react-grid-item.react-grid-placeholder': {
-                background: 'rgba(46,125,50,0.15) !important',
-                borderRadius: '8px',
+              ".react-grid-item.react-grid-placeholder": {
+                background: "rgba(46,125,50,0.15) !important",
+                borderRadius: "8px",
               },
             }}
           />
@@ -50,7 +58,7 @@ export default function DashboardGrid({
               xs: [0, 0],
               xxs: [0, 0],
             }}
-            dragConfig={{ enabled: isEditing, handle: '.drag-handle' }}
+            dragConfig={{ enabled: isEditing, handle: ".drag-handle" }}
             resizeConfig={{ enabled: isEditing }}
             compactor={verticalCompactor}
             onLayoutChange={onLayoutChange}

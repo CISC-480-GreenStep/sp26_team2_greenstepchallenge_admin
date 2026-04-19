@@ -1,6 +1,18 @@
+/**
+ * @file CompletionRatesWidget.jsx
+ * @summary Horizontal bar chart of per-challenge completion percentages.
+ */
+
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
-} from 'recharts';
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from "recharts";
 
 export default function CompletionRatesWidget({ data }) {
   return (
@@ -14,7 +26,7 @@ export default function CompletionRatesWidget({ data }) {
           {data.completionRatesData.map((entry, i) => (
             <Cell
               key={i}
-              fill={entry.rate >= 50 ? '#4CAF50' : entry.rate >= 25 ? '#FF9800' : '#F44336'}
+              fill={entry.rate >= 50 ? "#4CAF50" : entry.rate >= 25 ? "#FF9800" : "#F44336"}
             />
           ))}
         </Bar>

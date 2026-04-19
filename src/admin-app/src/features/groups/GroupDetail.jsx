@@ -1,81 +1,94 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+/**
+ * @file GroupDetail.jsx
+ * @summary GroupDetail -- single-group page showing the group header card,
+ * its members table, and the (optional) list of challenges scoped
+ * to the group.
+ *
+ * Responsibilities (intentionally thin):
+ *   - Load group, users, challenges in parallel.
+ *   - Own the Add-Member, Remove-Member, and Delete-Group dialog
+ *     state and the corresponding mutation callbacks.
+ *   - Delegate row-rendering to MembersTable / GroupChallengesTable.
+ */
+
+import { useCallback, useEffect, useState } from "react";
+
+import { useNavigate, useParams } from "react-router-dom";
+
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import GroupsIcon from "@mui/icons-material/Groups";
 import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  Stack,
-  CircularProgress,
   Alert,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import GroupsIcon from '@mui/icons-material/Groups';
-import EventIcon from '@mui/icons-material/Event';
-import {
-  getGroupById,
-  getUsers,
-  getChallenges,
-  updateUser,
-  deleteGroup,
-} from '../../data/api';
-import { useAuth } from '../auth/AuthContext';
-import ConfirmDialog from '../../components/shared/ConfirmDialog';
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+
+import GroupChallengesTable from "./components/GroupChallengesTable";
+import MembersTable from "./components/MembersTable";
+import { ConfirmDialog } from "../../components/shared/feedback";
+import { deleteGroup, getChallenges, getGroupById, getUsers, updateUser } from "../../data/api";
+import { useAuth } from "../auth/useAuth";
 
 export default function GroupDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
-  const canManage = hasRole('Admin');
+  const canManage = hasRole("Admin");
 
   const [group, setGroup] = useState(null);
   const [users, setUsers] = useState([]);
   const [challenges, setChallenges] = useState([]);
+  const [error, setError] = useState(null);
+
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [pendingRemoveUser, setPendingRemoveUser] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [error, setError] = useState(null);
 
-  const load = async () => {
+  // Stable callback so mutate handlers can re-fetch without retriggering the
+  // mount effect. Wrapped in useCallback to satisfy exhaustive-deps when used
+  // as a dependency below.
+  const load = useCallback(async () => {
     try {
       const gid = Number(id);
-      const [g, u, c] = await Promise.all([
-        getGroupById(gid),
-        getUsers(),
-        getChallenges(),
-      ]);
+      const [g, u, c] = await Promise.all([getGroupById(gid), getUsers(), getChallenges()]);
       setGroup(g);
       setUsers(u);
       setChallenges(c);
     } catch (err) {
-      setError(err.message || 'Failed to load group details');
+      setError(err.message || "Failed to load group details");
     }
-  };
-
-  useEffect(() => {
-    load();
   }, [id]);
 
-  if (!group) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  // Fetch on mount and whenever the route id changes. Disabling
+  // set-state-in-effect here is the lesser evil: this is a route-driven
+  // initial fetch, not a derived-state pattern. Mutations re-call load()
+  // outside the effect.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  if (!group) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const members = users.filter((u) => u.groupId === group.id);
   const groupChallenges = challenges.filter((c) => c.groupId === group.id);
@@ -84,7 +97,7 @@ export default function GroupDetail() {
   const handleAddMember = async () => {
     if (!selectedUserId) return;
     await updateUser(Number(selectedUserId), { groupId: group.id });
-    setSelectedUserId('');
+    setSelectedUserId("");
     setAddDialogOpen(false);
     load();
   };
@@ -100,218 +113,44 @@ export default function GroupDetail() {
   const handleDeleteGroup = async () => {
     await deleteGroup(group.id);
     setConfirmDeleteOpen(false);
-    navigate('/groups');
+    navigate("/groups");
+  };
+
+  const requestRemove = (user) => {
+    setPendingRemoveUser(user);
+    setConfirmRemoveOpen(true);
   };
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
-      >
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
         Back
       </Button>
 
-      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            mb: 2,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 1,
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-            }}
-          >
-            <GroupsIcon />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="h5"
-              fontWeight={700}
-              sx={{ fontSize: { xs: '1.15rem', sm: '1.5rem' } }}
-            >
-              {group.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {group.description || 'No description'}
-            </Typography>
-          </Box>
-          {canManage && (
-            <Stack direction="row" spacing={1}>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<EditIcon />}
-                onClick={() => navigate(`/groups/${group.id}/edit`)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                startIcon={<DeleteIcon />}
-                onClick={() => setConfirmDeleteOpen(true)}
-              >
-                Delete
-              </Button>
-            </Stack>
-          )}
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {members.length} member{members.length !== 1 ? 's' : ''} ·{' '}
-          {groupChallenges.length} challenge
-          {groupChallenges.length !== 1 ? 's' : ''} · Created {group.createdAt}
-        </Typography>
-      </Paper>
+      <GroupHeaderCard
+        group={group}
+        memberCount={members.length}
+        challengeCount={groupChallenges.length}
+        canManage={canManage}
+        onEdit={() => navigate(`/groups/${group.id}/edit`)}
+        onDelete={() => setConfirmDeleteOpen(true)}
+      />
 
-      {/* Members Section */}
-      <Box sx={{ mb: 3 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
-          flexWrap="wrap"
-          gap={1}
-        >
-          <Typography variant="h6" fontWeight={600}>
-            Members ({members.length})
-          </Typography>
-          {canManage && (
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setAddDialogOpen(true)}
-              disabled={usersNotInGroup.length === 0}
-            >
-              Add Member
-            </Button>
-          )}
-        </Stack>
-        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-          <Table size="small" sx={{ minWidth: 400 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                {canManage ? <TableCell align="right">Actions</TableCell> : null}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {members.map((u) => (
-                <TableRow key={u.id} hover>
-                  <TableCell>
-                    <Button
-                      size="small"
-                      sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
-                      onClick={() => navigate(`/users/${u.id}`)}
-                    >
-                      {u.name}
-                    </Button>
-                  </TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>{u.role}</TableCell>
-                  <TableCell>{u.status}</TableCell>
-                  {canManage ? (
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        title="Remove from group"
-                        onClick={() => {
-                          setPendingRemoveUser(u);
-                          setConfirmRemoveOpen(true);
-                        }}
-                      >
-                        <PersonRemoveIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  ) : null}
-                </TableRow>
-              ))}
-              {members.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={canManage ? 5 : 4}
-                    align="center"
-                    sx={{ py: 3 }}
-                  >
-                    <Typography color="text.secondary">
-                      No members yet. Add members to get started.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+      <MembersTable
+        members={members}
+        canManage={canManage}
+        canAddMore={usersNotInGroup.length > 0}
+        onAddClick={() => setAddDialogOpen(true)}
+        onRemoveClick={requestRemove}
+      />
 
-      {/* Challenges Section */}
-      {groupChallenges.length > 0 && (
-        <Box>
-          <Typography variant="h6" fontWeight={600} mb={1}>
-            Challenges in this Group
-          </Typography>
-          <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-            <Table size="small" sx={{ minWidth: 400 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Start</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {groupChallenges.map((e) => (
-                  <TableRow key={e.id} hover>
-                    <TableCell>
-                      <Button
-                        size="small"
-                        sx={{ p: 0, minWidth: 'auto', textTransform: 'none' }}
-                        onClick={() => navigate(`/challenges/${e.id}`)}
-                      >
-                        {e.name}
-                      </Button>
-                    </TableCell>
-                    <TableCell>{e.status}</TableCell>
-                    <TableCell>{e.startDate}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/challenges/${e.id}`)}
-                      >
-                        <EventIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      )}
+      {groupChallenges.length > 0 && <GroupChallengesTable challenges={groupChallenges} />}
 
-      {/* Add Member Dialog */}
       <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add Member to {group.name}</DialogTitle>
         <DialogContent>
@@ -333,17 +172,12 @@ export default function GroupDetail() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAddMember}
-            disabled={!selectedUserId}
-          >
+          <Button variant="contained" onClick={handleAddMember} disabled={!selectedUserId}>
             Add
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Remove Member Confirm */}
       <ConfirmDialog
         open={confirmRemoveOpen}
         title="Remove from Group"
@@ -355,7 +189,6 @@ export default function GroupDetail() {
         }}
       />
 
-      {/* Delete Group Confirm */}
       <ConfirmDialog
         open={confirmDeleteOpen}
         title="Delete Group"
@@ -364,5 +197,73 @@ export default function GroupDetail() {
         onCancel={() => setConfirmDeleteOpen(false)}
       />
     </Box>
+  );
+}
+
+/**
+ * Header card with group name, description, and the Edit/Delete
+ * actions (Admin-only). Inlined because it has no other consumer
+ * and pulling it out would only add a one-call indirection.
+ */
+function GroupHeaderCard({ group, memberCount, challengeCount, canManage, onEdit, onDelete }) {
+  return (
+    <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          mb: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 1,
+            bgcolor: "primary.main",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+          }}
+        >
+          <GroupsIcon />
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ fontSize: { xs: "1.15rem", sm: "1.5rem" } }}
+          >
+            {group.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {group.description || "No description"}
+          </Typography>
+        </Box>
+        {canManage && (
+          <Stack direction="row" spacing={1}>
+            <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={onEdit}>
+              Edit
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              startIcon={<DeleteIcon />}
+              onClick={onDelete}
+            >
+              Delete
+            </Button>
+          </Stack>
+        )}
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        {memberCount} member{memberCount !== 1 ? "s" : ""} · {challengeCount} challenge
+        {challengeCount !== 1 ? "s" : ""} · Created {group.createdAt}
+      </Typography>
+    </Paper>
   );
 }

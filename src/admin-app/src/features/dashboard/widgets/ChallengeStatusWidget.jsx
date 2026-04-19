@@ -1,10 +1,15 @@
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+/**
+ * @file ChallengeStatusWidget.jsx
+ * @summary Donut chart showing the count of challenges in each lifecycle status.
+ */
+
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 const STATUS_COLORS = {
-  Active: '#4CAF50',
-  Upcoming: '#2196F3',
-  Completed: '#9E9E9E',
-  Archived: '#FF9800',
+  Active: "#4CAF50",
+  Upcoming: "#2196F3",
+  Completed: "#9E9E9E",
+  Archived: "#FF9800",
 };
 
 export default function ChallengeStatusWidget({ data }) {
@@ -21,7 +26,7 @@ export default function ChallengeStatusWidget({ data }) {
           outerRadius="70%"
         >
           {data.challengeStatusData.map((entry) => (
-            <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || '#757575'} />
+            <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || "#757575"} />
           ))}
         </Pie>
         <Tooltip />

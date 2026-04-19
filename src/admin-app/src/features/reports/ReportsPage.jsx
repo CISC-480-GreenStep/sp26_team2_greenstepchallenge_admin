@@ -1,4 +1,19 @@
-import { useEffect, useState, useMemo } from "react";
+/**
+ * @file ReportsPage.jsx
+ * @summary Cross-challenge participation report with filterable table + chart.
+ *
+ * Loads challenges, users, participation records, and actions in parallel,
+ * then derives:
+ *   - a filtered participation table (challenge + date range filters)
+ *   - a category-bucket bar chart of actions in the filtered set
+ *   - a CSV export of the table contents
+ *
+ * Lookups (`userName`, `challengeName`, `actionName`, `actionCategory`) are
+ * memoized so derived data (`chartData`, `tableData`) only recomputes when
+ * the underlying source arrays actually change.
+ */
+
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -65,19 +80,37 @@ export default function ReportsPage() {
     });
   }, [participation, challengeFilter, dateFrom, dateTo]);
 
-  const userName = (uid) => users.find((u) => u.id === uid)?.name || "Unknown";
-  const challengeName = (cid) => challenges.find((c) => c.id === cid)?.name || "Unknown";
-  const actionName = (aid) => actions.find((a) => a.id === aid)?.name || "Unknown";
-  const actionCategory = (aid) => actions.find((a) => a.id === aid)?.category || "Unknown";
+  // Stable lookup callbacks so derived memos only invalidate when the
+  // underlying source array actually changes.
+  const userName = useCallback(
+    (uid) => users.find((u) => u.id === uid)?.name || "Unknown",
+    [users],
+  );
+  const challengeName = useCallback(
+    (cid) => challenges.find((c) => c.id === cid)?.name || "Unknown",
+    [challenges],
+  );
+  const actionName = useCallback(
+    (aid) => actions.find((a) => a.id === aid)?.name || "Unknown",
+    [actions],
+  );
+  const actionCategory = useCallback(
+    (aid) => actions.find((a) => a.id === aid)?.category || "Unknown",
+    [actions],
+  );
 
-  const tableData = filtered.map((p) => ({
-    User: userName(p.userId),
-    Challenge: challengeName(p.challengeId),
-    Action: actionName(p.actionId),
-    Category: actionCategory(p.actionId),
-    Date: p.completedAt,
-    Notes: p.notes || "",
-  }));
+  const tableData = useMemo(
+    () =>
+      filtered.map((p) => ({
+        User: userName(p.userId),
+        Challenge: challengeName(p.challengeId),
+        Action: actionName(p.actionId),
+        Category: actionCategory(p.actionId),
+        Date: p.completedAt,
+        Notes: p.notes || "",
+      })),
+    [filtered, userName, challengeName, actionName, actionCategory],
+  );
 
   const chartData = useMemo(() => {
     const counts = {};
@@ -86,7 +119,7 @@ export default function ReportsPage() {
       counts[cat] = (counts[cat] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
-  }, [filtered, actions]);
+  }, [filtered, actionCategory]);
 
   if (loading)
     return (

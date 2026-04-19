@@ -104,6 +104,8 @@ There is no in-app "reset" button anymore — entity data lives in Supabase. To 
 
 All contributors follow [`CODING_GUIDELINES.md`](CODING_GUIDELINES.md) for naming, imports, comments, branch and commit conventions, the tiered file-size policy, and the cohesive comment standard.
 
+For the **annotated source tree**, "where do I change X?" recipes, and "how do I add Y?" playbooks, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The `Project Structure` section below is a high-level map; `ARCHITECTURE.md` is the contributor's reference.
+
 ---
 
 ## Project Structure

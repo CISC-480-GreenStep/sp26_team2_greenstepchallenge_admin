@@ -344,6 +344,11 @@ await createUser(payload);
 
 **Intent:** Keep related code together. Each feature has its own folder under `features/` containing all its pages, the per-page sub-components it uses (under `components/`), and any feature-scoped hooks (under `hooks/`). Cross-feature reusable pieces live in `components/shared/` (grouped by intent) and `lib/`.
 
+> **For the full annotated source tree** (every file with a one-line description),
+> "where do I change X?" recipes, and "how do I add Y?" playbooks, see
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The summary below is the
+> normative rule; that doc is the navigation reference.
+
 ```
 features/
   users/

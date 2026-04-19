@@ -12,13 +12,13 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.7.1 — Phase 2 Cleanup (Reorganization)
+### Current Version: v0.7.2 — Phase 2 Cleanup (Audit Follow-ups)
 
-**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; auth context decomposed for React Fast Refresh. Every source file now carries a `@file` / `@summary` docblock. Coding standards enforced via Prettier + ESLint.
+**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; dashboard stats split into hook + pure `aggregations` module; `WidgetCatalog` decomposed into per-section sub-components; auth context decomposed for React Fast Refresh. Every source file now carries a `@file` / `@summary` docblock and **no source file is over 300 lines**. Coding standards enforced via Prettier + ESLint.
 
 ### What's Built
 
-- **Login page** with mock authentication (email/password) and Reset Demo Data button
+- **Authentication** — Supabase magic-link sign-in with role lookup; a "Quick Login as Kristin (SuperAdmin)" dev shortcut is wired up for local development
 - **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards
 - **Customizable Dashboard** — 22 available widgets (8 stat cards, 9 charts, 5 tables/lists) arranged in a drag-and-drop grid; click **Customize** to enter edit mode where widgets can be rearranged by dragging and resized from corners; **Widget Library** drawer lets you toggle any widget on/off and apply **Quick Layout Presets** (Default, Executive Summary, Analytics Deep Dive, Compact Overview); layout persists to localStorage per user; HCI-informed design with affordance cues (grip handles, dashed borders in edit mode), feedback (snackbar confirmations), error prevention (can't remove all widgets, cancel/reset available), and progressive disclosure (edit controls only appear when customizing)
 - **Challenge Management** (renamed from "Events") — list with search/filter by status and group (URL support for groupId), create/edit forms, detail view with **Participants** table (who completed actions), participation log, clickable group link, archive/delete, CSV export
@@ -28,16 +28,15 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 - **Challenge Presets** — reusable templates with pre-configured actions; create, edit, delete presets from a dedicated page; applying a preset when creating a new challenge pre-fills form fields and automatically creates all template actions; 3 seed presets (H2O Hero Week, Power Down Challenge, Sustainable Commute Week)
 - **Reports** — filter by challenge and date range, category breakdown chart, full participation table with clickable user/challenge links, CSV export
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
-- **localStorage persistence** — all changes survive page refresh; "Reset Demo Data" button restores defaults
+- **Persistence** — all entity data lives in Supabase (Postgres); per-user dashboard layout is cached in `localStorage` so customizations survive refresh
 
 ### What's NOT Built Yet
 
-- Real authentication (OAuth, JWT, etc.)
-- Python backend (Flask/FastAPI)
-- PostgreSQL database
-- Integration with Team 1's user-facing app
+- Integration with Team 1's user-facing mobile app (shared schema in progress)
 - Photo uploads and content moderation
-- Advanced analytics and BI features
+- Advanced analytics / saved report templates and BI features
+- Push-notification integration for challenge reminders
+- Server-side persistence of per-user dashboard layouts (currently `localStorage` only)
 
 ---
 
@@ -54,22 +53,17 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 | Data       | Supabase (Postgres + Auth)         |
 | Quality    | ESLint + Prettier (import order, max-lines, format-on-save) |
 
-### Planned (not yet implemented)
-
-| Layer    | Technology          |
-|----------|---------------------|
-| Backend  | Python (FastAPI)    |
-| Database | PostgreSQL          |
-| Auth     | TBD (OAuth/JWT)     |
+> Note: an earlier project plan called for a separate Python (FastAPI) + standalone PostgreSQL backend. That layer was dropped in v0.6.x in favor of Supabase, which provides Postgres + Auth + the REST/Realtime API in one managed service. The "Future Goals" section below tracks what's still left.
 
 ---
 
 ## Getting Started
 
-### Quick Start (3 steps)
+### Quick Start (4 steps)
 
-1. Make sure you have [Node.js](https://nodejs.org/) 18 or newer installed (`node -v` to check)
-2. Open a terminal and run:
+1. Make sure you have [Node.js](https://nodejs.org/) 18 or newer installed (`node -v` to check).
+2. Copy `src/admin-app/.env.example` to `src/admin-app/.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (ask a maintainer or grab them from the Supabase project dashboard).
+3. Install + start the dev server:
 
 ```bash
 cd src/admin-app
@@ -77,20 +71,12 @@ npm install
 npm run dev
 ```
 
-3. Open **http://localhost:5173** in your browser
-
-That's it — the app runs entirely in the browser with mock data, no backend or database needed.
+4. Open **http://localhost:5173** in your browser.
 
 ### Logging In
 
-Click **"Quick Login as Kristin (SuperAdmin)"** on the login page to sign in instantly.
-
-Or use one of the demo accounts:
-
-| Email                           | Password | Role        |
-|---------------------------------|----------|-------------|
-| kristin.mroz@mpca.mn.gov       | admin    | SuperAdmin  |
-| sarah.johnson@mpca.mn.gov     | user     | GeneralUser |
+- **Production / shared deploys:** enter your email on the login page, click "Send magic link", and follow the link Supabase emails to you.
+- **Local dev shortcut:** click **"Quick Login as Kristin (SuperAdmin)"** on the login page. This runs a Supabase password sign-in against the seeded SuperAdmin account so you don't have to round-trip through email each time.
 
 ### Managing Presets
 
@@ -108,9 +94,9 @@ Or use one of the demo accounts:
 - **Delete:** Click the trash icon (confirmation required)
 - **Manage Actions:** Edit a challenge > scroll to "Actions" section > add/edit/delete actions with name, category, and points
 
-### Reset Demo Data
+### Resetting Data
 
-Click the **"Reset Demo Data"** button on the login page to clear all changes and restore the original sample data. All data is stored in your browser's localStorage.
+There is no in-app "reset" button anymore — entity data lives in Supabase. To reseed a development database, re-run the SQL in `supabase/migrations/` against your Supabase project. The only client-side state is the per-user dashboard layout in `localStorage` under the `dashboardLayout*` keys; clear those in DevTools to get the default layout back.
 
 ---
 
@@ -258,6 +244,15 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 
 ## Version History
 
+### v0.7.2 — Phase 2 Cleanup: Audit Follow-ups (Apr 19, 2026)
+
+Honest follow-up after the Phase 2 self-audit: removes the last "justified" 300+ line file, decomposes the last >300 line page component, and corrects stale README claims. Same umbrella branch / PR #43.
+
+- **`useDashboardStats.js` actually decomposed (393 → 177 lines)** — the previous "splitting would hide the helpers" justification was weak. The 13 pure aggregators (`buildCategoryData`, `buildChallengeSummary`, `buildComparisonData`, `buildStatusBreakdown`, `buildUserGrowth`, `buildGroupPerformance`, `buildCompletionRates`, `buildPointsDistribution`, `buildMostActiveUsers`, `buildRecentActivity`, plus `truncate` / `sumPoints` / `countUsersCreatedThisMonth`) moved to `dashboard/hooks/aggregations.js`. Hook now owns orchestration only; helpers are independently unit-testable.
+- **`WidgetCatalog.jsx` decomposed (304 → 88 lines)** — the in-file section dividers (`{/* ── Quick Layout Presets ── */}` etc.) were already extraction markers. Split into `components/catalog/CatalogPresets.jsx` (~39), `CatalogChallengeFilter.jsx` (~120), and `CatalogWidgetList.jsx` (~136). Parent is now a pure orchestrator that composes the four sections + drawer chrome + reset footer.
+- **`max-lines` exemption no longer needed** — every source file under `src/admin-app/src/` is now ≤300 lines. The previous in-file justification comment is gone.
+- **README correctness pass** — removed "mock authentication" claim (Supabase magic-link auth has shipped), removed the demo-account password table (no longer applicable), removed "Reset Demo Data" instructions (Supabase is the source of truth), removed obsolete "Planned: FastAPI / standalone PostgreSQL / OAuth/JWT" tech-stack table (Supabase covers all three), expanded Quick Start to include the `.env` step, rewrote "Future Goals" to reflect what's actually open (shared schema with Team 1, photos, moderation, code-splitting, tests).
+
 ### v0.7.1 — Phase 2 Cleanup: Reorganization and Decomposition (Apr 19, 2026)
 
 Builds on v0.7.0 (PR #43, same umbrella branch). Behavior unchanged; the goal was to push past "comments only" into structural cleanup the team had flagged in code review.
@@ -385,14 +380,14 @@ Closes #42 (Code Cleanup and Refactor). Behavior unchanged; the goal was to make
 
 ## Future Goals
 
-1. Connect to Python (FastAPI) backend with PostgreSQL
-2. Real authentication with OAuth/JWT
-3. Coordinate shared database schema with Team 1
-4. Photo upload support for user-submitted content
-5. Content moderation tools (flag/remove comments and photos)
-6. Advanced reporting with saved report templates
-7. Push notification integration for challenge reminders
-8. Save dashboard layouts per-user in the database (currently localStorage only)
+1. Coordinate the shared Supabase schema with Team 1's user-facing mobile app
+2. Photo upload support for user-submitted content (Supabase Storage)
+3. Content moderation tools (flag/remove comments and photos)
+4. Advanced reporting with saved report templates
+5. Push notification integration for challenge reminders
+6. Persist per-user dashboard layouts to Supabase instead of `localStorage`
+7. Route-level code-splitting (`React.lazy` + `Suspense`) to bring the production bundle below the 500 KB warning threshold
+8. Test suite — start with unit tests for `data/api/*` modules and `dashboard/hooks/aggregations.js`
 
 ---
 

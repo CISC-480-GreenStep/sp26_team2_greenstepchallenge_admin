@@ -1,12 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Box, Typography, TextField, Button, Stack, Paper, Grid,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getGroupById, createGroup, updateGroup } from '../../data/api';
+/**
+ * @file GroupForm.jsx
+ * @summary Create / edit screen for a single group (Postgres `departments`).
+ *
+ * Used for both the "New Group" and "Edit Group" flows; switches mode
+ * based on the presence of `:id` in the URL.
+ */
 
-const EMPTY = { name: '', description: '' };
+import { useEffect, useState } from "react";
+
+import { useNavigate, useParams } from "react-router-dom";
+
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Typography, TextField, Button, Stack, Paper, Grid } from "@mui/material";
+
+import { getGroupById, createGroup, updateGroup } from "../../data/api";
+
+const EMPTY = { name: "", description: "" };
 
 export default function GroupForm() {
   const { id } = useParams();
@@ -16,12 +25,13 @@ export default function GroupForm() {
 
   useEffect(() => {
     if (isEdit) {
-      getGroupById(Number(id)).then((g) => { if (g) setForm(g); });
+      getGroupById(Number(id)).then((g) => {
+        if (g) setForm(g);
+      });
     }
   }, [id, isEdit]);
 
-  const handleChange = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +40,7 @@ export default function GroupForm() {
     } else {
       await createGroup({ name: form.name, description: form.description });
     }
-    navigate('/groups');
+    navigate("/groups");
   };
 
   return (
@@ -39,23 +49,45 @@ export default function GroupForm() {
         Back
       </Button>
 
-      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-        {isEdit ? 'Edit Group' : 'Create Group'}
+      <Typography
+        variant="h5"
+        fontWeight={700}
+        mb={3}
+        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+      >
+        {isEdit ? "Edit Group" : "Create Group"}
       </Typography>
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 500 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
-              <TextField label="Group Name" value={form.name} onChange={handleChange('name')} required fullWidth />
+              <TextField
+                label="Group Name"
+                value={form.name}
+                onChange={handleChange("name")}
+                required
+                fullWidth
+              />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <TextField label="Description" value={form.description} onChange={handleChange('description')} multiline rows={3} fullWidth />
+              <TextField
+                label="Description"
+                value={form.description}
+                onChange={handleChange("description")}
+                multiline
+                rows={3}
+                fullWidth
+              />
             </Grid>
           </Grid>
           <Stack direction="row" spacing={2} mt={3}>
-            <Button type="submit" variant="contained">{isEdit ? 'Save Changes' : 'Create Group'}</Button>
-            <Button variant="outlined" onClick={() => navigate('/groups')}>Cancel</Button>
+            <Button type="submit" variant="contained">
+              {isEdit ? "Save Changes" : "Create Group"}
+            </Button>
+            <Button variant="outlined" onClick={() => navigate("/groups")}>
+              Cancel
+            </Button>
           </Stack>
         </form>
       </Paper>

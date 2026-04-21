@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+coverage
+.netlify
+.vercel
+package-lock.json
+public

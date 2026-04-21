@@ -59,11 +59,17 @@ export default function ChallengeDetail() {
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     const cid = Number(id);
+    // Reset to the loading state on id changes so the spinner reappears
+    // while the new challenge is fetched. Rule disabled because this is a
+    // route-driven initial fetch, not a derived-state pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
     Promise.all([
       getChallengeById(cid),
       getActionsByChallenge(cid),
@@ -80,13 +86,21 @@ export default function ChallengeDetail() {
         setGroups(g);
         setLeaderboard(lb);
       })
-      .catch((err) => setError(err.message || "Failed to load challenge details"));
+      .catch((err) => setError(err.message || "Failed to load challenge details"))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (!challenge) {
+  if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+  if (error && !challenge) {
+    return (
+      <Box sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
   }

@@ -11,7 +11,7 @@
  * module exports only a component — required for Vite React Fast Refresh.
  */
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { AuthContext } from "./authContextValue";
 import { ROLES } from "../../data/api";
@@ -42,6 +42,33 @@ async function loadAppUser(email) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Track the auth email separately so we can load the DB user outside
+  // the onAuthStateChange callback (avoids deadlocks during token refresh)
+  const [authEmail, setAuthEmail] = useState(null);
+  const initialLoad = useRef(true);
+
+  // Reload the app user row whenever the auth email changes. Done in a
+  // dedicated effect (rather than inside onAuthStateChange) to avoid
+  // deadlocking the Supabase auth state machine during token refresh.
+  useEffect(() => {
+    if (authEmail === null && !initialLoad.current) {
+      // Clear the app user synchronously on sign-out so protected routes
+      // redirect immediately. This is an auth-driven state reset, not a
+      // derived-state pattern.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUser(null);
+      return;
+    }
+    if (!authEmail) return;
+
+    let cancelled = false;
+    loadAppUser(authEmail).then((appUser) => {
+      if (!cancelled) setUser(appUser);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authEmail]);
 
   useEffect(() => {
     // Initial session restore: prefer a real Supabase session, fall back to
@@ -50,6 +77,7 @@ export function AuthProvider({ children }) {
       if (session?.user?.email) {
         const appUser = await loadAppUser(session.user.email);
         setUser(appUser);
+        setAuthEmail(session.user.email);
       } else {
         const devEmail = localStorage.getItem(DEV_LOGIN_STORAGE_KEY);
         if (devEmail) {
@@ -57,20 +85,24 @@ export function AuthProvider({ children }) {
           if (appUser) setUser(appUser);
         }
       }
+      initialLoad.current = false;
       setLoading(false);
     });
 
-    // Keep React state in sync with Supabase auth state changes from any
-    // source (other tabs, token refresh, programmatic sign-out).
+    // Keep React state in sync with Supabase auth events from any source
+    // (other tabs, token refresh, programmatic sign-out). Callback is kept
+    // synchronous on purpose — async work here can deadlock the Supabase
+    // auth state machine during token refresh. The DB lookup is delegated
+    // to the `authEmail` effect above.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user?.email) {
-        const appUser = await loadAppUser(session.user.email);
-        setUser(appUser);
+        setAuthEmail(session.user.email);
       } else if (event === "SIGNED_OUT") {
-        setUser(null);
+        setAuthEmail(null);
       }
+      // TOKEN_REFRESHED: no action needed, session is still valid.
     });
 
     return () => subscription.unsubscribe();

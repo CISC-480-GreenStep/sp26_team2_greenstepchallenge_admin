@@ -57,6 +57,7 @@ export default function GroupDetail() {
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [pendingRemoveUser, setPendingRemoveUser] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Stable callback so mutate handlers can re-fetch without retriggering the
   // mount effect. Wrapped in useCallback to satisfy exhaustive-deps when used
@@ -70,22 +71,30 @@ export default function GroupDetail() {
       setChallenges(c);
     } catch (err) {
       setError(err.message || "Failed to load group details");
+    } finally {
+      setLoading(false);
     }
   }, [id]);
 
-  // Fetch on mount and whenever the route id changes. Disabling
-  // set-state-in-effect here is the lesser evil: this is a route-driven
-  // initial fetch, not a derived-state pattern. Mutations re-call load()
-  // outside the effect.
+  // Fetch on mount and whenever the route id changes. Mutations re-call
+  // load() outside the effect. `load()` defers all setState calls until
+  // after its first `await`, so the set-state-in-effect rule does not
+  // apply here.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 
-  if (!group) {
+  if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+  if (error && !group) {
+    return (
+      <Box sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
   }

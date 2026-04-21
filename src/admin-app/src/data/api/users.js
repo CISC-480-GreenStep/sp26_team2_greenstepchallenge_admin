@@ -2,11 +2,10 @@
  * @file users.js
  * @summary Users API -- read/write the `users` table.
  *
- * Note: createUser does NOT insert directly. It calls the
- * `/.netlify/functions/invite-user` (or Vercel equivalent) serverless
- * function, which provisions a Supabase Auth user, sends a magic-link
- * invite, and inserts the matching profile row. Components must always
- * go through `createUser` so the auth side stays in sync.
+ * Note: createUser does NOT insert directly. It calls the `/api/invite-user`
+ * Vercel serverless function, which provisions a Supabase Auth user, sends
+ * a magic-link invite, and inserts the matching profile row. Components
+ * must always go through `createUser` so the auth side stays in sync.
  */
 
 import { supabase } from "../supabase";
@@ -38,7 +37,7 @@ export async function getUserById(id) {
  * @throws {Error} When the serverless function responds with a non-2xx.
  */
 export async function createUser(data) {
-  const res = await fetch("/.netlify/functions/invite-user", {
+  const res = await fetch("/api/invite-user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

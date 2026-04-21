@@ -73,10 +73,16 @@ export default function UserDetail() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [points, setPoints] = useState({ total: 0, breakdown: [] });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const uid = Number(id);
+    // Reset to the loading state on id changes so the spinner reappears
+    // while the new user is fetched. Rule disabled because this is a
+    // route-driven initial fetch, not a derived-state pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
     Promise.all([
       getUserById(uid),
       getActivityLogsByUser(uid),
@@ -95,13 +101,21 @@ export default function UserDetail() {
         setPoints(pts);
         setGroups(g);
       })
-      .catch((err) => setError(err.message || "Failed to load user details"));
+      .catch((err) => setError(err.message || "Failed to load user details"))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (!user) {
+  if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+  if (error && !user) {
+    return (
+      <Box sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
   }

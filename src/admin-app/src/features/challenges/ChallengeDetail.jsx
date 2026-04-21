@@ -47,10 +47,12 @@ export default function ChallengeDetail() {
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const cid = Number(id);
+    setLoading(true);
     Promise.all([
       getChallengeById(cid),
       getActionsByChallenge(cid),
@@ -67,10 +69,13 @@ export default function ChallengeDetail() {
       setLeaderboard(lb);
     }).catch((err) => {
       setError(err.message || 'Failed to load challenge details');
+    }).finally(() => {
+      setLoading(false);
     });
   }, [id]);
 
-  if (!challenge) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+  if (error && !challenge) return <Box sx={{ py: 4 }}><Alert severity="error">{error}</Alert></Box>;
 
   const userName = (uid) => users.find((u) => u.id === uid)?.name || "Unknown";
   const actionName = (aid) =>

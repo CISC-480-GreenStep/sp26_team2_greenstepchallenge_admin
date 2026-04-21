@@ -1,5 +1,11 @@
-import { Box, Typography, Chip, Stack } from '@mui/material';
-import EntityLink from '../../../components/EntityLink';
+/**
+ * @file UpcomingChallengesWidget.jsx
+ * @summary List of challenges scheduled to start in the near future.
+ */
+
+import { Box, Typography, Chip, Stack } from "@mui/material";
+
+import { EntityLink } from "../../../components/shared/data";
 
 export default function UpcomingChallengesWidget({ data }) {
   if (!data.upcomingChallenges?.length) {
@@ -11,22 +17,26 @@ export default function UpcomingChallengesWidget({ data }) {
   }
 
   return (
-    <Stack spacing={1.5} sx={{ height: '100%', overflow: 'auto' }}>
+    <Stack spacing={1.5} sx={{ height: "100%", overflow: "auto" }}>
       {data.upcomingChallenges.map((c) => (
         <Box
           key={c.id}
           sx={{
             p: 1.5,
             borderRadius: 1,
-            bgcolor: 'grey.50',
-            border: '1px solid',
-            borderColor: 'divider',
+            bgcolor: "grey.50",
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: c.theme, flexShrink: 0 }} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+            <Box
+              sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: c.theme, flexShrink: 0 }}
+            />
             <Typography variant="body2" fontWeight={600}>
-              <EntityLink type="challenges" id={c.id}>{c.name}</EntityLink>
+              <EntityLink type="challenges" id={c.id}>
+                {c.name}
+              </EntityLink>
             </Typography>
           </Box>
           <Typography variant="caption" color="text.secondary">

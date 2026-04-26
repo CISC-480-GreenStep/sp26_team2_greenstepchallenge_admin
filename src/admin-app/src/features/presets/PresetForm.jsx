@@ -17,10 +17,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 
 import PresetActionsEditor from "./components/PresetActionsEditor";
 import PresetFieldsSection from "./components/PresetFieldsSection";
+import { MobilePreview } from "../../components/shared/preview";
 import { ACTIONS, createPreset, getPresetById, updatePreset } from "../../data/api";
 
 const EMPTY_FORM = {
@@ -82,26 +83,43 @@ export default function PresetForm() {
         {isEdit ? "Edit Preset" : "Create Preset"}
       </Typography>
 
-      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 700, mb: 3 }}>
-        <form onSubmit={handleSubmit}>
-          <PresetFieldsSection form={form} onChange={handleChange} />
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+            <form onSubmit={handleSubmit}>
+              <PresetFieldsSection form={form} onChange={handleChange} />
 
-          <PresetActionsEditor actions={actions} onChange={setActions} />
+              <PresetActionsEditor actions={actions} onChange={setActions} />
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <Button type="submit" variant="contained" sx={{ width: { xs: "100%", sm: "auto" } }}>
-              {isEdit ? "Save Changes" : "Create Preset"}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/presets")}
-              sx={{ width: { xs: "100%", sm: "auto" } }}
-            >
-              Cancel
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{ width: { xs: "100%", sm: "auto" } }}
+                >
+                  {isEdit ? "Save Changes" : "Create Preset"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate("/presets")}
+                  sx={{ width: { xs: "100%", sm: "auto" } }}
+                >
+                  Cancel
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+        </Grid>
+
+        {/* Mirrors the live-preview pattern in ChallengeForm so the two
+            authoring flows feel identical. Hidden below md for the same
+            width-budget reason — see the matching note there. */}
+        <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ position: "sticky", top: 80 }}>
+            <MobilePreview challenge={form} actions={actions} />
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

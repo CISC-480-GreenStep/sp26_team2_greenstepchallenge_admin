@@ -32,7 +32,7 @@ export default function AdminLayout() {
           width: { xs: "100%", md: `calc(100% - ${DRAWER_WIDTH}px)` },
           maxWidth: { xs: "100vw", md: `calc(100vw - ${DRAWER_WIDTH}px)` },
           minHeight: "100vh",
-          bgcolor: "grey.50",
+          bgcolor: "background.default",
           overflowX: "auto",
         }}
       >

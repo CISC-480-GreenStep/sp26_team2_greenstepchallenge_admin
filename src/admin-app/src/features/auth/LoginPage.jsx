@@ -44,7 +44,7 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "grey.100",
+        bgcolor: "background.default",
         px: 2,
       }}
     >
@@ -65,7 +65,8 @@ export default function LoginPage() {
 
           {sent ? (
             <Alert severity="success">
-              Check your email for a magic link to sign in. If you don't see it, check your junk/spam folder. You can close this tab.
+              Check your email for a magic link to sign in. If you don't see it, check your
+              junk/spam folder. You can close this tab.
             </Alert>
           ) : (
             <form onSubmit={handleSubmit}>

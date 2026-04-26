@@ -52,7 +52,7 @@ export default function LeaderboardWidget({ data }) {
             sx={{
               height: 8,
               borderRadius: 4,
-              bgcolor: "grey.200",
+              bgcolor: "action.selected",
               "& .MuiLinearProgress-bar": {
                 borderRadius: 4,
                 bgcolor:

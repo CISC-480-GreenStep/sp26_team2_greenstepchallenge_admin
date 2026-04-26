@@ -29,6 +29,7 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 - **Reports** — filter by challenge and date range, category breakdown chart, full participation table with clickable user/challenge links, CSV export
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
 - **Persistence** — all entity data lives in Supabase (Postgres); per-user dashboard layout is cached in `localStorage` so customizations survive refresh
+- **Dark design system** — global MUI v7 dark theme in `src/lib/theme.js` (dark surfaces, brand greens, semantic tokens), plus a live mobile-app preview rendered next to the challenge and preset forms so admins see the result as they type
 
 ### What's NOT Built Yet
 
@@ -245,6 +246,17 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.8.0 — Theme & Design System: Tasks A + C (Apr 26, 2026)
+
+First slice of [Issue #20 (Theme & Design System)](https://github.com/CISC-480-GreenStep/sp26_team2_greenstepchallenge_admin/issues/20). Lands the dark-theme baseline and the live mobile preview; tasks B (split header/body color) and D (header image upload) remain open and are tracked in `docs/guides/theme-design-system.md`.
+
+- **Global MUI v7 dark theme** (Task A) — extracted into a new `src/admin-app/src/lib/theme.js` (the location `ARCHITECTURE.md §4` already named as the expected home for it). Defines `palette.mode: "dark"` with brand greens (primary `#66BB6A`, dark `#2E7D32`), teal secondary (`#4DD0E1` / `#00838F`), tuned dark surfaces (`background.default` `#0F1419`, `background.paper` `#1A1F26`), WCAG-AA text tokens, and component defaults: `MuiPaper.backgroundImage: none` (kills the dark-mode elevation overlay), `MuiButton` un-elevated with rounded corners + `textTransform: none`, `MuiAppBar` / `MuiDrawer` painted with `background.paper` plus a `divider` border, `MuiTableCell` borders pinned to `divider`. The exact hex values are a first-pass baseline — final palette is still a `[TEAM DECISION]` per the guide.
+- **Pre-mount flash fix** (Task A) — `index.css` now sets `html, body { background-color: #0f1419; color-scheme: dark; }` so the browser doesn't show a white frame before React mounts the theme. The hex matches `palette.background.default`; a comment in `theme.js` calls out that the two need to stay in sync.
+- **Hardcoded-color sweep** (Task A) — replaced raw `grey.50`/`grey.100`/`grey.200`/`#f9f9f9` backgrounds (which are fixed light values that survive into dark mode) with semantic theme tokens that follow the palette: `background.default` (`AdminLayout` main, `LoginPage`), `action.hover` (`PresetPicker`, `UpcomingChallengesWidget` list rows), `action.selected` (`LeaderboardWidget` progress track). The `MobilePreview` phone screen kept its white interior intentionally — it's modeling a real phone, called out in the guide.
+- **Live mobile preview next to forms** (Task C) — `ChallengeForm.jsx` and `PresetForm.jsx` now render `<MobilePreview>` in a sticky right column on `md+` screens (hidden below `md` so the phone frame doesn't crush the form). Updates re-render automatically because `form` is already React state — no extra wiring needed. `ChallengeForm` derives `previewActions = isEdit ? actions : presetActions` so the preview shows saved actions on edit and seeded preset actions on create.
+- **Docs** — `ARCHITECTURE.md` source-tree now lists `lib/theme.js`, and the §4 "Look & feel" row points at it directly instead of saying "(none yet)". `docs/guides/theme-design-system.md` ownership annotations preserved.
+- **No data-layer changes.** Tasks B and D add migrations and read-side changes; this PR is intentionally UI-only.
 
 ### v0.7.2 — Phase 2 Cleanup: Audit Follow-ups (Apr 19, 2026)
 

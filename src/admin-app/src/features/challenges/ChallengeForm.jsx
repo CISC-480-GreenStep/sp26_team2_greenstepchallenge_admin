@@ -26,14 +26,14 @@ import {
   getActionsByChallenge,
   getChallengeById,
   getGroups,
-  getPresets,
+  getTemplates,
   logActivity,
   updateChallenge,
 } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
-import PresetPicker from "./components/PresetPicker";
+import TemplatePicker from "./components/TemplatePicker";
 
 const EMPTY_FORM = {
   name: "",
@@ -55,13 +55,13 @@ export default function ChallengeForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [presets, setPresets] = useState([]);
-  const [selectedPresetId, setSelectedPresetId] = useState("");
-  const [presetActions, setPresetActions] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [templateActions, setTemplateActions] = useState([]);
 
   useEffect(() => {
     getGroups().then(setGroups);
-    getPresets().then(setPresets);
+    getTemplates().then(setTemplates);
     if (isEdit) {
       const cid = Number(id);
       getChallengeById(cid).then((c) => {
@@ -71,23 +71,23 @@ export default function ChallengeForm() {
     }
   }, [id, isEdit]);
 
-  const handleApplyPreset = (e) => {
+  const handleApplyTemplate = (e) => {
     const pid = e.target.value;
-    setSelectedPresetId(pid);
-    const preset = presets.find((p) => p.id === pid);
-    if (!preset) {
-      setPresetActions([]);
+    setSelectedTemplateId(pid);
+    const template = templates.find((p) => p.id === pid);
+    if (!template) {
+      setTemplateActions([]);
       return;
     }
     setForm((prev) => ({
       ...prev,
-      name: preset.name,
-      description: preset.description,
-      category: preset.category,
-      theme: preset.theme,
-      status: preset.status || prev.status,
+      name: template.name,
+      description: template.description,
+      category: template.categories?.[0] || prev.category,
+      theme: template.theme,
+      status: template.status || prev.status,
     }));
-    setPresetActions(preset.actions || []);
+    setTemplateActions(template.actions || []);
   };
 
   const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -111,13 +111,20 @@ export default function ChallengeForm() {
       joinBy: null,
     });
 
-    // If the user picked a preset, materialize each template action into
+    // If the user picked a template, materialize each template action into
     // a real action row and wire it to the new challenge.
-    if (presetActions.length > 0) {
+    if (templateActions.length > 0) {
       const newActionIds = [];
-      for (const tmpl of presetActions) {
-        const newAction = await createAction({ ...tmpl });
-        newActionIds.push(newAction.id);
+      for (const tmpl of templateActions) {
+        // We strip the ID if it's a global action so it creates a duplicate for the challenge,
+        // or we just reuse the ID if the backend is updated.
+        // For now, we reuse the existing ID if it has one (global action), else create new.
+        if (tmpl.id) {
+          newActionIds.push(tmpl.id);
+        } else {
+          const newAction = await createAction({ ...tmpl });
+          newActionIds.push(newAction.id);
+        }
       }
       await updateChallenge(newChallenge.id, { actionIds: newActionIds });
     }
@@ -149,11 +156,11 @@ export default function ChallengeForm() {
         <form onSubmit={handleSubmit}>
           {!isEdit && (
             <Box mb={2}>
-              <PresetPicker
-                presets={presets}
-                selectedPresetId={selectedPresetId}
-                onSelect={handleApplyPreset}
-                presetActions={presetActions}
+              <TemplatePicker
+                templates={templates}
+                selectedTemplateId={selectedTemplateId}
+                onSelect={handleApplyTemplate}
+                templateActions={templateActions}
               />
             </Box>
           )}

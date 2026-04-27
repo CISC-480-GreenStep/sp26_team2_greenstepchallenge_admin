@@ -125,7 +125,7 @@ export default function ChallengesPage() {
       <ChallengesToolbar
         exportData={filtered}
         canEdit={canEdit}
-        onManagePresets={() => navigate("/presets")}
+        onManagePresets={() => navigate("/templates")}
         onNewChallenge={() => navigate("/challenges/new")}
       />
 

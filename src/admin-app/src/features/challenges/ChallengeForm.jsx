@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Paper, Stack, Typography, Grid } from "@mui/material";
 
 import {
   ACTIONS,
@@ -34,11 +34,12 @@ import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
+import MobilePreview from "../../components/shared/preview/MobilePreview";
 
 const EMPTY_FORM = {
   name: "",
   description: "",
-  category: ACTIONS[0],
+  categories: [ACTIONS[0]],
   theme: "#4CAF50",
   startDate: "",
   endDate: "",
@@ -83,7 +84,7 @@ export default function ChallengeForm() {
       ...prev,
       name: template.name,
       description: template.description,
-      category: template.categories?.[0] || prev.category,
+      categories: template.categories?.length ? template.categories : prev.categories,
       theme: template.theme,
       status: template.status || prev.status,
     }));
@@ -152,35 +153,48 @@ export default function ChallengeForm() {
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>
 
-      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 700, mb: 3 }}>
-        <form onSubmit={handleSubmit}>
-          {!isEdit && (
-            <Box mb={2}>
-              <TemplatePicker
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onSelect={handleApplyTemplate}
-                templateActions={templateActions}
-              />
-            </Box>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={7}>
+          <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+            <form onSubmit={handleSubmit}>
+              {!isEdit && (
+                <Box mb={2}>
+                  <TemplatePicker
+                    templates={templates}
+                    selectedTemplateId={selectedTemplateId}
+                    onSelect={handleApplyTemplate}
+                    templateActions={templateActions}
+                  />
+                </Box>
+              )}
+
+              <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
+
+              <Stack direction="row" spacing={2} mt={3}>
+                <Button type="submit" variant="contained">
+                  {isEdit ? "Save Changes" : "Create Challenge"}
+                </Button>
+                <Button variant="outlined" onClick={() => navigate("/challenges")}>
+                  Cancel
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+
+          {isEdit && (
+            <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />
           )}
+        </Grid>
 
-          <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
-
-          <Stack direction="row" spacing={2} mt={3}>
-            <Button type="submit" variant="contained">
-              {isEdit ? "Save Changes" : "Create Challenge"}
-            </Button>
-            <Button variant="outlined" onClick={() => navigate("/challenges")}>
-              Cancel
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
-
-      {isEdit && (
-        <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />
-      )}
+        <Grid item xs={12} md={5}>
+          <Box sx={{ position: { md: "sticky" }, top: { md: 24 } }}>
+            <Typography variant="h6" fontWeight={600} mb={2} textAlign="center" color="text.secondary">
+              Mobile Preview
+            </Typography>
+            <MobilePreview challenge={form} actions={isEdit ? actions : templateActions} />
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

@@ -8,9 +8,9 @@
  * to know how the parent stores it.
  */
 
-import { Grid, MenuItem, TextField } from "@mui/material";
+import { Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
 
-import { ACTIONS, CHALLENGE_STATUSES } from "../../../data/api";
+import { CHALLENGE_STATUSES, fetchAllCategories } from "../../../data/api";
 
 /**
  * @param {object} props
@@ -19,6 +19,19 @@ import { ACTIONS, CHALLENGE_STATUSES } from "../../../data/api";
  * @param {Array<{ id: number, name: string }>} props.groups
  */
 export default function ChallengeFieldsSection({ form, onChange, groups }) {
+  const categories = fetchAllCategories();
+
+  const handleCategoryChange = (category) => (e) => {
+    const isChecked = e.target.checked;
+    let nextCategories = [...(form.categories || [])];
+    if (isChecked) {
+      if (!nextCategories.includes(category)) nextCategories.push(category);
+    } else {
+      nextCategories = nextCategories.filter((c) => c !== category);
+    }
+    onChange("categories")({ target: { value: nextCategories } });
+  };
+
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12 }}>
@@ -42,20 +55,22 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
         />
       </Grid>
 
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField
-          label="Category"
-          select
-          value={form.category}
-          onChange={onChange("category")}
-          fullWidth
-        >
-          {ACTIONS.map((c) => (
-            <MenuItem key={c} value={c}>
-              {c}
-            </MenuItem>
+      <Grid size={{ xs: 12 }}>
+        <FormLabel component="legend" sx={{ mb: 1 }}>Categories</FormLabel>
+        <FormGroup row>
+          {categories.map((c) => (
+            <FormControlLabel
+              key={c}
+              control={
+                <Checkbox
+                  checked={(form.categories || []).includes(c)}
+                  onChange={handleCategoryChange(c)}
+                />
+              }
+              label={c}
+            />
           ))}
-        </TextField>
+        </FormGroup>
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>

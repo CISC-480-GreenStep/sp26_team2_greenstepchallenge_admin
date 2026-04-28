@@ -34,7 +34,7 @@ export async function getTemplateById(id) {
   if (!template) return null;
   template.categories = template.category ? template.category.split(', ') : [];
   template.actions = unwrap(
-    await supabase.from("templates_actions").select("*").eq("templatesId", id).order("id"),
+    await supabase.from("actions").select("*").eq("templatesId", id).order("id"),
   );
   return template;
 }
@@ -54,7 +54,7 @@ export async function createTemplate(data) {
   template.actions = [];
   if (templateActions?.length) {
     const rows = templateActions.map((a) => ({ ...a, templatesId: template.id }));
-    template.actions = unwrap(await supabase.from("templates_actions").insert(rows).select());
+    template.actions = unwrap(await supabase.from("actions").insert(rows).select());
   }
   return template;
 }
@@ -75,17 +75,17 @@ export async function updateTemplate(id, data) {
     unwrap(await supabase.from("templates").update(rest).eq("id", id));
   }
   if (templateActions !== undefined) {
-    await supabase.from("templates_actions").delete().eq("templatesId", id);
+    await supabase.from("actions").delete().eq("templatesId", id);
     if (templateActions.length) {
       const rows = templateActions.map((a) => ({ ...a, templatesId: id }));
-      await supabase.from("templates_actions").insert(rows);
+      await supabase.from("actions").insert(rows);
     }
   }
   return getTemplateById(id);
 }
 
 /**
- * Hard-delete a template. Cascades on `templates_actions` via FK ON DELETE.
+ * Hard-delete a template. Cascades on `actions` via FK ON DELETE.
  * @param {number|string} id
  */
 export async function deleteTemplate(id) {

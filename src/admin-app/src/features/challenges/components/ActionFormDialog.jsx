@@ -2,8 +2,8 @@
  * @file ActionFormDialog.jsx
  * @summary Modal form for creating or editing a single action template.
  *
- * Used by both `ActionsEditor` (challenges) and `PresetActionsEditor`
- * (presets) so the field set, validation, and labels stay in lock-step
+ * Used by both `ActionsEditor` (challenges) and `TemplatesActionsEditor`
+ * (templates) so the field set, validation, and labels stay in lock-step
  * across the two surfaces.
  *
  * Controlled component: parent owns `actionForm`, `onChange`, `onSave`,

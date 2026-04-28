@@ -88,7 +88,7 @@ src/admin-app/src/
 │       ├── actions.js                      ← Sustainability action catalog
 │       ├── participation.js                ← Per-(user, action, challenge) completion events
 │       ├── groups.js                       ← Postgres `departments` table (UI calls them Groups)
-│       ├── presets.js                      ← Reusable challenge templates + their action templates
+<!-- │       ├── presets.js                      ← Reusable challenge templates + their action templates -->
 │       ├── templates.js                    ← Legacy templates (no UI yet; kept for completeness)
 │       ├── activityLogs.js                 ← Admin audit log
 │       └── leaderboard.js                  ← Cross-table aggregation queries (points, top users)
@@ -157,17 +157,17 @@ src/admin-app/src/
     │       ├── ChallengeFieldsSection.jsx    ← Form fields (shared by create + edit)
     │       ├── ActionsEditor.jsx             ← Edit-mode actions table
     │       ├── ActionFormDialog.jsx          ← Add/edit action modal (shared w/ presets)
-    │       ├── PresetPicker.jsx              ← "Quick Start" preset dropdown (create flow only)
+    │       ├── TemplatePicker.jsx              ← "Quick Start" preset dropdown (create flow only)
     │       ├── ParticipantsTable.jsx         ← ChallengeDetail: who has logged ≥1 action
     │       ├── ChallengeLeaderboard.jsx      ← ChallengeDetail: top scorers w/ medals
     │       └── ParticipationLog.jsx          ← ChallengeDetail: per-completion event feed
     │
     ├── presets/                           ← Reusable challenge templates
-    │   ├── PresetsPage.jsx                 ← List
-    │   ├── PresetForm.jsx                  ← Create / edit (orchestrator)
+    │   ├── TemplatesPage.jsx                 ← List
+    │   ├── TemplateForm.jsx                  ← Create / edit (orchestrator)
     │   └── components/
-    │       ├── PresetFieldsSection.jsx
-    │       └── PresetActionsEditor.jsx       ← Reuses ActionFormDialog from challenges/
+    │       ├── TemplateFieldsSection.jsx
+    <!-- │       └── PresetActionsEditor.jsx       ← Reuses ActionFormDialog from challenges/ -->
     │
     ├── groups/                            ← Group (Postgres `departments`) CRUD
     │   ├── GroupsPage.jsx                  ← List + search

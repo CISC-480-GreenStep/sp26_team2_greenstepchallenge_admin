@@ -169,7 +169,7 @@ export default function ChallengeDetail() {
         maxWidth="xs"
         slotProps={{
           paper: {
-            sx: { borderRadius: "20px", bgcolor: challenge.bgColorBody, boxShadow: "none" },
+            sx: { borderRadius: "20px", bgcolor: "transparent", boxShadow: "none" },
           },
         }}
       >

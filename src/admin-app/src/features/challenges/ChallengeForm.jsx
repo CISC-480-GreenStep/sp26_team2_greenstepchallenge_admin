@@ -97,7 +97,7 @@ export default function ChallengeForm() {
     setTemplateActions(template.actions || []);
   };
 
-  const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field) => (e) => {setForm((prev) => ({ ...prev, [field]: e.target.value }))};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

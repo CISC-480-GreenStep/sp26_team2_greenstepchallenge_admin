@@ -44,13 +44,13 @@ export default function MobilePreview({ challenge, actions }) {
         {/* Mobile header: themed banner with the current challenge name. */}
         <Box
           sx={{
-            bgcolor: challenge.theme || "#4CAF50",
+            bgcolor: challenge.bgColorHeader || "#4CAF50",
             p: 3,
-            color: "#fff",
+            color: challenge.txColorHeader || "#fff",
             textAlign: "center",
           }}
         >
-          <Typography variant="caption" sx={{ opacity: 0.8, textTransform: "uppercase" }}>
+          <Typography variant="h6" fontWeight={700} sx={{ opacity: 0.8, textTransform: "uppercase" }}>
             Current Challenge
           </Typography>
           <Typography variant="h6" fontWeight={700}>
@@ -59,7 +59,12 @@ export default function MobilePreview({ challenge, actions }) {
         </Box>
 
         {/* Body: description + action checklist (read-only preview). */}
-        <Box sx={{ p: 2, flexGrow: 1, overflowY: "auto" }}>
+        <Box sx={{ 
+          bgcolor: challenge.bgColorBody || "#C8E6C9",
+          color: challenge.txColorBody || "#000000",
+          p: 2, 
+          flexGrow: 1, 
+          overflowY: "auto" }}>
           <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
             {challenge.description}
           </Typography>
@@ -99,7 +104,7 @@ export default function MobilePreview({ challenge, actions }) {
               width: 20,
               height: 20,
               borderRadius: "50%",
-              bgcolor: challenge.theme,
+              bgcolor: challenge.bgColorHeader || "#4CAF50",
             }}
           />
           <Box sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: "#ddd" }} />

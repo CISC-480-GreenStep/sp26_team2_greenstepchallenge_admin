@@ -12,9 +12,9 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.7.2 — Phase 2 Cleanup (Audit Follow-ups)
+### Current Version: v0.9.0 — Theme System + Templates Rename
 
-**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; dashboard stats split into hook + pure `aggregations` module; `WidgetCatalog` decomposed into per-section sub-components; auth context decomposed for React Fast Refresh. Every source file now carries a `@file` / `@summary` docblock and **no source file is over 300 lines**. Coding standards enforced via Prettier + ESLint.
+**Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; dashboard stats split into hook + pure `aggregations` module; `WidgetCatalog` decomposed into per-section sub-components; auth context decomposed for React Fast Refresh. **Global MUI v7 dark theme** lives in `src/lib/theme.js` and is mounted in `main.jsx`; both authoring forms (`ChallengeForm` and the new `TemplateForm`) render a sticky `<MobilePreview>` next to the form on `md+` screens. The "Preset" feature has been **renamed to "Template"** at the UI/route/API-module level (Supabase tables remain `presets` / `preset_actions` for now and are accessed through `data/api/templates.js`). Every source file carries a `@file` / `@summary` docblock and **no source file is over 300 lines**. Coding standards enforced via Prettier + ESLint.
 
 ### What's Built
 
@@ -25,11 +25,11 @@ This is the **admin-side** application for the GreenStep Sustainability Challeng
 - **Action CRUD** — admins can add, edit, and delete actions within each challenge (name, description, category, points)
 - **Group Management** — full CRUD for flexible groups; **Group Detail** page with member list (add/remove), challenges in group, bidirectional links; clickable member/challenge counts on list
 - **User Management** — list with search/filter by role and group, create/edit forms with group assignment, detail view with **Change Group** dropdown (Admin/SuperAdmin), clickable group and challenge links, activity log, participation history, **global points** total, and **per-challenge points history** table (earned vs max with progress bars), activate/deactivate, CSV export
-- **Challenge Presets** — reusable templates with pre-configured actions; create, edit, delete presets from a dedicated page; applying a preset when creating a new challenge pre-fills form fields and automatically creates all template actions; 3 seed presets (H2O Hero Week, Power Down Challenge, Sustainable Commute Week)
+- **Challenge Templates** (formerly "Presets") — reusable templates with pre-configured actions; create, edit, delete templates from a dedicated page (`/templates`); applying a template when creating a new challenge pre-fills form fields and stages template actions to attach on submit; 3 seed templates (H2O Hero Week, Power Down Challenge, Sustainable Commute Week). Backed by the same Supabase `presets` / `preset_actions` tables — UI label changed in v0.9.0, schema unchanged.
 - **Reports** — filter by challenge and date range, category breakdown chart, full participation table with clickable user/challenge links, CSV export
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
 - **Persistence** — all entity data lives in Supabase (Postgres); per-user dashboard layout is cached in `localStorage` so customizations survive refresh
-- **Dark design system** — global MUI v7 dark theme in `src/lib/theme.js` (dark surfaces, brand greens, semantic tokens), plus a live mobile-app preview rendered next to the challenge and preset forms so admins see the result as they type
+- **Dark design system** — global MUI v7 dark theme in `src/lib/theme.js` (dark surfaces, brand greens, semantic tokens), plus a live mobile-app preview rendered next to the challenge and template forms so admins see the result as they type
 
 ### What's NOT Built Yet
 
@@ -79,13 +79,13 @@ npm run dev
 - **Production / shared deploys:** enter your email on the login page, click "Send magic link", and follow the link Supabase emails to you.
 - **Local dev shortcut:** click **"Quick Login as Kristin (SuperAdmin)"** on the login page. This runs a Supabase password sign-in against the seeded SuperAdmin account so you don't have to round-trip through email each time.
 
-### Managing Presets
+### Managing Templates
 
-- **View:** From the Challenges page, click "Manage Presets" to see all reusable templates with category, theme, and action count
-- **Create:** Manage Presets > "New Preset" > fill in name, description, category, theme, and add action templates > Create
-- **Edit:** Click a preset name or the pencil icon to modify fields and actions
+- **View:** From the Challenges page, click "Manage Presets" (button label is being renamed in a follow-up; the route is `/templates`) to see all reusable templates with categories, theme, and action count
+- **Create:** Manage Templates > "New Template" > fill in name, description, categories, theme, and pick global actions to include > Create
+- **Edit:** Click a template name or the pencil icon to modify fields and actions
 - **Delete:** Click the trash icon (confirmation required)
-- **Apply:** When creating a new challenge, use the "Quick Start: Select a Template" dropdown — the form fields auto-fill and a preview of actions appears; on submit, all template actions are created automatically
+- **Apply:** When creating a new challenge, use the "Quick Start: Select a Template" dropdown — the form fields auto-fill and a preview of actions appears; on submit, the staged actions are linked to the new challenge
 
 ### Managing Challenges
 
@@ -155,9 +155,10 @@ sp26_team2_greenstepchallenge_admin/
         │   │   │                       ChallengesTable, ActionFormDialog,
         │   │   │                       ActionsEditor, ChallengeFieldsSection,
         │   │   │                       ChallengeLeaderboard, ParticipantsTable,
-        │   │   │                       ParticipationLog, PresetPicker
-        │   │   ├── presets/     ← PresetsPage, PresetForm
-        │   │   │   └── components/  ← PresetFieldsSection, PresetActionsEditor
+        │   │   │                       ParticipationLog, TemplatePicker
+        │   │   ├── presets/     ← TemplatesPage, TemplateForm
+        │   │   │                  (folder name kept; files renamed in v0.9.0)
+        │   │   │   └── components/  ← TemplateFieldsSection
         │   │   ├── groups/      ← GroupsPage, GroupForm, GroupDetail
         │   │   │   └── components/  ← MembersTable, GroupChallengesTable
         │   │   ├── users/       ← UsersPage, UserForm, UserDetail
@@ -167,13 +168,14 @@ sp26_team2_greenstepchallenge_admin/
         │   │   └── reports/     ← ReportsPage (filters + CSV export)
         │   ├── data/
         │   │   ├── api/         ← Per-entity modules (users, challenges, actions,
-        │   │   │                   participation, groups, presets, templates,
+        │   │   │                   participation, groups, templates,
         │   │   │                   activityLogs, leaderboard, constants, helpers)
         │   │   │                   plus a barrel index.js — components import from `data/api`
         │   │   └── supabase.js  ← Supabase client singleton
         │   ├── lib/
         │   │   ├── constants.js ← Shared color palettes (incl. comparison) + status maps
-        │   │   └── permissions.js ← Role-based view/edit rules
+        │   │   ├── permissions.js ← Role-based view/edit rules
+        │   │   └── theme.js     ← Global MUI v7 dark theme (palette + component defaults)
         │   ├── App.jsx
         │   └── main.jsx
         ├── .env.example
@@ -196,7 +198,7 @@ All logged-in users can see everyone and click any user to view full details. Pe
 | Create/Edit Challenges      |     ✓      |   ✓   |             |
 | Manage Actions in Challenge |     ✓      |   ✓   |             |
 | Archive/Delete Challenges   |     ✓      |   ✓   |             |
-| View/Manage Presets         |     ✓      |   ✓   |             |
+| View/Manage Templates       |     ✓      |   ✓   |             |
 | View/Manage Groups          |     ✓      |   ✓   |      ✓ (view only) |
 | View Users list + all users |     ✓      |   ✓   |      ✓      |
 | View any user detail        |     ✓      |   ✓   |      ✓      |
@@ -221,7 +223,7 @@ All logged-in users can see everyone and click any user to view full details. Pe
 | Participation  | id, userId, challengeId, actionId, completedAt, notes, photoUrl |
 | ActivityLog    | id, userId, action, timestamp, details                      |
 | Group          | id, name, description, createdAt                            |
-| Preset         | id, name, description, category, theme, status, actions[], createdAt |
+| Template       | id, name, description, categories[], theme, status, actions[], createdAt — stored in the Supabase `presets` table; UI/API renamed to "Template" in v0.9.0 |
 
 ### Action Categories (from MPCA taxonomy)
 General Sustainability, Food, Water, Energy, Transportation, Consumption & Waste
@@ -246,6 +248,15 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.9.0 — Theme System + Templates Rename Merged (Apr 28, 2026)
+
+Consolidation release: merged the three remaining open PRs into `main` and pruned 23 dead branches. No new features beyond what those PRs introduced.
+
+- **PR #47 — `chore/gitignore-env`** — added `.env*` patterns to `src/admin-app/.gitignore` so local Supabase credentials can no longer be accidentally committed.
+- **PR #46 — Theme & design system (Tasks A + C of [#20](https://github.com/CISC-480-GreenStep/sp26_team2_greenstepchallenge_admin/issues/20))** — see v0.8.0 entry below for the full changelog. This was the first PR to land of the consolidation pass.
+- **PR #48 — `Preset → Template` rename** — surface-level rename of the reusable-template feature: `presets/PresetForm.jsx` → `presets/TemplateForm.jsx`, `presets/PresetsPage.jsx` → `presets/TemplatesPage.jsx`, `challenges/components/PresetPicker.jsx` → `TemplatePicker.jsx`, `data/api/presets.js` → `data/api/templates.js`, route `/presets` → `/templates`. The folder name `features/presets/` and the underlying Supabase tables (`presets`, `preset_actions`) are intentionally **not** renamed — `templates.js` documents the mapping inline. The `TemplateForm` was extended in this consolidation merge to render the same sticky `<MobilePreview>` pattern that PR #46 introduced on `ChallengeForm` so the two authoring flows stay symmetric.
+- **Branch cleanup** — deleted 14 local refactor/* / backup branches and 9 remote branches (`design-and-color`, `database-update`, `feature/activity-logging`, `fix/env-vars`, `fix/infinite-spinner`, `refactor/migrate-to-vercel`, `supabase-integration`, `chore/theme-design-system-guide`, `refactor/code-cleanup-and-comments`) that all had **0 unique commits** vs `main` (they were leftover labels from the slice-PR workflow). Two branches with unique-but-stale commits (`feature/auth-magic-links`, `Eli-feature-customizable-dashboard`) were intentionally left for owner decision and are flagged in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ### v0.8.0 — Theme & Design System: Tasks A + C (Apr 26, 2026)
 

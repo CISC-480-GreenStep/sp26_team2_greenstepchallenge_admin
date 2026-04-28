@@ -3,7 +3,7 @@
  * @summary ChallengeForm -- create or edit a challenge.
  *
  * Renders three sub-views, all under one route:
- *   - PresetPicker: only on create, lets the user pre-fill from a template
+ *   - TemplatePicker: only on create, lets the user pre-fill from a template
  *   - ChallengeFieldsSection: the field grid
  *   - ActionsEditor: only on edit, manages the challenge's actions
  *
@@ -16,8 +16,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 
+import { MobilePreview } from "../../components/shared/preview";
+import { useAuth } from "../auth/useAuth";
+import ActionsEditor from "./components/ActionsEditor";
+import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
+import TemplatePicker from "./components/TemplatePicker";
 import {
   ACTIONS,
   CHALLENGE_STATUSES,
@@ -30,10 +35,6 @@ import {
   logActivity,
   updateChallenge,
 } from "../../data/api";
-import { useAuth } from "../auth/useAuth";
-import ActionsEditor from "./components/ActionsEditor";
-import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
-import TemplatePicker from "./components/TemplatePicker";
 
 const EMPTY_FORM = {
   name: "",
@@ -58,6 +59,10 @@ export default function ChallengeForm() {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [templateActions, setTemplateActions] = useState([]);
+
+  // Edit mode shows the saved actions; create mode shows whatever the
+  // selected template would seed (empty list when no template is picked).
+  const previewActions = isEdit ? actions : templateActions;
 
   useEffect(() => {
     getGroups().then(setGroups);
@@ -152,31 +157,44 @@ export default function ChallengeForm() {
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>
 
-      <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 700, mb: 3 }}>
-        <form onSubmit={handleSubmit}>
-          {!isEdit && (
-            <Box mb={2}>
-              <TemplatePicker
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onSelect={handleApplyTemplate}
-                templateActions={templateActions}
-              />
-            </Box>
-          )}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 } }}>
+            <form onSubmit={handleSubmit}>
+              {!isEdit && (
+                <Box mb={2}>
+                  <TemplatePicker
+                    templates={templates}
+                    selectedTemplateId={selectedTemplateId}
+                    onSelect={handleApplyTemplate}
+                    templateActions={templateActions}
+                  />
+                </Box>
+              )}
 
-          <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
+              <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
 
-          <Stack direction="row" spacing={2} mt={3}>
-            <Button type="submit" variant="contained">
-              {isEdit ? "Save Changes" : "Create Challenge"}
-            </Button>
-            <Button variant="outlined" onClick={() => navigate("/challenges")}>
-              Cancel
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
+              <Stack direction="row" spacing={2} mt={3}>
+                <Button type="submit" variant="contained">
+                  {isEdit ? "Save Changes" : "Create Challenge"}
+                </Button>
+                <Button variant="outlined" onClick={() => navigate("/challenges")}>
+                  Cancel
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+        </Grid>
+
+        {/* Live preview hidden on small screens — the phone frame eats too
+            much width below md. Could stack instead later if the team
+            wants it visible on mobile too. */}
+        <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ position: "sticky", top: 80 }}>
+            <MobilePreview challenge={form} actions={previewActions} />
+          </Box>
+        </Grid>
+      </Grid>
 
       {isEdit && (
         <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />

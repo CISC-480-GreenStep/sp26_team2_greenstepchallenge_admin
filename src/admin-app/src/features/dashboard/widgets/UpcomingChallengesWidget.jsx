@@ -24,7 +24,7 @@ export default function UpcomingChallengesWidget({ data }) {
           sx={{
             p: 1.5,
             borderRadius: 1,
-            bgcolor: "grey.50",
+            bgcolor: "action.hover",
             border: "1px solid",
             borderColor: "divider",
           }}

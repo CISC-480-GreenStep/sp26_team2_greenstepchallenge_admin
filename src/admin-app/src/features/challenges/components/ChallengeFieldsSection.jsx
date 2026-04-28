@@ -113,16 +113,43 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
         />
       </Grid>
 
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField
-          label="Theme Color"
-          type="color"
-          value={form.theme}
-          onChange={onChange("theme")}
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-        />
+      <Grid container spacing={2} >
+        {/* Header Background Color */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Header Background Color"
+            type="color"
+            value={form.bgColorDark1 || "#000000"}
+            onChange={onChange("bgColorDark1")}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              htmlInput: {
+                style: { width: '200px', cursor: 'pointer' }
+              }
+            }}
+          />
+        </Grid>
+
+        {/* Header Text Color */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Header Text Color"
+            type="color"
+            value={form.accentColor1 || "#ffffff"}
+            onChange={onChange("accentColor1")}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              htmlInput: {
+                style: { width: '200px', cursor: 'pointer' }
+              }
+            }}
+          />
+        </Grid>
+
       </Grid>
+
 
       <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
@@ -139,6 +166,44 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
             </MenuItem>
           ))}
         </TextField>
+      </Grid>
+
+      <Grid container spacing={2} >
+        {/* Body Background Color */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Body Background Color"
+            type="color"
+            value={form.bgColorLight1 || "#ffffff"}
+            onChange={onChange("bgColorLight1")}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              htmlInput: {
+                style: { width: '200px', cursor: 'pointer' }
+              }
+            }}
+          />
+        </Grid>
+
+        {/* Body Text Color */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Body Text Color"
+            type="color"
+            value={form.accentColor2 || "#000000"}
+            onChange={onChange("accentColor2")}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              htmlInput: {
+                style: { width: '200px', cursor: 'pointer' }
+              }
+            }}
+          />
+        </Grid>
+
+
       </Grid>
     </Grid>
   );

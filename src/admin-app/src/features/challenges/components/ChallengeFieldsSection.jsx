@@ -119,8 +119,8 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
           <TextField
             label="Header Background Color"
             type="color"
-            value={form.bgColorDark1 || "#000000"}
-            onChange={onChange("bgColorDark1")}
+            value={form.bgColorHeader}
+            onChange={onChange("bgColorHeader")}
             fullWidth
             InputLabelProps={{ shrink: true }}
             slotProps={{
@@ -136,8 +136,8 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
           <TextField
             label="Header Text Color"
             type="color"
-            value={form.accentColor1 || "#ffffff"}
-            onChange={onChange("accentColor1")}
+            value={form.txColorHeader}
+            onChange={onChange("txColorHeader")}
             fullWidth
             InputLabelProps={{ shrink: true }}
             slotProps={{
@@ -174,8 +174,8 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
           <TextField
             label="Body Background Color"
             type="color"
-            value={form.bgColorLight1 || "#ffffff"}
-            onChange={onChange("bgColorLight1")}
+            value={form.bgColorBody}
+            onChange={onChange("bgColorBody")}
             fullWidth
             InputLabelProps={{ shrink: true }}
             slotProps={{
@@ -191,8 +191,8 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
           <TextField
             label="Body Text Color"
             type="color"
-            value={form.accentColor2 || "#000000"}
-            onChange={onChange("accentColor2")}
+            value={form.txColorBody}
+            onChange={onChange("txColorBody")}
             fullWidth
             InputLabelProps={{ shrink: true }}
             slotProps={{

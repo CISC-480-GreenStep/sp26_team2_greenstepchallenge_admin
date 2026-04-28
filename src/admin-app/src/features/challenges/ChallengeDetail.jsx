@@ -169,7 +169,7 @@ export default function ChallengeDetail() {
         maxWidth="xs"
         slotProps={{
           paper: {
-            sx: { borderRadius: "20px", bgcolor: "transparent", boxShadow: "none" },
+            sx: { borderRadius: "20px", bgcolor: challenge.bgColorBody, boxShadow: "none" },
           },
         }}
       >
@@ -214,7 +214,7 @@ function ChallengeSummaryCard({ challenge, groupName, onPreview, onNavigateGroup
             width: 16,
             height: 16,
             borderRadius: "50%",
-            bgcolor: challenge.theme,
+            bgcolor: challenge.bgColorHeader,
             flexShrink: 0,
           }}
         />

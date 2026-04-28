@@ -40,7 +40,10 @@ const EMPTY_FORM = {
   name: "",
   description: "",
   categories: [ACTIONS[0]],
-  theme: "#4CAF50",
+  bgColorHeader: "#4CAF50",
+  txColorHeader: "#ffffff",
+  bgColorBody: "#C8E6C9",
+  txColorBody: "#000000",
   startDate: "",
   endDate: "",
   status: CHALLENGE_STATUSES.UPCOMING,
@@ -85,7 +88,10 @@ export default function ChallengeForm() {
       name: template.name,
       description: template.description,
       categories: template.categories?.length ? template.categories : prev.categories,
-      theme: template.theme,
+      bgColorHeader: template.bgColorHeader,
+      txColorHeader: template.txColorHeader,
+      bgColorBody: template.bgColorBody,
+      txColorBody: template.txColorBody,
       status: template.status || prev.status,
     }));
     setTemplateActions(template.actions || []);

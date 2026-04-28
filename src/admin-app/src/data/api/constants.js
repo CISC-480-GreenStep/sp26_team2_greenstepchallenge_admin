@@ -37,3 +37,6 @@ export const ACTIONS = [
   "Transportation",
   "Consumption & Waste",
 ];
+
+export const fetchAllCategories = () => ACTIONS;
+

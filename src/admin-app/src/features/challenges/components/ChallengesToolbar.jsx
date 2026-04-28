@@ -45,7 +45,7 @@ export default function ChallengesToolbar({
         {canEdit && (
           <>
             <Button variant="outlined" startIcon={<BookmarkIcon />} onClick={onManagePresets}>
-              Manage Presets
+              Manage Templates
             </Button>
             <Button variant="contained" startIcon={<AddIcon />} onClick={onNewChallenge}>
               New Challenge

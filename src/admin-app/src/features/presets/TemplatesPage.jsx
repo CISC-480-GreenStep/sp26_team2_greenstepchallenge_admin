@@ -1,15 +1,10 @@
 /**
- * @file PresetsPage.jsx
- * @summary List of saved challenge presets (reusable templates).
- *
- * Presets are picked from `<PresetPicker>` in `<ChallengeForm>` create
- * mode to pre-fill all fields plus a staged set of action templates.
+ * @file TemplatesPage.jsx
+ * @summary List of saved challenge templates (reusable templates).
  */
 
 import { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,11 +28,11 @@ import {
 } from "@mui/material";
 
 import { ConfirmDialog } from "../../components/shared/feedback";
-import { getPresets, deletePreset } from "../../data/api";
+import { getTemplates, deleteTemplate } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 
-export default function PresetsPage() {
-  const [presets, setPresets] = useState([]);
+export default function TemplatesPage() {
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -48,9 +43,9 @@ export default function PresetsPage() {
 
   const load = async () => {
     try {
-      setPresets(await getPresets());
+      setTemplates(await getTemplates());
     } catch (err) {
-      setError(err.message || "Failed to load presets");
+      setError(err.message || "Failed to load templates");
     } finally {
       setLoading(false);
     }
@@ -61,7 +56,7 @@ export default function PresetsPage() {
 
   const handleDelete = async () => {
     if (pendingDelete) {
-      await deletePreset(pendingDelete);
+      await deleteTemplate(pendingDelete);
       setPendingDelete(null);
       setConfirmOpen(false);
       load();
@@ -101,15 +96,15 @@ export default function PresetsPage() {
           fontWeight={700}
           sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
         >
-          Challenge Presets
+          Challenge Templates
         </Typography>
         {canManage && (
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/presets/new")}
+            onClick={() => navigate("/templates/new")}
           >
-            New Preset
+            New Template
           </Button>
         )}
       </Box>
@@ -123,7 +118,7 @@ export default function PresetsPage() {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
+              <TableCell>Categories</TableCell>
               <TableCell>Theme</TableCell>
               <TableCell align="right">Actions</TableCell>
               <TableCell>Created</TableCell>
@@ -131,19 +126,23 @@ export default function PresetsPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {presets.map((p) => (
+            {templates.map((p) => (
               <TableRow key={p.id} hover>
                 <TableCell>
                   <Button
                     size="small"
                     sx={{ p: 0, minWidth: "auto", textTransform: "none", fontWeight: 600 }}
-                    onClick={() => navigate(`/presets/${p.id}/edit`)}
+                    onClick={() => navigate(`/templates/${p.id}/edit`)}
                   >
                     {p.name}
                   </Button>
                 </TableCell>
                 <TableCell>
-                  <Chip label={p.category} size="small" variant="outlined" />
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                    {(p.categories || []).map(cat => (
+                      <Chip key={cat} label={cat} size="small" variant="outlined" />
+                    ))}
+                  </Stack>
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -163,7 +162,7 @@ export default function PresetsPage() {
                 <TableCell>{p.createdAt}</TableCell>
                 {canManage && (
                   <TableCell align="right">
-                    <IconButton size="small" onClick={() => navigate(`/presets/${p.id}/edit`)}>
+                    <IconButton size="small" onClick={() => navigate(`/templates/${p.id}/edit`)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
@@ -180,10 +179,10 @@ export default function PresetsPage() {
                 )}
               </TableRow>
             ))}
-            {presets.length === 0 && (
+            {templates.length === 0 && (
               <TableRow>
                 <TableCell colSpan={canManage ? 6 : 5} align="center">
-                  No presets yet. Create one to get started.
+                  No templates yet. Create one to get started.
                 </TableCell>
               </TableRow>
             )}
@@ -193,8 +192,8 @@ export default function PresetsPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete Preset"
-        message="Are you sure you want to delete this preset? This cannot be undone."
+        title="Delete Template"
+        message="Are you sure you want to delete this template? This cannot be undone."
         onConfirm={handleDelete}
         onCancel={() => {
           setConfirmOpen(false);

@@ -17,7 +17,6 @@ export * from "./challenges";
 export * from "./actions";
 export * from "./participation";
 export * from "./groups";
-export * from "./presets";
 export * from "./templates";
 export * from "./activityLogs";
 export * from "./leaderboard";

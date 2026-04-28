@@ -26,8 +26,8 @@ import DashboardPage from "./features/dashboard/DashboardPage";
 import GroupDetail from "./features/groups/GroupDetail";
 import GroupForm from "./features/groups/GroupForm";
 import GroupsPage from "./features/groups/GroupsPage";
-import PresetForm from "./features/presets/PresetForm";
-import PresetsPage from "./features/presets/PresetsPage";
+import TemplateForm from "./features/presets/TemplateForm";
+import TemplatesPage from "./features/presets/TemplatesPage";
 import ReportsPage from "./features/reports/ReportsPage";
 import UserDetail from "./features/users/UserDetail";
 import UserForm from "./features/users/UserForm";
@@ -69,26 +69,26 @@ export default function App() {
           />
 
           <Route
-            path="presets"
+            path="templates"
             element={
               <RequireAuth minRole={ROLES.ADMIN}>
-                <PresetsPage />
+                <TemplatesPage />
               </RequireAuth>
             }
           />
           <Route
-            path="presets/new"
+            path="templates/new"
             element={
               <RequireAuth minRole={ROLES.ADMIN}>
-                <PresetForm />
+                <TemplateForm />
               </RequireAuth>
             }
           />
           <Route
-            path="presets/:id/edit"
+            path="templates/:id/edit"
             element={
               <RequireAuth minRole={ROLES.ADMIN}>
-                <PresetForm />
+                <TemplateForm />
               </RequireAuth>
             }
           />

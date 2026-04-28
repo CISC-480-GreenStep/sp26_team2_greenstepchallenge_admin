@@ -1,10 +1,10 @@
 /**
- * @file PresetPicker.jsx
- * @summary PresetPicker -- "Quick Start: Select a Template" panel shown only on
- * the create flow. Picking a preset pre-fills the challenge fields and
- * stages a list of action templates to create on submit.
+ * @file TemplatePicker.jsx
+ * @summary TemplatePicker -- "Quick Start: Select a Template" panel shown only on
+ * the create flow. Picking a template pre-fills the challenge fields and
+ * stages a list of global actions to attach on submit.
  *
- * Pure presentational; the parent owns the form/preset state.
+ * Pure presentational; the parent owns the form/template state.
  */
 
 import {
@@ -22,13 +22,13 @@ import {
 
 /**
  * @param {object}   props
- * @param {Array<{ id: string, name: string, category: string, actions?: Array<object> }>} props.presets
- * @param {string}   props.selectedPresetId
+ * @param {Array<{ id: string, name: string, categories: string[], actions?: Array<object> }>} props.templates
+ * @param {string}   props.selectedTemplateId
  * @param {(event: React.ChangeEvent<HTMLInputElement>) => void} props.onSelect
- * @param {Array<{ name: string, category: string, points: number }>} props.presetActions
+ * @param {Array<{ name: string, category: string, points: number }>} props.templateActions
  */
-export default function PresetPicker({ presets, selectedPresetId, onSelect, presetActions }) {
-  if (!presets.length) return null;
+export default function TemplatePicker({ templates, selectedTemplateId, onSelect, templateActions }) {
+  if (!templates.length) return null;
 
   return (
     <>
@@ -40,36 +40,35 @@ export default function PresetPicker({ presets, selectedPresetId, onSelect, pres
           select
           fullWidth
           size="small"
-          value={selectedPresetId}
+          value={selectedTemplateId}
           onChange={onSelect}
-          label="Choose a Preset"
+          label="Choose a Template"
         >
           <MenuItem value="">None</MenuItem>
-          {presets.map((p) => (
+          {templates.map((p) => (
             <MenuItem key={p.id} value={p.id}>
-              {p.name} ({p.category})
+              {p.name} ({p.categories?.join(', ') || 'No Category'})
             </MenuItem>
           ))}
         </TextField>
       </Paper>
 
-      {presetActions.length > 0 && <PresetActionsPreview actions={presetActions} />}
+      {templateActions.length > 0 && <TemplateActionsPreview actions={templateActions} />}
     </>
   );
 }
 
 /**
- * Preview table of the actions the preset will spawn after submit.
- * Kept here (not its own file) because it has no other consumer.
+ * Preview table of the actions the template will link.
  */
-function PresetActionsPreview({ actions }) {
+function TemplateActionsPreview({ actions }) {
   return (
     <>
       <Typography variant="subtitle2" fontWeight={600} mt={2} mb={1}>
-        Actions from Preset ({actions.length})
+        Actions from Template ({actions.length})
       </Typography>
       <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-        These actions will be created automatically when you submit.
+        These actions will be linked to the challenge automatically when you submit.
       </Typography>
       <TableContainer component={Paper} variant="outlined" sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ minWidth: 400 }}>

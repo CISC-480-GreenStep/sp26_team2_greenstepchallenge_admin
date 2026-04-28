@@ -15,3 +15,11 @@ body,
   width: 100%;
   max-width: 100vw;
 }
+
+/* Match palette.background.default in src/lib/theme.js so the browser
+   doesn't flash a white background before React mounts the theme. */
+html,
+body {
+  background-color: #0f1419;
+  color-scheme: dark;
+}

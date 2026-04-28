@@ -32,7 +32,7 @@ export default function PresetPicker({ presets, selectedPresetId, onSelect, pres
 
   return (
     <>
-      <Paper variant="outlined" sx={{ p: 2, mb: 1, bgcolor: "#f9f9f9" }}>
+      <Paper variant="outlined" sx={{ p: 2, mb: 1, bgcolor: "action.hover" }}>
         <Typography variant="subtitle2" color="primary" gutterBottom>
           Quick Start: Select a Template
         </Typography>

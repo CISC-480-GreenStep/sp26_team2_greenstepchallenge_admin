@@ -24,7 +24,7 @@ The issue breaks down into four subtasks — one from the issue body, three
 from Khue-Vo's follow-up comment. Each one gets its own letter (A–D) that
 the rest of this guide refers back to.
 
-### Task A — Configure the MUI v7 theme
+### Task A — Configure the MUI v7 theme Eli
 
 > **From the issue body:** *"Configure the Material UI v7 theme and
 > @emotion styling to match the project's professional, dark-themed
@@ -34,14 +34,14 @@ Expand the very small theme object in `main.jsx` into a real one — palette,
 typography, and maybe a couple of component defaults — so the whole app
 reads as the intended dark aesthetic.
 
-### Task B — Header color + body color
+### Task B — Header color + body color Khue
 
 > **From the comment:** *"Theme color: header color and body color."*
 
 Today a challenge has **one** color field called `theme`. Split it so the
 admin can pick a header color *and* a body color separately.
 
-### Task C — Live preview next to the form
+### Task C — Live preview next to the form Eli
 
 > **From the comment:** *"a preview view next to the created challenge and
 > template to know how the challenge [is] gonna be like once created."*
@@ -50,7 +50,7 @@ The phone-shaped preview component already exists — today it only appears
 inside a dialog on the detail page. You're going to also render it live,
 beside the create/edit form, so the admin sees the result as they type.
 
-### Task D — Import image as header
+### Task D — Import image as header Khue
 
 > **From the comment:** *"Import Image as header: the image will override
 > the solid color header."*

@@ -95,7 +95,8 @@ src/admin-app/src/
 │
 ├── lib/                                   ← Domain-agnostic utilities
 │   ├── constants.js                        ← Color palettes (CHART, COMPARISON, MEDAL) + status maps
-│   └── permissions.js                      ← can(role, perm) + the PERMS table
+│   ├── permissions.js                      ← can(role, perm) + the PERMS table
+│   └── theme.js                            ← Global MUI v7 theme (dark palette, typography, component defaults)
 │
 └── features/                              ← One folder per top-level UI area
     │
@@ -245,7 +246,7 @@ line inside the source tree.
 |---|---|
 | Chart color palettes | [`src/lib/constants.js`](../src/admin-app/src/lib/constants.js) (`CHART_COLORS`, `COMPARISON_COLORS`, `MEDAL_COLORS`, `STATUS_COLOR`) |
 | Sidebar drawer width | `DRAWER_WIDTH` constant exported from `src/components/layout/Sidebar.jsx` |
-| The page-level MUI theme | (none yet — themes are inline `sx` props; if a global theme is added, it should live in `src/lib/theme.js`) |
+| The page-level MUI theme | [`src/lib/theme.js`](../src/admin-app/src/lib/theme.js) — palette / typography / component defaults; mounted in `main.jsx` via `<ThemeProvider>` |
 
 ### Tooling
 

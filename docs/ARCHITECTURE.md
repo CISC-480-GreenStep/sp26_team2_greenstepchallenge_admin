@@ -88,7 +88,8 @@ src/admin-app/src/
 │       ├── actions.js                      ← Sustainability action catalog
 │       ├── participation.js                ← Per-(user, action, challenge) completion events
 │       ├── groups.js                       ← Postgres `departments` table (UI calls them Groups)
-│       ├── templates.js                    ← Reusable challenge templates (renamed from presets.js in v0.9.0; backing Supabase tables are still `presets` / `preset_actions`)
+│       ├── presets.js                      ← Reusable challenge templates + their action templates
+│       ├── templates.js                    ← Legacy templates (no UI yet; kept for completeness)
 │       ├── activityLogs.js                 ← Admin audit log
 │       └── leaderboard.js                  ← Cross-table aggregation queries (points, top users)
 │
@@ -148,25 +149,26 @@ src/admin-app/src/
     │
     ├── challenges/                        ← Challenge CRUD + detail
     │   ├── ChallengesPage.jsx              ← List, search, filter
-    │   ├── ChallengeForm.jsx               ← Create / edit (mode driven by URL :id) + sticky MobilePreview on md+
+    │   ├── ChallengeForm.jsx               ← Create / edit (mode driven by URL :id)
     │   ├── ChallengeDetail.jsx             ← Read-only view with participants + leaderboard + log
     │   └── components/
-    │       ├── ChallengesToolbar.jsx         ← Title row + CSV / Manage Templates / New buttons
+    │       ├── ChallengesToolbar.jsx         ← Title row + CSV / Manage Presets / New buttons
     │       ├── ChallengesFilterBar.jsx       ← Search + status + group filters
     │       ├── ChallengesTable.jsx           ← The list table + row action buttons
     │       ├── ChallengeFieldsSection.jsx    ← Form fields (shared by create + edit)
     │       ├── ActionsEditor.jsx             ← Edit-mode actions table
-    │       ├── ActionFormDialog.jsx          ← Add/edit action modal (shared w/ templates)
-    │       ├── TemplatePicker.jsx            ← "Quick Start" template dropdown (create flow only; renamed from PresetPicker in v0.9.0)
+    │       ├── ActionFormDialog.jsx          ← Add/edit action modal (shared w/ presets)
+    │       ├── PresetPicker.jsx              ← "Quick Start" preset dropdown (create flow only)
     │       ├── ParticipantsTable.jsx         ← ChallengeDetail: who has logged ≥1 action
     │       ├── ChallengeLeaderboard.jsx      ← ChallengeDetail: top scorers w/ medals
     │       └── ParticipationLog.jsx          ← ChallengeDetail: per-completion event feed
     │
-    ├── presets/                           ← Reusable challenge templates (folder name kept; files renamed to Template* in v0.9.0)
-    │   ├── TemplatesPage.jsx               ← List (route `/templates`)
-    │   ├── TemplateForm.jsx                ← Create / edit (orchestrator) + sticky MobilePreview on md+
+    ├── presets/                           ← Reusable challenge templates
+    │   ├── PresetsPage.jsx                 ← List
+    │   ├── PresetForm.jsx                  ← Create / edit (orchestrator)
     │   └── components/
-    │       └── TemplateFieldsSection.jsx     ← Form fields for a template
+    │       ├── PresetFieldsSection.jsx
+    │       └── PresetActionsEditor.jsx       ← Reuses ActionFormDialog from challenges/
     │
     ├── groups/                            ← Group (Postgres `departments`) CRUD
     │   ├── GroupsPage.jsx                  ← List + search
@@ -364,25 +366,3 @@ Update `docs/ARCHITECTURE.md` in the same PR if you:
 
 Routine bug fixes and intra-feature refactors do **not** require editing this
 file. The goal is to keep the map accurate without making it a chore.
-
----
-
-## Appendix: Stale branches awaiting owner decision
-
-The v0.9.0 consolidation pruned branches with **0 unique commits** vs `main`.
-Two remote branches were intentionally **not** deleted because they still hold
-unique commits, but they appear stale and have no open PR:
-
-- **`origin/feature/auth-magic-links`** — 1 unique commit ("Add permanent user
-  deletion for SuperAdmins"), 64 commits behind `main`. Targets the old
-  pre-split `data/api.js` monolith and ships a Netlify function — the project
-  migrated to Vercel in PR #39, so the function is dead code as-is. Either port
-  the SuperAdmin delete-user feature onto current `data/api/users.js` + a
-  Vercel API route, or close and delete the branch.
-- **`origin/Eli-feature-customizable-dashboard`** — 3 unique commits, 72 behind
-  `main`. The customizable-dashboard work appears to be fully superseded by the
-  per-slice refactor that already landed in v0.7.x. Recommended: file-by-file
-  diff to confirm nothing unique is left, then delete.
-
-Owner (or any maintainer) should triage these and either open a PR or delete
-the branch so the remote stays clean.

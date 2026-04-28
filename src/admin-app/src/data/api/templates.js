@@ -16,10 +16,10 @@ import { unwrap } from "./helpers";
  */
 export async function getTemplates() {
   const templates = unwrap(await supabase.from("templates").select("*").order("id"));
-  const pa = unwrap(await supabase.from("templates_actions").select("*").order("id"));
+  const pa = unwrap(await supabase.from("actions").select("*").order("id"));
   for (const t of templates) {
     t.categories = t.category ? t.category.split(', ') : [];
-    t.actions = pa.filter((a) => a.presetId === t.id);
+    t.actions = pa.filter((a) => a.templatesId === t.id);
   }
   return templates;
 }

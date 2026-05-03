@@ -109,15 +109,32 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * Step 1 of email auth: send the user a 8-digit code by email.
+   * Step 1 of email auth: send the user an 8-digit code by email.
    * Step 2 (`verifyCode`) is what actually starts the Supabase Auth session.
    *
    * Code-based instead of click-based because institutional email scanners
    * (Microsoft Defender Safe Links, Mimecast, etc.) pre-fetch one-time
    * magic-link URLs on arrival and consume the token before the user can
-   * click. A 8-digit code in plain text dodges that whole class of issue.
+   * click. An 8-digit code in plain text dodges that whole class of issue.
+   *
+   * Pre-flights against `public.users` so an email with no admin row gets
+   * a clear "no account" error instead of a code that won't actually let
+   * them in. (When RLS is re-enabled this lookup will need to go through
+   * a serverless function or a narrow anon-read policy -- see issue #31.)
    */
   const login = useCallback(async (email) => {
+    const { data: existing } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+    if (!existing) {
+      return {
+        success: false,
+        error: "No admin account exists for this email. Contact an administrator to be invited.",
+      };
+    }
+
     const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) return { success: false, error: error.message };
     return { success: true };

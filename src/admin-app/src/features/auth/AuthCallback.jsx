@@ -19,17 +19,32 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Supabase automatically picks up the tokens from the URL hash/query params
-    // and fires onAuthStateChange in AuthContext. We just need to wait a moment
-    // for the session to be established, then redirect.
+    // supabase-js v2 defaults to PKCE flow, so the magic-link redirect lands
+    // here with a `?code=...` query param that needs to be swapped for a
+    // session before we navigate. getSession() alone won't do that exchange.
     const handleCallback = async () => {
-      const { error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Auth callback error:", error.message);
-        navigate("/login");
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("Auth callback exchange error:", error.message);
+          navigate("/login");
+          return;
+        }
       } else {
-        navigate("/");
+        // Implicit / hash-token flow: detectSessionInUrl picks tokens up
+        // automatically; just verify a session ended up established.
+        const { data, error } = await supabase.auth.getSession();
+        if (error || !data.session) {
+          if (error) console.error("Auth callback error:", error.message);
+          navigate("/login");
+          return;
+        }
       }
+
+      navigate("/");
     };
 
     handleCallback();

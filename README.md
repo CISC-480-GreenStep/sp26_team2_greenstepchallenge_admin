@@ -99,6 +99,24 @@ npm run dev
 
 There is no in-app "reset" button anymore — entity data lives in Supabase. To reseed a development database, re-run the SQL in `supabase/migrations/` against your Supabase project. The only client-side state is the per-user dashboard layout in `localStorage` under the `dashboardLayout*` keys; clear those in DevTools to get the default layout back.
 
+### Database Migrations (Supabase CLI)
+
+Schema changes go in `supabase/migrations/` as `NNN_description.sql` files (incrementing the prefix). Apply them via the Supabase CLI instead of pasting into the SQL editor:
+
+```bash
+# one-time setup
+brew install supabase/tap/supabase   # if not already installed
+supabase link --project-ref <project-ref>   # ref is the subdomain of your supabase.co URL
+
+# apply pending migrations
+supabase db push
+
+# inspect migration history
+supabase migration list
+```
+
+If a migration was applied manually outside the CLI, mark it as applied with `supabase migration repair --status applied <version>` so `db push` skips it.
+
 ---
 
 ## Coding Standards

@@ -109,13 +109,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * Step 1 of email auth: send the user a 6-digit code by email.
+   * Step 1 of email auth: send the user a 8-digit code by email.
    * Step 2 (`verifyCode`) is what actually starts the Supabase Auth session.
    *
    * Code-based instead of click-based because institutional email scanners
    * (Microsoft Defender Safe Links, Mimecast, etc.) pre-fetch one-time
    * magic-link URLs on arrival and consume the token before the user can
-   * click. A 6-digit code in plain text dodges that whole class of issue.
+   * click. A 8-digit code in plain text dodges that whole class of issue.
    */
   const login = useCallback(async (email) => {
     const { error } = await supabase.auth.signInWithOtp({ email });
@@ -123,7 +123,7 @@ export function AuthProvider({ children }) {
     return { success: true };
   }, []);
 
-  /** Step 2 of email auth: verify the 6-digit code the user typed in. */
+  /** Step 2 of email auth: verify the 8-digit code the user typed in. */
   const verifyCode = useCallback(async (email, code) => {
     const { error } = await supabase.auth.verifyOtp({
       email,

@@ -2,7 +2,7 @@
  * @file LoginPage.jsx
  * @summary Sign-in screen with two-step OTP code auth + a dev-login fallback.
  *
- * Step 1: user enters their email and we send them a 6-digit code via Supabase
+ * Step 1: user enters their email and we send them a 8-digit code via Supabase
  * Auth. Step 2: user enters the code and we exchange it for a session.
  *
  * Code entry instead of magic-link clicks because institutional email scanners
@@ -82,7 +82,7 @@ export default function LoginPage() {
           <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
             {step === "email"
               ? "Sign in with your email"
-              : `Enter the 6-digit code we sent to ${email}`}
+              : `Enter the 8-digit code we sent to ${email}`}
           </Typography>
 
           {error && (
@@ -118,7 +118,7 @@ export default function LoginPage() {
             <form onSubmit={handleVerifyCode}>
               <Stack spacing={2}>
                 <TextField
-                  label="6-digit code"
+                  label="8-digit code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   required
@@ -127,9 +127,9 @@ export default function LoginPage() {
                   inputMode="numeric"
                   slotProps={{
                     htmlInput: {
-                      maxLength: 6,
+                      maxLength: 8,
                       pattern: "[0-9]*",
-                      style: { letterSpacing: "0.5em", textAlign: "center", fontSize: "1.25rem" },
+                      style: { letterSpacing: "0.4em", textAlign: "center", fontSize: "1.25rem" },
                     },
                   }}
                 />
@@ -138,7 +138,7 @@ export default function LoginPage() {
                   variant="contained"
                   size="large"
                   fullWidth
-                  disabled={submitting || code.trim().length < 6}
+                  disabled={submitting || code.trim().length < 8}
                 >
                   {submitting ? "Verifying..." : "Sign In"}
                 </Button>

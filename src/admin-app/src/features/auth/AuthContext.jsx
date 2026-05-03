@@ -123,7 +123,16 @@ export function AuthProvider({ children }) {
     return { success: true };
   }, []);
 
-  /** Step 2 of email auth: verify the 8-digit code the user typed in. */
+  /**
+   * Step 2 of email auth: verify the 8-digit code the user typed in.
+   *
+   * After verifyOtp succeeds the Supabase client has the session, but
+   * the SIGNED_IN event that triggers loadAppUser fires asynchronously.
+   * If the caller navigates immediately, RequireAuth sees `user` still
+   * null and bounces back to /login. We avoid that race by loading the
+   * app user inline here and setting state before returning, so an
+   * `await verifyCode(...)` truly blocks until the caller is signed in.
+   */
   const verifyCode = useCallback(async (email, code) => {
     const { error } = await supabase.auth.verifyOtp({
       email,
@@ -131,6 +140,20 @@ export function AuthProvider({ children }) {
       type: "email",
     });
     if (error) return { success: false, error: error.message };
+
+    const appUser = await loadAppUser(email);
+    if (!appUser) {
+      // Supabase auth accepted the code but this email has no row in
+      // public.users -- they're not an admin. Drop the session and
+      // surface a clear error.
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: "No admin account exists for this email. Contact an administrator to be invited.",
+      };
+    }
+    setUser(appUser);
+    setAuthEmail(email);
     return { success: true };
   }, []);
 

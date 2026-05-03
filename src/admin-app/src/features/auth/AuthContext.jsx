@@ -5,7 +5,7 @@
  * Wraps the app in `<AuthProvider>` to:
  *   - Restore Supabase sessions on mount (and a "dev login" fallback from localStorage).
  *   - Subscribe to Supabase auth events so login/logout in another tab still propagates.
- *   - Expose `login`, `devLogin`, `logout`, and `hasRole` to consumers.
+ *   - Expose `login`, `verifyCode`, `devLogin`, `logout`, and `hasRole` to consumers.
  *
  * The hook (`useAuth`) and the context object live in sibling files so this
  * module exports only a component — required for Vite React Fast Refresh.
@@ -108,11 +108,27 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  /** Send a magic-link email to start a real Supabase Auth session. */
+  /**
+   * Step 1 of email auth: send the user a 6-digit code by email.
+   * Step 2 (`verifyCode`) is what actually starts the Supabase Auth session.
+   *
+   * Code-based instead of click-based because institutional email scanners
+   * (Microsoft Defender Safe Links, Mimecast, etc.) pre-fetch one-time
+   * magic-link URLs on arrival and consume the token before the user can
+   * click. A 6-digit code in plain text dodges that whole class of issue.
+   */
   const login = useCallback(async (email) => {
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  }, []);
+
+  /** Step 2 of email auth: verify the 6-digit code the user typed in. */
+  const verifyCode = useCallback(async (email, code) => {
+    const { error } = await supabase.auth.verifyOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      token: code,
+      type: "email",
     });
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -146,8 +162,8 @@ export function AuthProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ user, loading, login, devLogin, logout, hasRole }),
-    [user, loading, login, devLogin, logout, hasRole],
+    () => ({ user, loading, login, verifyCode, devLogin, logout, hasRole }),
+    [user, loading, login, verifyCode, devLogin, logout, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

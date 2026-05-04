@@ -14,7 +14,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { AuthContext } from "./authContextValue";
-import { ROLES } from "../../data/api";
+import { ROLES, USER_STATUSES } from "../../data/api";
 import { supabase } from "../../data/supabase";
 
 /**
@@ -36,6 +36,31 @@ async function loadAppUser(email) {
   const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
   if (error || !data) return null;
   return data;
+}
+
+/**
+ * Post-auth gate: load the user's profile row and verify they're allowed
+ * to use the admin app (exists in `users` and not deactivated). On any
+ * failure, drop the just-established Supabase Auth session so the user
+ * isn't left half-signed-in.
+ */
+async function authorizeOrSignOut(email) {
+  const appUser = await loadAppUser(email);
+  if (!appUser) {
+    await supabase.auth.signOut();
+    return {
+      success: false,
+      error: "No admin account exists for this email. Contact an administrator to be invited.",
+    };
+  }
+  if (appUser.status === USER_STATUSES.DEACTIVATED) {
+    await supabase.auth.signOut();
+    return {
+      success: false,
+      error: "This account has been deactivated. Contact an administrator if you think this is a mistake.",
+    };
+  }
+  return { success: true, appUser };
 }
 
 /**
@@ -155,18 +180,9 @@ export function AuthProvider({ children }) {
     });
     if (error) return { success: false, error: error.message };
 
-    const appUser = await loadAppUser(email);
-    if (!appUser) {
-      // Supabase auth accepted the code but this email has no row in
-      // public.users -- they're not an admin. Drop the session and
-      // surface a clear error.
-      await supabase.auth.signOut();
-      return {
-        success: false,
-        error: "No admin account exists for this email. Contact an administrator to be invited.",
-      };
-    }
-    setUser(appUser);
+    const guard = await authorizeOrSignOut(email);
+    if (!guard.success) return guard;
+    setUser(guard.appUser);
     setAuthEmail(email);
     return { success: true };
   }, []);
@@ -186,12 +202,9 @@ export function AuthProvider({ children }) {
     });
     if (error) return { success: false, error: error.message };
 
-    const appUser = await loadAppUser(email);
-    if (!appUser) {
-      await supabase.auth.signOut();
-      return { success: false, error: "User not found in database" };
-    }
-    setUser(appUser);
+    const guard = await authorizeOrSignOut(email);
+    if (!guard.success) return guard;
+    setUser(guard.appUser);
     setAuthEmail(email);
     return { success: true };
   }, []);

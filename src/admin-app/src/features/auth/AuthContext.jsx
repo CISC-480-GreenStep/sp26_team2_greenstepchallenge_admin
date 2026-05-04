@@ -175,12 +175,24 @@ export function AuthProvider({ children }) {
   // known dev password (seeded for test accounts by migration 005). Goes
   // through real Supabase Auth so the resulting JWT lets RLS policies
   // see the caller's role just like an OTP-code login.
+  //
+  // Same race avoidance as verifyCode: load the app user synchronously
+  // and update state before returning so the caller's `navigate("/")`
+  // doesn't fire before RequireAuth can see the new user.
   const devLogin = useCallback(async (email) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password: DEV_LOGIN_PASSWORD,
     });
     if (error) return { success: false, error: error.message };
+
+    const appUser = await loadAppUser(email);
+    if (!appUser) {
+      await supabase.auth.signOut();
+      return { success: false, error: "User not found in database" };
+    }
+    setUser(appUser);
+    setAuthEmail(email);
     return { success: true };
   }, []);
 

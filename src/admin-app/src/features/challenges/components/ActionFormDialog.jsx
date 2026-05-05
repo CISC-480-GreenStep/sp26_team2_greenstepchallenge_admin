@@ -22,18 +22,17 @@ import {
   TextField,
 } from "@mui/material";
 
-import { ACTIONS } from "../../../data/api";
-
 /**
  * @param {object} props
  * @param {boolean} props.open
  * @param {boolean} props.isEdit - When true, render "Edit" labels instead of "Add".
  * @param {{ name: string, description: string, category: string, points: number }} props.actionForm
+ * @param {Array<{ id: number, name: string }>} props.categories
  * @param {(next: object) => void} props.onChange - Receives the next form value (already merged).
  * @param {() => void} props.onCancel
  * @param {() => void} props.onSave
  */
-export default function ActionFormDialog({ open, isEdit, actionForm, onChange, onCancel, onSave }) {
+export default function ActionFormDialog({ open, isEdit, actionForm, categories = [], onChange, onCancel, onSave }) {
   const patch = (key, value) => onChange({ ...actionForm, [key]: value });
 
   return (
@@ -63,9 +62,9 @@ export default function ActionFormDialog({ open, isEdit, actionForm, onChange, o
             onChange={(e) => patch("category", e.target.value)}
             fullWidth
           >
-            {ACTIONS.map((c) => (
-              <MenuItem key={c} value={c}>
-                {c}
+            {categories.map((c) => (
+              <MenuItem key={c.id} value={c.name}>
+                {c.name}
               </MenuItem>
             ))}
           </TextField>

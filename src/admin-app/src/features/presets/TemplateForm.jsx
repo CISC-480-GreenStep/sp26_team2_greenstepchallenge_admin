@@ -11,19 +11,21 @@ import { Box, Button, Grid, Paper, Stack, Typography, Checkbox, FormControlLabel
 
 import TemplateFieldsSection from "./components/TemplateFieldsSection";
 import ActionFormDialog from "../challenges/components/ActionFormDialog";
+import CategoryFormDialog from "../challenges/components/CategoryFormDialog";
 import { MobilePreview } from "../../components/shared/preview";
-import { ACTIONS, createTemplate, getTemplateById, updateTemplate, getActions, createAction } from "../../data/api";
+import { createTemplate, getTemplateById, updateTemplate, getActions, createAction, getCategories, createCategory } from "../../data/api";
 
 const EMPTY_TEMPLATE = {
   name: "",
   description: "",
-  categories: [ACTIONS[0]],
+  categories: [],
   theme: "#4CAF50",
   status: "Upcoming",
   actions: [],
 };
 
-const EMPTY_ACTION = { name: "", description: "", category: ACTIONS[0], points: 5 };
+const EMPTY_ACTION = { name: "", description: "", category: "", points: 5 };
+const EMPTY_CATEGORY = { name: "", description: "" };
 
 export default function TemplateForm() {
   const { id } = useParams();
@@ -32,11 +34,16 @@ export default function TemplateForm() {
 
   const [currentTemplate, setCurrentTemplate] = useState(EMPTY_TEMPLATE);
   const [globalActions, setGlobalActions] = useState([]);
+  const [globalCategories, setGlobalCategories] = useState([]);
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [actionForm, setActionForm] = useState(EMPTY_ACTION);
 
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
+
   useEffect(() => {
+    getCategories().then(setGlobalCategories);
     getActions().then(setGlobalActions);
 
     if (!isEdit) return;
@@ -92,6 +99,17 @@ export default function TemplateForm() {
     setDialogOpen(false);
   };
 
+  const handleCategoryCreated = async () => {
+    const newCategory = await createCategory(categoryForm);
+    setGlobalCategories((prev) => [...prev, newCategory]);
+    // Optionally auto-select the new category
+    setCurrentTemplate((prev) => ({
+      ...prev,
+      categories: [...(prev.categories || []), newCategory.name]
+    }));
+    setCategoryDialogOpen(false);
+  };
+
   const availableActions = globalActions.filter(a => currentTemplate.categories.includes(a.category));
 
   return (
@@ -108,7 +126,12 @@ export default function TemplateForm() {
         <Grid size={{ xs: 12, md: 7 }}>
           <Paper sx={{ p: { xs: 2, sm: 3 } }}>
             <form onSubmit={handleSubmit}>
-              <TemplateFieldsSection form={currentTemplate} onChange={handleChange} />
+              <TemplateFieldsSection 
+                form={currentTemplate} 
+                onChange={handleChange} 
+                categories={globalCategories}
+                onAddCategoryClick={() => { setCategoryForm(EMPTY_CATEGORY); setCategoryDialogOpen(true); }}
+              />
 
               <Box mt={4}>
                 <Typography variant="h6" fontWeight={600} mb={1}>Available Actions</Typography>
@@ -168,9 +191,19 @@ export default function TemplateForm() {
         open={dialogOpen}
         isEdit={false}
         actionForm={actionForm}
+        categories={globalCategories}
         onChange={setActionForm}
         onCancel={() => setDialogOpen(false)}
         onSave={handleCreateNewAction}
+      />
+
+      <CategoryFormDialog
+        open={categoryDialogOpen}
+        isEdit={false}
+        categoryForm={categoryForm}
+        onChange={setCategoryForm}
+        onCancel={() => setCategoryDialogOpen(false)}
+        onSave={handleCategoryCreated}
       />
     </Box>
   );

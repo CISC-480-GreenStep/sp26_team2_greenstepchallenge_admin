@@ -20,3 +20,4 @@ export * from "./groups";
 export * from "./templates";
 export * from "./activityLogs";
 export * from "./leaderboard";
+export * from "./categories";

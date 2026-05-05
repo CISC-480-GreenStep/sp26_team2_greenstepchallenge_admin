@@ -22,6 +22,7 @@ export const WIDGET_CATEGORIES = {
   overview: { label: "Overview Stats", order: 1 },
   charts: { label: "Charts & Visualizations", order: 2 },
   tables: { label: "Tables & Lists", order: 3 },
+  reports: { label: "Reports & Analysis", order: 4 },
 };
 
 /** All widgets the dashboard can render. Order here drives the catalog. */
@@ -240,6 +241,19 @@ export const WIDGETS = [
     defaultH: 6,
     minW: 2,
     minH: 4,
+  },
+
+  // ─── Reports & Analysis ──────────────────────────────
+  {
+    id: "table-report-participation",
+    title: "Participation Report",
+    description:
+      "Filterable cross-challenge participation log with date range, challenge filter, and CSV export",
+    category: "reports",
+    defaultW: 12,
+    defaultH: 9,
+    minW: 6,
+    minH: 6,
   },
 ];
 

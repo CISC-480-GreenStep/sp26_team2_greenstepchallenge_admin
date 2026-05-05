@@ -224,6 +224,49 @@ export function buildMostActiveUsers(participation, users) {
     .slice(0, MOST_ACTIVE_LIMIT);
 }
 
+/**
+ * Enrich every participation row with display-ready user / challenge / action /
+ * category fields so the Reports widget (and future widgets like CSV export)
+ * can render and filter without re-running lookups per row.
+ *
+ * Returned rows are sorted newest-first so the widget's default view matches
+ * the legacy `/reports` page.
+ *
+ * @returns {Array<{
+ *   id: string|number,
+ *   userId: number,
+ *   userName: string,
+ *   challengeId: number,
+ *   challengeName: string,
+ *   actionId: number,
+ *   actionName: string,
+ *   actionCategory: string,
+ *   completedAt: string,
+ *   notes: string,
+ * }>}
+ */
+export function buildEnrichedParticipation(participation, users, actions, challenges) {
+  return [...participation]
+    .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""))
+    .map((p) => {
+      const user = users.find((u) => u.id === p.userId);
+      const challenge = challenges.find((c) => c.id === p.challengeId);
+      const action = actions.find((a) => a.id === p.actionId);
+      return {
+        id: p.id,
+        userId: p.userId,
+        userName: user?.name || "Unknown",
+        challengeId: p.challengeId,
+        challengeName: challenge?.name || "Unknown",
+        actionId: p.actionId,
+        actionName: action?.name || "Unknown",
+        actionCategory: action?.category || "Unknown",
+        completedAt: p.completedAt || "",
+        notes: p.notes || "",
+      };
+    });
+}
+
 /** Most-recent participation events for the activity feed widget. */
 export function buildRecentActivity(participation, users, actions, challenges) {
   return [...participation]

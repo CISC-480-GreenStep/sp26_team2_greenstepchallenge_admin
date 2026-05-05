@@ -21,6 +21,7 @@ import ParticipationBarWidget from "../widgets/ParticipationBarWidget";
 import PointsByChallengeWidget from "../widgets/PointsByChallengeWidget";
 import PointsDistributionWidget from "../widgets/PointsDistributionWidget";
 import RecentActivityWidget from "../widgets/RecentActivityWidget";
+import ReportParticipationTableWidget from "../widgets/ReportParticipationTableWidget";
 import StatWidget from "../widgets/StatWidget";
 import UpcomingChallengesWidget from "../widgets/UpcomingChallengesWidget";
 import UserGrowthWidget from "../widgets/UserGrowthWidget";
@@ -39,6 +40,7 @@ const WIDGET_COMPONENTS = {
   "chart-points-distribution": PointsDistributionWidget,
   "list-recent-activity": RecentActivityWidget,
   "list-upcoming": UpcomingChallengesWidget,
+  "table-report-participation": ReportParticipationTableWidget,
 };
 
 /**

@@ -23,8 +23,8 @@ import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
+import CategoryFormDialog from "./components/CategoryFormDialog";
 import {
-  ACTIONS,
   CHALLENGE_STATUSES,
   createAction,
   createChallenge,
@@ -34,18 +34,22 @@ import {
   getTemplates,
   logActivity,
   updateChallenge,
+  getCategories,
+  createCategory,
 } from "../../data/api";
 
 const EMPTY_FORM = {
   name: "",
   description: "",
-  category: ACTIONS[0],
+  category: "",
   theme: "#4CAF50",
   startDate: "",
   endDate: "",
   status: CHALLENGE_STATUSES.UPCOMING,
   groupId: "",
 };
+
+const EMPTY_CATEGORY = { name: "", description: "" };
 
 export default function ChallengeForm() {
   const { id } = useParams();
@@ -57,14 +61,19 @@ export default function ChallengeForm() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [globalCategories, setGlobalCategories] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [templateActions, setTemplateActions] = useState([]);
+  
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
 
   // Edit mode shows the saved actions; create mode shows whatever the
   // selected template would seed (empty list when no template is picked).
   const previewActions = isEdit ? actions : templateActions;
 
   useEffect(() => {
+    getCategories().then(setGlobalCategories);
     getGroups().then(setGroups);
     getTemplates().then(setTemplates);
     if (isEdit) {
@@ -96,6 +105,17 @@ export default function ChallengeForm() {
   };
 
   const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const handleCategoryCreated = async () => {
+    const newCategory = await createCategory(categoryForm);
+    setGlobalCategories((prev) => [...prev, newCategory]);
+    // Optionally auto-select the new category
+    setForm((prev) => ({
+      ...prev,
+      category: newCategory.name
+    }));
+    setCategoryDialogOpen(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,7 +192,13 @@ export default function ChallengeForm() {
                 </Box>
               )}
 
-              <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
+              <ChallengeFieldsSection 
+                form={form} 
+                onChange={handleChange} 
+                groups={groups} 
+                categories={globalCategories}
+                onAddCategoryClick={() => { setCategoryForm(EMPTY_CATEGORY); setCategoryDialogOpen(true); }}
+              />
 
               <Stack direction="row" spacing={2} mt={3}>
                 <Button type="submit" variant="contained">
@@ -197,8 +223,22 @@ export default function ChallengeForm() {
       </Grid>
 
       {isEdit && (
-        <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />
+        <ActionsEditor 
+          challengeId={Number(id)} 
+          actions={actions} 
+          categories={globalCategories}
+          onChanged={reloadActions} 
+        />
       )}
+
+      <CategoryFormDialog
+        open={categoryDialogOpen}
+        isEdit={false}
+        categoryForm={categoryForm}
+        onChange={setCategoryForm}
+        onCancel={() => setCategoryDialogOpen(false)}
+        onSave={handleCategoryCreated}
+      />
     </Box>
   );
 }

@@ -31,7 +31,6 @@ import {
 
 import ActionFormDialog from "./ActionFormDialog";
 import {
-  ACTIONS,
   createAction,
   deleteAction,
   getChallengeById,
@@ -42,7 +41,7 @@ import {
 const EMPTY_ACTION = {
   name: "",
   description: "",
-  category: ACTIONS[0],
+  category: "",
   points: 5,
 };
 
@@ -50,9 +49,10 @@ const EMPTY_ACTION = {
  * @param {object}   props
  * @param {number}   props.challengeId
  * @param {Array<object>} props.actions
+ * @param {Array<object>} props.categories
  * @param {() => Promise<void> | void} props.onChanged Invoked after add/edit/delete so the parent can reload.
  */
-export default function ActionsEditor({ challengeId, actions, onChanged }) {
+export default function ActionsEditor({ challengeId, actions, categories = [], onChanged }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAction, setEditingAction] = useState(null);
   const [actionForm, setActionForm] = useState(EMPTY_ACTION);
@@ -156,6 +156,7 @@ export default function ActionsEditor({ challengeId, actions, onChanged }) {
         open={dialogOpen}
         isEdit={Boolean(editingAction)}
         actionForm={actionForm}
+        categories={categories}
         onChange={setActionForm}
         onCancel={() => setDialogOpen(false)}
         onSave={handleSave}

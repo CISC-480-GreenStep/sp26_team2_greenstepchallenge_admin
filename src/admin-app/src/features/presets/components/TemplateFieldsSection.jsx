@@ -3,11 +3,10 @@
  * @summary Template metadata fields (name, description, categories, theme).
  */
 
-import { Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from "@mui/material";
-import { fetchAllCategories } from "../../../data/api";
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
-export default function TemplateFieldsSection({ form, onChange }) {
-  const categories = fetchAllCategories();
+export default function TemplateFieldsSection({ form, onChange, categories = [], onAddCategoryClick }) {
 
   const handleCategoryChange = (category) => (e) => {
     const isChecked = e.target.checked;
@@ -44,20 +43,25 @@ export default function TemplateFieldsSection({ form, onChange }) {
       </Grid>
       <Grid size={{ xs: 12 }}>
         <FormLabel component="legend" sx={{ mb: 1 }}>Categories</FormLabel>
-        <FormGroup row>
-          {categories.map((c) => (
-            <FormControlLabel
-              key={c}
-              control={
-                <Checkbox
-                  checked={(form.categories || []).includes(c)}
-                  onChange={handleCategoryChange(c)}
-                />
-              }
-              label={c}
-            />
-          ))}
-        </FormGroup>
+        <Box sx={{ maxHeight: 250, overflowY: "auto", border: "1px solid", borderColor: "divider", p: 1, borderRadius: 1, mb: 1 }}>
+          <FormGroup row>
+            {categories.map((c) => (
+              <FormControlLabel
+                key={c.id}
+                control={
+                  <Checkbox
+                    checked={(form.categories || []).includes(c.name)}
+                    onChange={handleCategoryChange(c.name)}
+                  />
+                }
+                label={c.name}
+              />
+            ))}
+          </FormGroup>
+        </Box>
+        <Button size="small" startIcon={<AddIcon />} onClick={onAddCategoryClick}>
+          Create New Category
+        </Button>
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
         <TextField

@@ -33,5 +33,9 @@ pnpm-debug.log*
 # Claude Code
 .claude/
 
+# Local test artifacts (Puppeteer smoke tests, etc.)
+# Per the team rule to keep generated outputs out of the repo.
+testing/
+
 # OS
 Thumbs.db

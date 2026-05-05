@@ -3,9 +3,9 @@
  * @summary Provides the application's auth state and actions to the React tree.
  *
  * Wraps the app in `<AuthProvider>` to:
- *   - Restore Supabase sessions on mount (and a "dev login" fallback from localStorage).
+ *   - Restore Supabase sessions on mount.
  *   - Subscribe to Supabase auth events so login/logout in another tab still propagates.
- *   - Expose `login`, `devLogin`, `logout`, and `hasRole` to consumers.
+ *   - Expose `login`, `verifyCode`, `devLogin`, `logout`, and `hasRole` to consumers.
  *
  * The hook (`useAuth`) and the context object live in sibling files so this
  * module exports only a component — required for Vite React Fast Refresh.
@@ -14,11 +14,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { AuthContext } from "./authContextValue";
-import { ROLES } from "../../data/api";
+import { ROLES, USER_STATUSES } from "../../data/api";
 import { supabase } from "../../data/supabase";
 
-/** localStorage key holding the dev-login email when Supabase Auth is bypassed. */
-const DEV_LOGIN_STORAGE_KEY = "gsc_dev_user";
+/**
+ * Shared dev password for the "Quick Login" shortcut. Matches the password
+ * seeded for dev users by migration 005. Will be removed along with the
+ * Quick Login button before the app ships to real users.
+ */
+const DEV_LOGIN_PASSWORD = "gsc-dev-password";
 
 /** Role hierarchy ordered from least to most privileged. */
 const ROLE_HIERARCHY = [ROLES.GENERAL_USER, ROLES.ADMIN, ROLES.SUPER_ADMIN];
@@ -32,6 +36,31 @@ async function loadAppUser(email) {
   const { data, error } = await supabase.from("users").select("*").eq("email", email).single();
   if (error || !data) return null;
   return data;
+}
+
+/**
+ * Post-auth gate: load the user's profile row and verify they're allowed
+ * to use the admin app (exists in `users` and not deactivated). On any
+ * failure, drop the just-established Supabase Auth session so the user
+ * isn't left half-signed-in.
+ */
+async function authorizeOrSignOut(email) {
+  const appUser = await loadAppUser(email);
+  if (!appUser) {
+    await supabase.auth.signOut();
+    return {
+      success: false,
+      error: "No admin account exists for this email. Contact an administrator to be invited.",
+    };
+  }
+  if (appUser.status === USER_STATUSES.DEACTIVATED) {
+    await supabase.auth.signOut();
+    return {
+      success: false,
+      error: "This account has been deactivated. Contact an administrator if you think this is a mistake.",
+    };
+  }
+  return { success: true, appUser };
 }
 
 /**
@@ -71,19 +100,13 @@ export function AuthProvider({ children }) {
   }, [authEmail]);
 
   useEffect(() => {
-    // Initial session restore: prefer a real Supabase session, fall back to
-    // the dev-login email if one is stashed in localStorage.
+    // Initial session restore. Both magic-link and dev-login flows go
+    // through Supabase Auth now, so getSession() handles either case.
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user?.email) {
         const appUser = await loadAppUser(session.user.email);
         setUser(appUser);
         setAuthEmail(session.user.email);
-      } else {
-        const devEmail = localStorage.getItem(DEV_LOGIN_STORAGE_KEY);
-        if (devEmail) {
-          const appUser = await loadAppUser(devEmail);
-          if (appUser) setUser(appUser);
-        }
       }
       initialLoad.current = false;
       setLoading(false);
@@ -108,31 +131,87 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  /** Send a magic-link email to start a real Supabase Auth session. */
+  /**
+   * Step 1 of email auth: send the user an 8-digit code by email.
+   * Step 2 (`verifyCode`) is what actually starts the Supabase Auth session.
+   *
+   * Code-based instead of click-based because institutional email scanners
+   * (Microsoft Defender Safe Links, Mimecast, etc.) pre-fetch one-time
+   * magic-link URLs on arrival and consume the token before the user can
+   * click. An 8-digit code in plain text dodges that whole class of issue.
+   *
+   * Pre-flights via the `auth_email_is_registered` RPC so unknown emails
+   * fail fast with a clear message. The RPC is `security definer` so it
+   * works under RLS even when the caller is anon (signed-out).
+   */
   const login = useCallback(async (email) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
+    const { data: registered, error: rpcError } = await supabase.rpc(
+      "auth_email_is_registered",
+      { email_to_check: email },
+    );
+    if (rpcError) return { success: false, error: rpcError.message };
+    if (!registered) {
+      return {
+        success: false,
+        error: "No admin account exists for this email. Contact an administrator to be invited.",
+      };
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) return { success: false, error: error.message };
     return { success: true };
   }, []);
 
-  // Dev-only escape hatch: bypass Supabase Auth entirely and load the user
-  // straight from the database. Persist the chosen email so a page refresh
-  // restores the same identity.
+  /**
+   * Step 2 of email auth: verify the 8-digit code the user typed in.
+   *
+   * After verifyOtp succeeds the Supabase client has the session, but
+   * the SIGNED_IN event that triggers loadAppUser fires asynchronously.
+   * If the caller navigates immediately, RequireAuth sees `user` still
+   * null and bounces back to /login. We avoid that race by loading the
+   * app user inline here and setting state before returning, so an
+   * `await verifyCode(...)` truly blocks until the caller is signed in.
+   */
+  const verifyCode = useCallback(async (email, code) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "email",
+    });
+    if (error) return { success: false, error: error.message };
+
+    const guard = await authorizeOrSignOut(email);
+    if (!guard.success) return guard;
+    setUser(guard.appUser);
+    setAuthEmail(email);
+    return { success: true };
+  }, []);
+
+  // Dev-only shortcut: skip the email round-trip by signing in with a
+  // known dev password (seeded for test accounts by migration 005). Goes
+  // through real Supabase Auth so the resulting JWT lets RLS policies
+  // see the caller's role just like an OTP-code login.
+  //
+  // Same race avoidance as verifyCode: load the app user synchronously
+  // and update state before returning so the caller's `navigate("/")`
+  // doesn't fire before RequireAuth can see the new user.
   const devLogin = useCallback(async (email) => {
-    const appUser = await loadAppUser(email);
-    if (!appUser) return { success: false, error: "User not found in database" };
-    setUser(appUser);
-    localStorage.setItem(DEV_LOGIN_STORAGE_KEY, email);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: DEV_LOGIN_PASSWORD,
+    });
+    if (error) return { success: false, error: error.message };
+
+    const guard = await authorizeOrSignOut(email);
+    if (!guard.success) return guard;
+    setUser(guard.appUser);
+    setAuthEmail(email);
     return { success: true };
   }, []);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem(DEV_LOGIN_STORAGE_KEY);
   }, []);
 
   // Closed over `user` only — recreating on every user change is intentional
@@ -146,8 +225,8 @@ export function AuthProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ user, loading, login, devLogin, logout, hasRole }),
-    [user, loading, login, devLogin, logout, hasRole],
+    () => ({ user, loading, login, verifyCode, devLogin, logout, hasRole }),
+    [user, loading, login, verifyCode, devLogin, logout, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

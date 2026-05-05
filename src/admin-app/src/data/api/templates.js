@@ -89,5 +89,5 @@ export async function updateTemplate(id, data) {
  * @param {number|string} id
  */
 export async function deleteTemplate(id) {
-  unwrap(await supabase.from("templates").delete().eq("id", id));
+  unwrap(await supabase.from("presets").delete().eq("id", id));
 }

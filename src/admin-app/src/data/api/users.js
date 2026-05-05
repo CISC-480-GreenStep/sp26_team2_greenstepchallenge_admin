@@ -58,20 +58,48 @@ export async function updateUser(id, data) {
 }
 
 /**
- * Mark a user as Deactivated. We never hard-delete users so participation
- * history and activity logs remain queryable.
+ * Mark a user as Deactivated and ban their auth credentials so they
+ * actually can't sign in anymore.
  * @param {number|string} id
  */
 export async function deactivateUser(id) {
-  return updateUser(id, { status: USER_STATUSES.DEACTIVATED });
+  const updated = await updateUser(id, { status: USER_STATUSES.DEACTIVATED });
+  await setAuthActive(updated.email, false);
+  return updated;
 }
 
 /**
- * Re-activate a previously deactivated user.
+ * Re-activate a previously deactivated user, restoring sign-in.
  * @param {number|string} id
  */
 export async function activateUser(id) {
-  return updateUser(id, { status: USER_STATUSES.ACTIVE });
+  const updated = await updateUser(id, { status: USER_STATUSES.ACTIVE });
+  await setAuthActive(updated.email, true);
+  return updated;
+}
+
+/**
+ * Toggle the Supabase Auth ban for an email via the service-role
+ * serverless function. Failures here are logged but not thrown so a
+ * missing auth row doesn't block the profile-side status flip.
+ */
+async function setAuthActive(email, active) {
+  if (!email) return;
+  try {
+    const res = await fetch("/api/set-user-active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, active }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      // eslint-disable-next-line no-console
+      console.warn("set-user-active failed:", body.error || res.statusText);
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("set-user-active failed:", err.message);
+  }
 }
 
 /**

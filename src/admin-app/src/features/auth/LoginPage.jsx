@@ -1,11 +1,17 @@
 /**
  * @file LoginPage.jsx
- * @summary Sign-in screen with magic-link + dev-login fallback.
+ * @summary Sign-in screen with two-step OTP code auth + a dev-login fallback.
  *
- * The "real" login flow uses Supabase magic links (email OTP). The
- * "Dev Login" button bypasses Supabase Auth and looks the user up by
- * email directly -- intended for local development and team demos
- * before the production Auth flow is fully provisioned.
+ * Step 1: user enters their email and we send them a 8-digit code via Supabase
+ * Auth. Step 2: user enters the code and we exchange it for a session.
+ *
+ * Code entry instead of magic-link clicks because institutional email scanners
+ * (Microsoft Defender Safe Links, Mimecast, etc.) pre-fetch one-time link URLs
+ * on arrival and consume the token before the user can click. A code in plain
+ * text dodges that whole class of issue.
+ *
+ * The "Quick Login as Kristin" button bypasses Supabase Auth entirely and is
+ * intended for local development and team demos only.
  */
 
 import { useState } from "react";
@@ -17,24 +23,44 @@ import { Box, Card, CardContent, TextField, Button, Typography, Alert, Stack } f
 import { useAuth } from "./useAuth";
 
 export default function LoginPage() {
-  const { login, devLogin } = useAuth();
+  const { login, verifyCode, devLogin } = useAuth();
   const navigate = useNavigate();
+  const [step, setStep] = useState("email"); // "email" | "code"
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSendCode = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     const result = await login(email);
     setSubmitting(false);
     if (result.success) {
-      setSent(true);
+      setStep("code");
     } else {
       setError(result.error);
     }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    const result = await verifyCode(email, code.trim());
+    setSubmitting(false);
+    if (result.success) {
+      navigate("/");
+    } else {
+      setError(result.error);
+    }
+  };
+
+  const handleStartOver = () => {
+    setStep("email");
+    setCode("");
+    setError("");
   };
 
   return (
@@ -44,7 +70,7 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "grey.100",
+        bgcolor: "background.default",
         px: 2,
       }}
     >
@@ -54,7 +80,9 @@ export default function LoginPage() {
             GreenStep Admin
           </Typography>
           <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
-            Sign in with your email
+            {step === "email"
+              ? "Sign in with your email"
+              : `Enter the 8-digit code we sent to ${email}`}
           </Typography>
 
           {error && (
@@ -63,12 +91,8 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          {sent ? (
-            <Alert severity="success">
-              Check your email for a magic link to sign in. If you don't see it, check your junk/spam folder. You can close this tab.
-            </Alert>
-          ) : (
-            <form onSubmit={handleSubmit}>
+          {step === "email" ? (
+            <form onSubmit={handleSendCode}>
               <Stack spacing={2}>
                 <TextField
                   label="Email"
@@ -86,8 +110,49 @@ export default function LoginPage() {
                   fullWidth
                   disabled={submitting}
                 >
-                  {submitting ? "Sending..." : "Send Magic Link"}
+                  {submitting ? "Sending..." : "Send Code"}
                 </Button>
+              </Stack>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyCode}>
+              <Stack spacing={2}>
+                <TextField
+                  label="8-digit code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                  fullWidth
+                  autoFocus
+                  inputMode="numeric"
+                  slotProps={{
+                    htmlInput: {
+                      maxLength: 8,
+                      pattern: "[0-9]*",
+                      style: { letterSpacing: "0.4em", textAlign: "center", fontSize: "1.25rem" },
+                    },
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  disabled={submitting || code.trim().length < 8}
+                >
+                  {submitting ? "Verifying..." : "Sign In"}
+                </Button>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleStartOver}
+                  disabled={submitting}
+                >
+                  Use a different email
+                </Button>
+                <Typography variant="caption" color="text.secondary" textAlign="center">
+                  Didn't get the code? Check your spam/junk folder.
+                </Typography>
               </Stack>
             </form>
           )}

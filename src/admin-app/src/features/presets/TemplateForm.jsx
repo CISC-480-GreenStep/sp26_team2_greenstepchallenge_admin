@@ -7,18 +7,18 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Paper, Stack, Typography, Checkbox, FormControlLabel, FormGroup, Grid, TextField, InputAdornment } from "@mui/material";
+import { Box, Button, Grid, Paper, Stack, Typography, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 
 import TemplateFieldsSection from "./components/TemplateFieldsSection";
 import ActionFormDialog from "../challenges/components/ActionFormDialog";
-import MobilePreview from "../../components/shared/preview/MobilePreview";
-import { ACTIONS, createTemplate, getTemplateById, updateTemplate, getActions, createAction } from "../../data/api";
+import CategoryFormDialog from "../challenges/components/CategoryFormDialog";
+import { MobilePreview } from "../../components/shared/preview";
+import { createTemplate, getTemplateById, updateTemplate, getActions, createAction, getCategories, createCategory } from "../../data/api";
 
 const EMPTY_TEMPLATE = {
   name: "",
   description: "",
-  categories: [ACTIONS[0]],
+  categories: [],
   bgColorHeader: "#4CAF50",
   txColorHeader: "#ffffff",
   bgColorBody: "#C8E6C9",
@@ -27,7 +27,8 @@ const EMPTY_TEMPLATE = {
   actions: [],
 };
 
-const EMPTY_ACTION = { name: "", description: "", category: ACTIONS[0], points: 5 };
+const EMPTY_ACTION = { name: "", description: "", category: "", points: 5 };
+const EMPTY_CATEGORY = { name: "", description: "" };
 
 export default function TemplateForm() {
   const { id } = useParams();
@@ -36,12 +37,16 @@ export default function TemplateForm() {
 
   const [currentTemplate, setCurrentTemplate] = useState(EMPTY_TEMPLATE);
   const [globalActions, setGlobalActions] = useState([]);
+  const [globalCategories, setGlobalCategories] = useState([]);
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [actionForm, setActionForm] = useState(EMPTY_ACTION);
-  const [actionSearchTerm, setActionSearchTerm] = useState("");
+
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
 
   useEffect(() => {
+    getCategories().then(setGlobalCategories);
     getActions().then(setGlobalActions);
 
     if (!isEdit) return;
@@ -100,11 +105,18 @@ export default function TemplateForm() {
     setDialogOpen(false);
   };
 
-  const availableActions = globalActions.filter(a => {
-    const matchesCategory = currentTemplate.categories.includes(a.category);
-    const matchesSearch = a.name.toLowerCase().includes(actionSearchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const handleCategoryCreated = async () => {
+    const newCategory = await createCategory(categoryForm);
+    setGlobalCategories((prev) => [...prev, newCategory]);
+    // Optionally auto-select the new category
+    setCurrentTemplate((prev) => ({
+      ...prev,
+      categories: [...(prev.categories || []), newCategory.name]
+    }));
+    setCategoryDialogOpen(false);
+  };
+
+  const availableActions = globalActions.filter(a => currentTemplate.categories.includes(a.category));
 
   return (
     <Box>
@@ -116,40 +128,26 @@ export default function TemplateForm() {
         {isEdit ? "Edit Template" : "Create Template"}
       </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={7} lg={8}>
-          <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 } }}>
             <form onSubmit={handleSubmit}>
-              <TemplateFieldsSection form={currentTemplate} onChange={handleChange} />
+              <TemplateFieldsSection 
+                form={currentTemplate} 
+                onChange={handleChange} 
+                categories={globalCategories}
+                onAddCategoryClick={() => { setCategoryForm(EMPTY_CATEGORY); setCategoryDialogOpen(true); }}
+              />
 
               <Box mt={4}>
                 <Typography variant="h6" fontWeight={600} mb={1}>Available Actions</Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
                   Select actions for this template. Only actions matching the selected categories are shown.
                 </Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Search actions..."
-                  value={actionSearchTerm}
-                  onChange={(e) => setActionSearchTerm(e.target.value)}
-                  sx={{ mb: 2 }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                
+
                 <Box sx={{ maxHeight: 300, overflowY: "auto", border: "1px solid", borderColor: "divider", p: 2, borderRadius: 1, mb: 2 }}>
                   {availableActions.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
-                      {actionSearchTerm 
-                        ? "No actions found matching your search." 
-                        : "No actions found for selected categories."}
-                    </Typography>
+                    <Typography variant="body2" color="text.secondary">No actions found for selected categories.</Typography>
                   ) : (
                     <FormGroup>
                       {availableActions.map((action) => (
@@ -185,11 +183,11 @@ export default function TemplateForm() {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={5} lg={4}>
-          <Box sx={{ position: { md: "sticky" }, top: { md: 24 } }}>
-            <Typography variant="h6" fontWeight={600} mb={2} textAlign="center" color="text.secondary">
-              Mobile Preview
-            </Typography>
+        {/* Mirrors the live-preview pattern in ChallengeForm so the two
+            authoring flows feel identical. Hidden below md for the same
+            width-budget reason — see the matching note there. */}
+        <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ position: "sticky", top: 80 }}>
             <MobilePreview challenge={currentTemplate} actions={currentTemplate.actions} />
           </Box>
         </Grid>
@@ -199,9 +197,19 @@ export default function TemplateForm() {
         open={dialogOpen}
         isEdit={false}
         actionForm={actionForm}
+        categories={globalCategories}
         onChange={setActionForm}
         onCancel={() => setDialogOpen(false)}
         onSave={handleCreateNewAction}
+      />
+
+      <CategoryFormDialog
+        open={categoryDialogOpen}
+        isEdit={false}
+        categoryForm={categoryForm}
+        onChange={setCategoryForm}
+        onCancel={() => setCategoryDialogOpen(false)}
+        onSave={handleCategoryCreated}
       />
     </Box>
   );

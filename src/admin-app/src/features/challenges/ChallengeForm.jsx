@@ -3,7 +3,7 @@
  * @summary ChallengeForm -- create or edit a challenge.
  *
  * Renders three sub-views, all under one route:
- *   - PresetPicker: only on create, lets the user pre-fill from a template
+ *   - TemplatePicker: only on create, lets the user pre-fill from a template
  *   - ChallengeFieldsSection: the field grid
  *   - ActionsEditor: only on edit, manages the challenge's actions
  *
@@ -16,10 +16,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Button, Paper, Stack, Typography, Grid } from "@mui/material";
+import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 
+import { MobilePreview } from "../../components/shared/preview";
+import { useAuth } from "../auth/useAuth";
+import ActionsEditor from "./components/ActionsEditor";
+import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
+import TemplatePicker from "./components/TemplatePicker";
+import CategoryFormDialog from "./components/CategoryFormDialog";
 import {
-  ACTIONS,
   CHALLENGE_STATUSES,
   createAction,
   createChallenge,
@@ -29,6 +34,8 @@ import {
   getTemplates,
   logActivity,
   updateChallenge,
+  getCategories,
+  createCategory,
 } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
@@ -50,6 +57,8 @@ const EMPTY_FORM = {
   groupId: "",
 };
 
+const EMPTY_CATEGORY = { name: "", description: "" };
+
 export default function ChallengeForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -60,10 +69,19 @@ export default function ChallengeForm() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [globalCategories, setGlobalCategories] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [templateActions, setTemplateActions] = useState([]);
+  
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
+
+  // Edit mode shows the saved actions; create mode shows whatever the
+  // selected template would seed (empty list when no template is picked).
+  const previewActions = isEdit ? actions : templateActions;
 
   useEffect(() => {
+    getCategories().then(setGlobalCategories);
     getGroups().then(setGroups);
     getTemplates().then(setTemplates);
     if (isEdit) {
@@ -87,7 +105,7 @@ export default function ChallengeForm() {
       ...prev,
       name: template.name,
       description: template.description,
-      categories: template.categories?.length ? template.categories : prev.categories,
+      category: template.categories?.[0] || prev.category,
       bgColorHeader: template.bgColorHeader,
       txColorHeader: template.txColorHeader,
       bgColorBody: template.bgColorBody,
@@ -98,6 +116,17 @@ export default function ChallengeForm() {
   };
 
   const handleChange = (field) => (e) => {setForm((prev) => ({ ...prev, [field]: e.target.value }))};
+
+  const handleCategoryCreated = async () => {
+    const newCategory = await createCategory(categoryForm);
+    setGlobalCategories((prev) => [...prev, newCategory]);
+    // Optionally auto-select the new category
+    setForm((prev) => ({
+      ...prev,
+      category: newCategory.name
+    }));
+    setCategoryDialogOpen(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -159,9 +188,9 @@ export default function ChallengeForm() {
         {isEdit ? "Edit Challenge" : "Create Challenge"}
       </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={7}>
-          <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 } }}>
             <form onSubmit={handleSubmit}>
               {!isEdit && (
                 <Box mb={2}>
@@ -174,7 +203,13 @@ export default function ChallengeForm() {
                 </Box>
               )}
 
-              <ChallengeFieldsSection form={form} onChange={handleChange} groups={groups} />
+              <ChallengeFieldsSection 
+                form={form} 
+                onChange={handleChange} 
+                groups={groups} 
+                categories={globalCategories}
+                onAddCategoryClick={() => { setCategoryForm(EMPTY_CATEGORY); setCategoryDialogOpen(true); }}
+              />
 
               <Stack direction="row" spacing={2} mt={3}>
                 <Button type="submit" variant="contained">
@@ -186,21 +221,35 @@ export default function ChallengeForm() {
               </Stack>
             </form>
           </Paper>
-
-          {isEdit && (
-            <ActionsEditor challengeId={Number(id)} actions={actions} onChanged={reloadActions} />
-          )}
         </Grid>
 
-        <Grid item xs={12} md={5}>
-          <Box sx={{ position: { md: "sticky" }, top: { md: 24 } }}>
-            <Typography variant="h6" fontWeight={600} mb={2} textAlign="center" color="text.secondary">
-              Mobile Preview
-            </Typography>
-            <MobilePreview challenge={form} actions={isEdit ? actions : templateActions} />
+        {/* Live preview hidden on small screens — the phone frame eats too
+            much width below md. Could stack instead later if the team
+            wants it visible on mobile too. */}
+        <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ position: "sticky", top: 80 }}>
+            <MobilePreview challenge={form} actions={previewActions} />
           </Box>
         </Grid>
       </Grid>
+
+      {isEdit && (
+        <ActionsEditor 
+          challengeId={Number(id)} 
+          actions={actions} 
+          categories={globalCategories}
+          onChanged={reloadActions} 
+        />
+      )}
+
+      <CategoryFormDialog
+        open={categoryDialogOpen}
+        isEdit={false}
+        categoryForm={categoryForm}
+        onChange={setCategoryForm}
+        onCancel={() => setCategoryDialogOpen(false)}
+        onSave={handleCategoryCreated}
+      />
     </Box>
   );
 }

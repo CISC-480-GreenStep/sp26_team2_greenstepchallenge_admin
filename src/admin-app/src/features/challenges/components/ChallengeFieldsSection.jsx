@@ -8,30 +8,20 @@
  * to know how the parent stores it.
  */
 
-import { Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
+import { Box, Button, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
-import { CHALLENGE_STATUSES, fetchAllCategories } from "../../../data/api";
+import { CHALLENGE_STATUSES } from "../../../data/api";
 
 /**
  * @param {object} props
  * @param {object} props.form Current form values.
  * @param {(field: string) => (event: React.ChangeEvent<HTMLInputElement>) => void} props.onChange
  * @param {Array<{ id: number, name: string }>} props.groups
+ * @param {Array<{ id: number, name: string }>} props.categories
+ * @param {() => void} props.onAddCategoryClick
  */
-export default function ChallengeFieldsSection({ form, onChange, groups }) {
-  const categories = fetchAllCategories();
-
-  const handleCategoryChange = (category) => (e) => {
-    const isChecked = e.target.checked;
-    let nextCategories = [...(form.categories || [])];
-    if (isChecked) {
-      if (!nextCategories.includes(category)) nextCategories.push(category);
-    } else {
-      nextCategories = nextCategories.filter((c) => c !== category);
-    }
-    onChange("categories")({ target: { value: nextCategories } });
-  };
-
+export default function ChallengeFieldsSection({ form, onChange, groups, categories = [], onAddCategoryClick }) {
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12 }}>
@@ -55,22 +45,22 @@ export default function ChallengeFieldsSection({ form, onChange, groups }) {
         />
       </Grid>
 
-      <Grid size={{ xs: 12 }}>
-        <FormLabel component="legend" sx={{ mb: 1 }}>Categories</FormLabel>
-        <FormGroup row>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <FormLabel component="legend" sx={{ mb: 1 }}>Category</FormLabel>
+        <Box sx={{ maxHeight: 250, overflowY: "auto", border: "1px solid", borderColor: "divider", p: 1, borderRadius: 1, mb: 1 }}>
           {categories.map((c) => (
-            <FormControlLabel
-              key={c}
-              control={
-                <Checkbox
-                  checked={(form.categories || []).includes(c)}
-                  onChange={handleCategoryChange(c)}
-                />
-              }
-              label={c}
-            />
+            <MenuItem 
+              key={c.id} 
+              onClick={() => onChange("category")({ target: { value: c.name } })}
+              selected={form.category === c.name}
+            >
+              {c.name}
+            </MenuItem>
           ))}
-        </FormGroup>
+        </Box>
+        <Button size="small" startIcon={<AddIcon />} onClick={onAddCategoryClick}>
+          Create New Category
+        </Button>
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>

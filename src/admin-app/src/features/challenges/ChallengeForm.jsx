@@ -12,7 +12,6 @@
  */
 
 import { useEffect, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -37,11 +36,6 @@ import {
   getCategories,
   createCategory,
 } from "../../data/api";
-import { useAuth } from "../auth/useAuth";
-import ActionsEditor from "./components/ActionsEditor";
-import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
-import TemplatePicker from "./components/TemplatePicker";
-import MobilePreview from "../../components/shared/preview/MobilePreview";
 
 const EMPTY_FORM = {
   name: "",

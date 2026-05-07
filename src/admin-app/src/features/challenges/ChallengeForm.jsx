@@ -24,6 +24,7 @@ import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
 import CategoryFormDialog from "./components/CategoryFormDialog";
 import {
+  ACTIONS,
   CHALLENGE_STATUSES,
   createAction,
   createChallenge,

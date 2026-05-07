@@ -88,7 +88,8 @@ src/admin-app/src/
 │       ├── actions.js                      ← Sustainability action catalog
 │       ├── participation.js                ← Per-(user, action, challenge) completion events
 │       ├── groups.js                       ← Postgres `departments` table (UI calls them Groups)
-│       ├── templates.js                    ← Reusable challenge templates (renamed from presets.js in v0.9.0; backing Supabase tables are still `presets` / `preset_actions`)
+<!-- │       ├── presets.js                      ← Reusable challenge templates + their action templates -->
+│       ├── templates.js                    ← Legacy templates (no UI yet; kept for completeness)
 │       ├── activityLogs.js                 ← Admin audit log
 │       └── leaderboard.js                  ← Cross-table aggregation queries (points, top users)
 │

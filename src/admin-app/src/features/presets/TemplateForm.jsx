@@ -19,7 +19,10 @@ const EMPTY_TEMPLATE = {
   name: "",
   description: "",
   categories: [],
-  theme: "#4CAF50",
+  bgColorHeader: "#4CAF50",
+  txColorHeader: "#ffffff",
+  bgColorBody: "#C8E6C9",
+  txColorBody: "#000000",
   status: "Upcoming",
   actions: [],
 };
@@ -53,7 +56,10 @@ export default function TemplateForm() {
         name: p.name,
         description: p.description,
         categories: p.categories || [],
-        theme: p.theme,
+        bgColorHeader: p.bgColorHeader || "#4CAF50",
+        txColorHeader: p.txColorHeader || "#ffffff",
+        bgColorBody: p.bgColorBody || "#C8E6C9",
+        txColorBody: p.txColorBody || "#000000",
         status: p.status,
         actions: p.actions || [],
       });

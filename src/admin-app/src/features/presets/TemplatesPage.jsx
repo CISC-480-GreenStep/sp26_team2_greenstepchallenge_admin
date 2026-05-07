@@ -151,11 +151,11 @@ export default function TemplatesPage() {
                         width: 16,
                         height: 16,
                         borderRadius: "50%",
-                        bgcolor: p.theme,
+                        bgcolor: p.bgColorHeader || "#4CAF50",
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="caption">{p.theme}</Typography>
+                    <Typography variant="caption">{p.bgColorHeader}</Typography>
                   </Box>
                 </TableCell>
                 <TableCell align="right">{p.actions?.length || 0}</TableCell>

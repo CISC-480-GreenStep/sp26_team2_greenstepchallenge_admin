@@ -15,11 +15,11 @@ import { unwrap } from "./helpers";
  * @returns {Promise<Array<object>>}
  */
 export async function getTemplates() {
-  const templates = unwrap(await supabase.from("presets").select("*").order("id"));
-  const pa = unwrap(await supabase.from("preset_actions").select("*").order("id"));
+  const templates = unwrap(await supabase.from("templates").select("*").order("id"));
+  const pa = unwrap(await supabase.from("actions").select("*").order("id"));
   for (const t of templates) {
     t.categories = t.category ? t.category.split(', ') : [];
-    t.actions = pa.filter((a) => a.presetId === t.id);
+    t.actions = pa.filter((a) => a.templatesId === t.id);
   }
   return templates;
 }
@@ -30,11 +30,11 @@ export async function getTemplates() {
  * @returns {Promise<object|null>}
  */
 export async function getTemplateById(id) {
-  const template = unwrap(await supabase.from("presets").select("*").eq("id", id).single());
+  const template = unwrap(await supabase.from("templates").select("*").eq("id", id).single());
   if (!template) return null;
   template.categories = template.category ? template.category.split(', ') : [];
   template.actions = unwrap(
-    await supabase.from("preset_actions").select("*").eq("presetId", id).order("id"),
+    await supabase.from("actions").select("*").eq("templatesId", id).order("id"),
   );
   return template;
 }
@@ -49,12 +49,12 @@ export async function createTemplate(data) {
   if (categories) {
     rest.category = categories.join(', ');
   }
-  const template = unwrap(await supabase.from("presets").insert(rest).select().single());
+  const template = unwrap(await supabase.from("templates").insert(rest).select().single());
   template.categories = template.category ? template.category.split(', ') : [];
   template.actions = [];
   if (templateActions?.length) {
-    const rows = templateActions.map((a) => ({ ...a, presetId: template.id }));
-    template.actions = unwrap(await supabase.from("preset_actions").insert(rows).select());
+    const rows = templateActions.map((a) => ({ ...a, templatesId: template.id }));
+    template.actions = unwrap(await supabase.from("actions").insert(rows).select());
   }
   return template;
 }
@@ -72,20 +72,20 @@ export async function updateTemplate(id, data) {
     rest.category = categories.join(', ');
   }
   if (Object.keys(rest).length > 0) {
-    unwrap(await supabase.from("presets").update(rest).eq("id", id));
+    unwrap(await supabase.from("templates").update(rest).eq("id", id));
   }
   if (templateActions !== undefined) {
-    await supabase.from("preset_actions").delete().eq("presetId", id);
+    await supabase.from("actions").delete().eq("templatesId", id);
     if (templateActions.length) {
-      const rows = templateActions.map((a) => ({ ...a, presetId: id }));
-      await supabase.from("preset_actions").insert(rows);
+      const rows = templateActions.map((a) => ({ ...a, templatesId: id }));
+      await supabase.from("actions").insert(rows);
     }
   }
   return getTemplateById(id);
 }
 
 /**
- * Hard-delete a template. Cascades on `preset_actions` via FK ON DELETE.
+ * Hard-delete a template. Cascades on `actions` via FK ON DELETE.
  * @param {number|string} id
  */
 export async function deleteTemplate(id) {

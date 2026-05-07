@@ -214,7 +214,7 @@ function ChallengeSummaryCard({ challenge, groupName, onPreview, onNavigateGroup
             width: 16,
             height: 16,
             borderRadius: "50%",
-            bgcolor: challenge.theme,
+            bgcolor: challenge.bgColorHeader,
             flexShrink: 0,
           }}
         />

@@ -180,9 +180,18 @@ export function AuthProvider({ children }) {
     });
     if (error) return { success: false, error: error.message };
 
-    const guard = await authorizeOrSignOut(email);
-    if (!guard.success) return guard;
-    setUser(guard.appUser);
+    const appUser = await loadAppUser(email);
+    if (!appUser) {
+      // Supabase auth accepted the code but this email has no row in
+      // public.users -- they're not an admin. Drop the session and
+      // surface a clear error.
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: "No admin account exists for this email. Contact an administrator to be invited.",
+      };
+    }
+    setUser(appUser);
     setAuthEmail(email);
     return { success: true };
   }, []);
@@ -202,9 +211,12 @@ export function AuthProvider({ children }) {
     });
     if (error) return { success: false, error: error.message };
 
-    const guard = await authorizeOrSignOut(email);
-    if (!guard.success) return guard;
-    setUser(guard.appUser);
+    const appUser = await loadAppUser(email);
+    if (!appUser) {
+      await supabase.auth.signOut();
+      return { success: false, error: "User not found in database" };
+    }
+    setUser(appUser);
     setAuthEmail(email);
     return { success: true };
   }, []);

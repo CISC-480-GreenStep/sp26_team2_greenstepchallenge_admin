@@ -25,3 +25,18 @@ export const CHALLENGE_STATUSES = {
   ARCHIVED: "Archived",
 };
 
+/**
+ * Action category taxonomy adopted from MPCA's GreenStep program.
+ * The first item is the catch-all default.
+ */
+export const ACTIONS = [
+  "General Sustainability",
+  "Food",
+  "Water",
+  "Energy",
+  "Transportation",
+  "Consumption & Waste",
+];
+
+export const fetchAllCategories = () => ACTIONS;
+

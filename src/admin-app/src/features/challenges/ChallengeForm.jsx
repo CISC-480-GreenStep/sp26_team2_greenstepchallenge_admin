@@ -12,7 +12,6 @@
  */
 
 import { useEffect, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -25,6 +24,7 @@ import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
 import CategoryFormDialog from "./components/CategoryFormDialog";
 import {
+  ACTIONS,
   CHALLENGE_STATUSES,
   createAction,
   createChallenge,
@@ -41,8 +41,11 @@ import {
 const EMPTY_FORM = {
   name: "",
   description: "",
-  category: "",
-  theme: "#4CAF50",
+  categories: [ACTIONS[0]],
+  bgColorHeader: "#4CAF50",
+  txColorHeader: "#ffffff",
+  bgColorBody: "#C8E6C9",
+  txColorBody: "#000000",
   startDate: "",
   endDate: "",
   status: CHALLENGE_STATUSES.UPCOMING,
@@ -98,13 +101,16 @@ export default function ChallengeForm() {
       name: template.name,
       description: template.description,
       category: template.categories?.[0] || prev.category,
-      theme: template.theme,
+      bgColorHeader: template.bgColorHeader,
+      txColorHeader: template.txColorHeader,
+      bgColorBody: template.bgColorBody,
+      txColorBody: template.txColorBody,
       status: template.status || prev.status,
     }));
     setTemplateActions(template.actions || []);
   };
 
-  const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field) => (e) => {setForm((prev) => ({ ...prev, [field]: e.target.value }))};
 
   const handleCategoryCreated = async () => {
     const newCategory = await createCategory(categoryForm);

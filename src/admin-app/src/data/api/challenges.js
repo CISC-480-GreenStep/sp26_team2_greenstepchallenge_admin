@@ -21,6 +21,38 @@ export async function getChallenges() {
   const ca = unwrap(await supabase.from("challenge_actions").select("challengeId, actionId"));
   const cp = unwrap(await supabase.from("challenge_participants").select("challengeId, userId"));
   for (const c of challenges) {
+    c.categories = c.category ? c.category.split(', ') : [];
+    c.actionIds = ca.filter((r) => r.challengeId === c.id).map((r) => r.actionId);
+    c.participants = cp.filter((r) => r.challengeId === c.id).map((r) => r.userId);
+  }
+  return challenges;
+}
+
+/**
+ * Fetch challenges within a specific date range.
+ * @param {string} fromDate 'YYYY-MM-DD'
+ * @param {string} toDate 'YYYY-MM-DD'
+ * @returns {Promise<Array<object>>}
+ */
+export async function getChallengesByDate(fromDate, toDate) {
+  const challenges = unwrap(
+    await supabase
+      .from("challenges")
+      .select("*")
+      .gte("startDate", fromDate)
+      .lte("endDate", toDate)
+      .order("id")
+  );
+  
+  if (!challenges.length) return [];
+
+  const challengeIds = challenges.map((c) => c.id);
+
+  const ca = unwrap(await supabase.from("challenge_actions").select("challengeId, actionId").in("challengeId", challengeIds));
+  const cp = unwrap(await supabase.from("challenge_participants").select("challengeId, userId").in("challengeId", challengeIds));
+  
+  for (const c of challenges) {
+    c.categories = c.category ? c.category.split(', ') : [];
     c.actionIds = ca.filter((r) => r.challengeId === c.id).map((r) => r.actionId);
     c.participants = cp.filter((r) => r.challengeId === c.id).map((r) => r.userId);
   }
@@ -35,6 +67,7 @@ export async function getChallenges() {
 export async function getChallengeById(id) {
   const challenge = unwrap(await supabase.from("challenges").select("*").eq("id", id).single());
   if (!challenge) return null;
+  challenge.categories = challenge.category ? challenge.category.split(', ') : [];
   const ca = unwrap(
     await supabase.from("challenge_actions").select("actionId").eq("challengeId", id),
   );
@@ -53,8 +86,12 @@ export async function getChallengeById(id) {
  * @returns {Promise<object>} The new challenge with its joined arrays.
  */
 export async function createChallenge(data) {
-  const { actionIds, participants, ...rest } = data;
+  const { actionIds, participants, categories, ...rest } = data;
+  if (categories) {
+    rest.category = categories.join(', ');
+  }
   const challenge = unwrap(await supabase.from("challenges").insert(rest).select().single());
+  challenge.categories = challenge.category ? challenge.category.split(', ') : [];
   if (actionIds?.length) {
     await supabase
       .from("challenge_actions")
@@ -81,7 +118,10 @@ export async function createChallenge(data) {
  * @returns {Promise<object>} The refreshed challenge with joins.
  */
 export async function updateChallenge(id, data) {
-  const { actionIds, participants, ...rest } = data;
+  const { actionIds, participants, categories, ...rest } = data;
+  if (categories) {
+    rest.category = categories.join(', ');
+  }
   if (Object.keys(rest).length > 0) {
     unwrap(await supabase.from("challenges").update(rest).eq("id", id));
   }

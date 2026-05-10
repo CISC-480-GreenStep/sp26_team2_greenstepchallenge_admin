@@ -1,5 +1,15 @@
 # Lessons Learned
 
+> ## ⚠️ DRAFT — Work In Progress
+>
+> **Status:** synthesis baseline drawn from the March 12 retro + commit
+> history. The framing and voice should be the team's own — please add,
+> remove, or rewrite anything that doesn't match how you remember the
+> sprint.
+>
+> **What this file is:** raw material for the lessons-learned slide(s).
+> **What this file is not:** the final slide content.
+>
 > Source material: the March 12 4Ls retro
 > ([`meetings/2026-03-12-meeting-notes.md`](../../meetings/2026-03-12-meeting-notes.md)),
 > the published Lucid board linked from

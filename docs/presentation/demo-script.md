@@ -1,5 +1,13 @@
 # Live Demo Script — 5 minutes
 
+> ## ⚠️ DRAFT — Work In Progress
+>
+> **Status:** baseline scenario for the team to react to. Adjust the order,
+> the narration voice, and the cut points to taste before rehearsal.
+>
+> **To-decide together:** who drives, who narrates, which features get
+> trimmed if we run long, fallback if Wi-Fi or Supabase is flaky.
+>
 > Goal: walk one realistic MPCA admin scenario top-to-bottom while exercising
 > the features added in v0.10.0 (OTP auth, RLS, custom categories, dashboard
 > reports widget, live mobile preview).

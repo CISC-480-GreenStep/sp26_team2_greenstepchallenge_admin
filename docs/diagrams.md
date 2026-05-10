@@ -1,7 +1,22 @@
 # Architecture Diagrams (C4)
 
-> Source-of-truth diagrams for the GreenStep Admin Console. Mermaid is the
-> canonical format; update *here* when architecture changes, not in slides.
+> ## ⚠️ DRAFT — Work In Progress
+>
+> **Status:** baseline for the team to review and personalize before the
+> presentation. Nothing here is final.
+>
+> **Things to decide / adjust together:**
+> - Are the box labels at the right level of detail for a non-technical
+>   audience? (Kristin, faculty)
+> - Should L3 be split into "what" vs "how" — one diagram for Kristin, one
+>   technical for faculty?
+> - Color palette — currently blues/greens/orange. Match the rest of our
+>   brand?
+> - Anything missing? (e.g. should the mobile app sibling have a stronger
+>   callout in L1?)
+>
+> Source-of-truth: this file. Mermaid is the canonical format; update
+> *here* when architecture changes, not in slides.
 >
 > An older image-based snapshot lives in
 > [Issue #4](https://github.com/CISC-480-GreenStep/sp26_team2_greenstepchallenge_admin/issues/4)

@@ -84,6 +84,7 @@ flowchart LR
   classDef shared fill:#2E7D32,stroke:#66BB6A,color:#fff
   classDef data fill:#5d3a1f,stroke:#FFA726,color:#fff
   classDef ext fill:#37474F,stroke:#90A4AE,color:#fff
+  classDef hub fill:#0d47a1,stroke:#42a5f5,color:#fff,stroke-width:2px
 
   subgraph Features["features/ — route-level UI"]
     direction TB
@@ -96,22 +97,22 @@ flowchart LR
     rpts["<b>reports</b><br/>ReportsPage<br/><i>(being absorbed by dashboard)</i>"]:::feature
   end
 
-  subgraph Cross["Cross-cutting (shared/ + lib/)"]
+  page(("Any page<br/>component")):::hub
+
+  subgraph Shared["components/shared/"]
     direction TB
-    subgraph Shared["components/shared/"]
-      direction TB
-      feedback["feedback/ — ConfirmDialog"]:::shared
-      sdata["data/ — StatCard · CSVExport · EntityLink"]:::shared
-      forms["forms/ — ActionFormDialog · CategoryFormDialog"]:::shared
-      layout["layout/ — PageHeader"]:::shared
-      preview["preview/ — MobilePreview"]:::shared
-    end
-    subgraph Lib["lib/"]
-      direction TB
-      perms["permissions.js — can(role, perm)"]:::shared
-      theme["theme.js — MUI dark theme"]:::shared
-      consts["constants.js — palettes · status maps"]:::shared
-    end
+    feedback["feedback/ — ConfirmDialog"]:::shared
+    sdata["data/ — StatCard · CSVExport · EntityLink"]:::shared
+    forms["forms/ — ActionFormDialog · CategoryFormDialog"]:::shared
+    layout["layout/ — PageHeader"]:::shared
+    preview["preview/ — MobilePreview"]:::shared
+  end
+
+  subgraph Lib["lib/"]
+    direction TB
+    perms["permissions.js — can(role, perm)"]:::shared
+    theme["theme.js — MUI dark theme"]:::shared
+    consts["constants.js — palettes · status maps"]:::shared
   end
 
   subgraph DataLayer["data/api/ — single import surface"]
@@ -124,9 +125,12 @@ flowchart LR
 
   ext_supabase[("<b>Supabase</b><br/>Postgres + Auth + RLS")]:::ext
 
-  Features ===>|"renders with"| Cross
-  Features ===>|"reads/writes"| DataLayer
-  DataLayer ===> ext_supabase
+  Features --> page
+  page -->|"composes UI from"| Shared
+  page -->|"checks roles · reads theme"| Lib
+  page -->|"reads/writes data via"| barrel
+  sb -->|"@supabase/supabase-js"| ext_supabase
+  auth -.->|"useAuth() context<br/>used by every page"| page
 ```
 
 ### Verified architectural invariants

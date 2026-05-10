@@ -7,6 +7,7 @@
  * lower per-user activity.
  */
 
+import { Box } from "@mui/material";
 import {
   ResponsiveContainer,
   BarChart,
@@ -29,14 +30,15 @@ function truncateTick(value) {
 export default function AverageActionsChart({ avgActionsData, selectedChallengeIds, height }) {
   return (
     <ComparisonCard title="Average Actions Per User" minHeight={height}>
-      <ResponsiveContainer key={selectedChallengeIds.join("-")} width="100%" height={height}>
+      <Box sx={{ width: '100%', height: 500, minHeight: 500, display: 'block' }}>
+        <ResponsiveContainer key={Math.random()} width="100%" height="100%" style={{ width: "100%", height: "100%" }}>
         <BarChart data={avgActionsData} margin={{ top: 40, right: 30, left: 20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" orientation="top" interval={0} tickFormatter={truncateTick} />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="averageActions" name="Avg Actions">
+          <Bar dataKey="averageActions" name="Avg Actions" isAnimationActive={false}>
             {avgActionsData.map((_entry, index) => (
               <Cell
                 key={`cell-${index}`}
@@ -46,6 +48,7 @@ export default function AverageActionsChart({ avgActionsData, selectedChallengeI
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      </Box>
     </ComparisonCard>
   );
 }

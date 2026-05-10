@@ -29,8 +29,6 @@ export default function WidgetCatalog({
   selectedChallengeIds = [],
   onToggleChallenge,
   onClearFilters,
-  isComparisonModeActive,
-  setIsComparisonModeActive,
 }) {
   return (
     <Drawer
@@ -66,8 +64,6 @@ export default function WidgetCatalog({
         selectedChallengeIds={selectedChallengeIds}
         onToggleChallenge={onToggleChallenge}
         onClearFilters={onClearFilters}
-        isComparisonModeActive={isComparisonModeActive}
-        setIsComparisonModeActive={setIsComparisonModeActive}
       />
 
       <CatalogWidgetList visible={visible} onToggle={onToggle} />

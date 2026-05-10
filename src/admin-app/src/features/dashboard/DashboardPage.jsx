@@ -110,6 +110,12 @@ export default function DashboardPage() {
         onSave={handleSave}
         onCancel={cancelEditing}
         onOpenCatalog={() => setCatalogOpen(true)}
+        isComparisonModeActive={isComparisonModeActive}
+        onToggleComparisonMode={() => setIsComparisonModeActive((prev) => !prev)}
+        allChallenges={allChallenges}
+        selectedChallengeIds={selectedChallengeIds}
+        onToggleChallenge={handleToggleChallenge}
+        onClearFilters={handleClearFilters}
       />
 
       {isEditing && (
@@ -183,8 +189,6 @@ export default function DashboardPage() {
         selectedChallengeIds={selectedChallengeIds}
         onToggleChallenge={handleToggleChallenge}
         onClearFilters={handleClearFilters}
-        isComparisonModeActive={isComparisonModeActive}
-        setIsComparisonModeActive={setIsComparisonModeActive}
       />
 
       <Snackbar

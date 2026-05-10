@@ -1,23 +1,17 @@
 /**
  * @file CatalogChallengeFilter.jsx
- * @summary "Filter Data by Challenge" + Comparison Mode toggle section
- * of the WidgetCatalog drawer.
+ * @summary "Filter Data by Challenge" section of the WidgetCatalog drawer.
  *
  * Owns no state -- the parent passes both the visible challenge list
- * and the controlled selection. Comparison Mode is disabled until the
- * user has picked at least 2 challenges so the chart has something to
- * actually compare.
+ * and the controlled selection.
  */
 
 import {
   Box,
   Button,
   Chip,
-  Divider,
-  FormControlLabel,
   Stack,
   Switch,
-  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -26,8 +20,6 @@ export default function CatalogChallengeFilter({
   selectedChallengeIds,
   onToggleChallenge,
   onClearFilters,
-  isComparisonModeActive,
-  setIsComparisonModeActive,
 }) {
   return (
     <Box
@@ -87,30 +79,6 @@ export default function CatalogChallengeFilter({
           </Box>
         ))}
       </Stack>
-      <Divider sx={{ my: 2 }} />
-      <Tooltip title="Select 2 or more challenges to enable Comparison Mode" arrow placement="top">
-        <Box>
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                color="primary"
-                checked={isComparisonModeActive}
-                onChange={(e) => setIsComparisonModeActive(e.target.checked)}
-                disabled={selectedChallengeIds.length <= 1}
-              />
-            }
-            label={
-              <Typography variant="body2" fontWeight={600}>
-                Comparison Mode
-              </Typography>
-            }
-          />
-        </Box>
-      </Tooltip>
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-        Replaces the standard dashboard with a head-to-head analysis.
-      </Typography>
     </Box>
   );
 }

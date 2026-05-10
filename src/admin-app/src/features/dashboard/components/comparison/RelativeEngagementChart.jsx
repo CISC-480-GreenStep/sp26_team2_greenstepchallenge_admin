@@ -17,7 +17,7 @@ import {
   Legend,
 } from "recharts";
 
-import { useTheme } from "@mui/material";
+import { useTheme, Box } from "@mui/material";
 
 import ComparisonCard from "./ComparisonCard";
 import { COMPARISON_COLORS } from "../../../../lib/constants";
@@ -37,7 +37,8 @@ export default function RelativeEngagementChart({
 
   return (
     <ComparisonCard title="Relative Engagement Trend" minHeight={height}>
-      <ResponsiveContainer key={selectedChallengeIds.join("-")} width="100%" height={height}>
+      <Box sx={{ width: '100%', height: 500, minHeight: 500, display: 'block' }}>
+        <ResponsiveContainer key={Math.random()} width="100%" height="100%" style={{ width: "100%", height: "100%" }}>
         <LineChart data={comparisonData} margin={{ top: 20, right: 30, left: 30, bottom: 80 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
@@ -74,10 +75,12 @@ export default function RelativeEngagementChart({
               strokeWidth={2}
               dot={{ r: 3 }}
               connectNulls
+              isAnimationActive={false}
             />
           ))}
         </LineChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </Box>
     </ComparisonCard>
   );
 }

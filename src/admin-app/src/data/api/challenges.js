@@ -60,6 +60,35 @@ export async function getChallengesByDate(fromDate, toDate) {
 }
 
 /**
+ * Fetch only archived (past) challenges with their action id arrays.
+ * Used by the "Clone from Past Challenge" quick-start flow.
+ * @returns {Promise<Array<object>>}
+ */
+export async function getArchivedChallenges() {
+  const challenges = unwrap(
+    await supabase
+      .from("challenges")
+      .select("*")
+      .eq("status", CHALLENGE_STATUSES.ARCHIVED)
+      .order("id"),
+  );
+  if (!challenges.length) return [];
+
+  const challengeIds = challenges.map((c) => c.id);
+  const ca = unwrap(
+    await supabase
+      .from("challenge_actions")
+      .select("challengeId, actionId")
+      .in("challengeId", challengeIds),
+  );
+  for (const c of challenges) {
+    c.categories = c.category ? c.category.split(", ") : [];
+    c.actionIds = ca.filter((r) => r.challengeId === c.id).map((r) => r.actionId);
+  }
+  return challenges;
+}
+
+/**
  * Fetch one challenge by id with its joined arrays.
  * @param {number|string} id
  * @returns {Promise<object|null>}

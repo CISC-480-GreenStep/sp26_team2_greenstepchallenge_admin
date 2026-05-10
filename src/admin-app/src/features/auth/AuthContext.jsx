@@ -84,7 +84,7 @@ export function AuthProvider({ children }) {
       // Clear the app user synchronously on sign-out so protected routes
       // redirect immediately. This is an auth-driven state reset, not a
       // derived-state pattern.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setUser(null);
       return;
     }

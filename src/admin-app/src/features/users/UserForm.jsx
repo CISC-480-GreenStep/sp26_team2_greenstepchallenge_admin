@@ -12,10 +12,8 @@ import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Box,
-  Typography,
   TextField,
   MenuItem,
   Button,
@@ -25,6 +23,7 @@ import {
   Alert,
 } from "@mui/material";
 
+import { PageHeader } from "../../components/shared/layout";
 import {
   getUserById,
   createUser,
@@ -109,18 +108,7 @@ export default function UserForm() {
 
   return (
     <Box>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
-
-      <Typography
-        variant="h5"
-        fontWeight={700}
-        mb={3}
-        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
-      >
-        {isEdit ? "Edit User" : "Create User"}
-      </Typography>
+      <PageHeader title={isEdit ? "Edit User" : "Create User"} />
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 600 }}>
         {error && (

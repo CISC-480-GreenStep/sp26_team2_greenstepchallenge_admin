@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Alert,
@@ -39,6 +38,7 @@ import {
 import ChallengeLeaderboard from "./components/ChallengeLeaderboard";
 import ParticipantsTable from "./components/ParticipantsTable";
 import ParticipationLog from "./components/ParticipationLog";
+import { PageHeader } from "../../components/shared/layout";
 import { MobilePreview } from "../../components/shared/preview";
 import {
   getActionsByChallenge,
@@ -117,9 +117,7 @@ export default function ChallengeDetail() {
           {error}
         </Alert>
       )}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
+      <PageHeader />
 
       <ChallengeSummaryCard
         challenge={challenge}

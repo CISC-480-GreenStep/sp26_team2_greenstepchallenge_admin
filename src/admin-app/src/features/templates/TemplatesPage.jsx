@@ -4,9 +4,10 @@
  */
 
 import { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
@@ -28,6 +29,7 @@ import {
 } from "@mui/material";
 
 import { ConfirmDialog } from "../../components/shared/feedback";
+import { PageHeader } from "../../components/shared/layout";
 import { getTemplates, deleteTemplate } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 
@@ -77,9 +79,7 @@ export default function TemplatesPage() {
           {error}
         </Alert>
       )}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
+      <PageHeader />
 
       <Box
         sx={{

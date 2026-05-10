@@ -87,8 +87,8 @@ src/admin-app/src/
 │       ├── actions.js                      ← Sustainability action catalog
 │       ├── participation.js                ← Per-(user, action, challenge) completion events
 │       ├── groups.js                       ← Postgres `departments` table (UI calls them Groups)
-<!-- │       ├── presets.js                      ← Reusable challenge templates + their action templates -->
-│       ├── templates.js                    ← Legacy templates (no UI yet; kept for completeness)
+│       ├── templates.js                    ← Reusable challenge templates (Postgres tables: `presets` / `preset_actions` -- name kept for backwards compat)
+│       ├── categories.js                   ← Action category catalog (custom categories from PR #66)
 │       ├── activityLogs.js                 ← Admin audit log
 │       └── leaderboard.js                  ← Cross-table aggregation queries (points, top users)
 │
@@ -367,22 +367,13 @@ file. The goal is to keep the map accurate without making it a chore.
 
 ---
 
-## Appendix: Stale branches awaiting owner decision
+## Appendix: Stale branches (resolved)
 
-The v0.9.0 consolidation pruned branches with **0 unique commits** vs `main`.
-Two remote branches were intentionally **not** deleted because they still hold
-unique commits, but they appear stale and have no open PR:
+The v0.9.0 stale-branch decisions tracked in [issue #55](https://github.com/CISC-480-GreenStep/sp26_team2_greenstepchallenge_admin/issues/55) have all
+been resolved: both `feature/auth-magic-links` and
+`Eli-feature-customizable-dashboard` were dropped. The SuperAdmin
+permanent-delete rebuild lives in [issue #67](https://github.com/CISC-480-GreenStep/sp26_team2_greenstepchallenge_admin/issues/67).
 
-- **`origin/feature/auth-magic-links`** — 1 unique commit ("Add permanent user
-  deletion for SuperAdmins"), 64 commits behind `main`. Targets the old
-  pre-split `data/api.js` monolith and ships a Netlify function — the project
-  migrated to Vercel in PR #39, so the function is dead code as-is. Either port
-  the SuperAdmin delete-user feature onto current `data/api/users.js` + a
-  Vercel API route, or close and delete the branch.
-- **`origin/Eli-feature-customizable-dashboard`** — 3 unique commits, 72 behind
-  `main`. The customizable-dashboard work appears to be fully superseded by the
-  per-slice refactor that already landed in v0.7.x. Recommended: file-by-file
-  diff to confirm nothing unique is left, then delete.
-
-Owner (or any maintainer) should triage these and either open a PR or delete
-the branch so the remote stays clean.
+If a future stale branch appears, follow the same pattern: open a tracking
+issue if there is reusable scope, then delete the branch so the remote stays
+clean.

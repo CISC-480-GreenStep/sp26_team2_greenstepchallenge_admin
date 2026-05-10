@@ -72,9 +72,14 @@ src/admin-app/src/
 │       │   ├── StatCard.jsx                ← KPI tile (value + icon)
 │       │   ├── CSVExport.jsx               ← "Export CSV" button for any array of objects
 │       │   └── EntityLink.jsx              ← Inline link → /{type}/{id}
+│       ├── forms/                          ← Dialog-based form editors used by 2+ features
+│       │   ├── ActionFormDialog.jsx          ← Add/edit a single action (Challenges + Templates)
+│       │   └── CategoryFormDialog.jsx        ← Add/edit a single category (Challenges + Templates)
+│       ├── layout/
+│       │   └── PageHeader.jsx              ← Standard "Back button + h5 title" row (8 sites)
 │       ├── preview/
 │       │   └── MobilePreview.jsx           ← Phone-frame preview of a challenge
-│       └── index.js                        ← Top-level barrel (re-exports the three subfolders)
+│       └── index.js                        ← Top-level barrel (re-exports the five subfolders)
 │
 ├── data/                                  ← Everything that talks to Supabase
 │   ├── supabase.js                         ← Supabase client singleton (only file that imports @supabase/supabase-js)
@@ -162,7 +167,7 @@ src/admin-app/src/
     │       ├── ChallengeLeaderboard.jsx      ← ChallengeDetail: top scorers w/ medals
     │       └── ParticipationLog.jsx          ← ChallengeDetail: per-completion event feed
     │
-    ├── presets/                           ← Reusable challenge templates (folder name kept; files renamed to Template* in v0.9.0)
+    ├── templates/                          ← Reusable challenge templates (folder renamed from `presets/` in v0.10.0)
     │   ├── TemplatesPage.jsx               ← List (route `/templates`)
     │   ├── TemplateForm.jsx                ← Create / edit (orchestrator) + sticky MobilePreview on md+
     │   └── components/
@@ -309,7 +314,7 @@ commit-able; if a playbook produces a >300-line file, see Section 3 of
 
 ```mermaid
 flowchart LR
-  user["User<br/>(browser)"] -->|magic link / dev login| login["LoginPage<br/>features/auth"]
+  user["User<br/>(browser)"] -->|8-digit OTP code / dev login| login["LoginPage<br/>features/auth"]
   login -->|sets session| sb["Supabase Auth"]
   sb -->|profile row| api["data/api/users.js"]
   api --> ctx["AuthProvider<br/>features/auth/AuthContext.jsx"]
@@ -328,6 +333,14 @@ Key invariants:
   always import from `"../../data/api"`, never from `"../../data/api/users"`.
 - **Auth state flows through the `useAuth` hook**, not by reading the
   Supabase client directly.
+- **Authorization is enforced by Postgres Row-Level Security**, not by the
+  React app. Role-based UI gates in `lib/permissions.js` are for UX
+  (hiding buttons that would fail anyway); the actual security boundary
+  lives in the RLS policies (migrations 006 / 011 / 012).
+- **Cross-feature components live in `components/shared/`.** A feature
+  folder importing from another feature folder is the smell that says
+  "move this to shared/" — see `forms/` and `layout/` for the established
+  pattern.
 
 ## 7. Conventions Reference
 

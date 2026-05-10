@@ -14,22 +14,26 @@
 Who interacts with the system, and which neighbouring systems it talks to.
 
 ```mermaid
-C4Context
-  title System Context — GreenStep Admin Console
+flowchart TB
+  classDef person fill:#08427b,stroke:#052e56,color:#fff
+  classDef personExt fill:#686868,stroke:#4a4a4a,color:#fff
+  classDef system fill:#1168bd,stroke:#0b4884,color:#fff
+  classDef systemExt fill:#999,stroke:#6b6b6b,color:#fff
 
-  Person(staff, "MPCA Staff", "SuperAdmin / Admin / GeneralUser roles")
-  Person_Ext(participant, "Challenge Participant", "Logs sustainability actions")
+  staff(["MPCA Staff<br/><br/>SuperAdmin / Admin /<br/>GeneralUser roles"]):::person
+  participant(["Challenge Participant<br/><br/>Logs sustainability actions"]):::personExt
 
-  System(admin, "GreenStep Admin Console", "Web app for managing challenges, users, groups, templates, and reports")
-  System_Ext(mobile, "GreenStep Mobile App", "Team 1 user-facing app (shares the database)")
-  System_Ext(supabase, "Supabase", "Postgres + Auth + REST + RLS")
-  System_Ext(vercel, "Vercel", "Hosts SPA + serverless functions")
+  admin["GreenStep Admin Console<br/><br/>Web app for managing challenges,<br/>users, groups, templates, reports"]:::system
 
-  Rel(staff, admin, "Manages challenges, runs reports", "HTTPS")
-  Rel(participant, mobile, "Logs actions", "HTTPS")
-  Rel(admin, supabase, "Reads/writes via @supabase/supabase-js", "HTTPS")
-  Rel(mobile, supabase, "Reads/writes (shared schema)", "HTTPS")
-  Rel(admin, vercel, "Hosted on", "deploy")
+  mobile["GreenStep Mobile App<br/><br/>Team 1 user-facing app<br/>(shares the database)"]:::systemExt
+  supabase["Supabase<br/><br/>Postgres + Auth + REST + RLS"]:::systemExt
+  vercel["Vercel<br/><br/>Hosts SPA +<br/>serverless functions"]:::systemExt
+
+  staff -->|"Manages challenges,<br/>runs reports (HTTPS)"| admin
+  participant -->|"Logs actions (HTTPS)"| mobile
+  admin -->|"Reads/writes via<br/>@supabase/supabase-js (HTTPS)"| supabase
+  mobile -->|"Reads/writes<br/>(shared schema, HTTPS)"| supabase
+  admin -.->|"Hosted on"| vercel
 ```
 
 ---
@@ -39,23 +43,27 @@ C4Context
 Deployable units inside the Admin Console boundary.
 
 ```mermaid
-C4Container
-  title Container View — GreenStep Admin Console
+flowchart TB
+  classDef person fill:#08427b,stroke:#052e56,color:#fff
+  classDef container fill:#438dd5,stroke:#2e6295,color:#fff
+  classDef containerDb fill:#438dd5,stroke:#2e6295,color:#fff
+  classDef systemExt fill:#999,stroke:#6b6b6b,color:#fff
 
-  Person(staff, "MPCA Staff", "Browser-based")
-  System_Ext(supabase, "Supabase", "Postgres + Auth + RLS")
+  staff(["MPCA Staff<br/><br/>Browser-based"]):::person
 
-  Container_Boundary(b, "GreenStep Admin Console (Vercel)") {
-    Container(spa, "React SPA", "React 19 + Vite + MUI v7", "Renders all admin pages; talks to Supabase directly via supabase-js")
-    Container(fns, "Vercel Serverless Functions", "Node.js (api/)", "Privileged ops only: invite-user, set-user-active (uses Supabase service-role key)")
-    ContainerDb(local, "Browser localStorage", "Per-user dashboard layout cache")
-  }
+  subgraph boundary["GreenStep Admin Console (deployed on Vercel)"]
+    spa["React SPA<br/><br/>React 19 + Vite + MUI v7<br/><br/>Renders all admin pages;<br/>talks to Supabase directly<br/>via supabase-js"]:::container
+    fns["Vercel Serverless Functions<br/><br/>Node.js (api/)<br/><br/>Privileged ops only:<br/>invite-user, set-user-active<br/>(uses Supabase service-role key)"]:::container
+    local[("Browser localStorage<br/><br/>Per-user dashboard<br/>layout cache")]:::containerDb
+  end
 
-  Rel(staff, spa, "Uses", "HTTPS")
-  Rel(spa, supabase, "Reads/writes (anon key, RLS-enforced)", "HTTPS")
-  Rel(spa, fns, "Calls for invites + activate/deactivate", "HTTPS")
-  Rel(fns, supabase, "Admin ops with service-role key", "HTTPS")
-  Rel(spa, local, "Persists dashboard layout", "")
+  supabase["Supabase<br/><br/>Postgres + Auth + RLS"]:::systemExt
+
+  staff -->|"Uses (HTTPS)"| spa
+  spa -->|"Reads/writes<br/>(anon key, RLS-enforced, HTTPS)"| supabase
+  spa -->|"Calls for invites +<br/>activate/deactivate (HTTPS)"| fns
+  fns -->|"Admin ops with<br/>service-role key (HTTPS)"| supabase
+  spa -.->|"Persists dashboard layout"| local
 ```
 
 **Key design decision (called out for the rubric):** the SPA talks to Supabase

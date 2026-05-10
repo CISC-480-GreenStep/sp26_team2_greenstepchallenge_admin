@@ -79,52 +79,54 @@ How the SPA is organized internally. Matches the source tree under
 `src/admin-app/src/`.
 
 ```mermaid
-flowchart TD
+flowchart LR
   classDef feature fill:#1f3a52,stroke:#4DD0E1,color:#fff
   classDef shared fill:#2E7D32,stroke:#66BB6A,color:#fff
   classDef data fill:#5d3a1f,stroke:#FFA726,color:#fff
   classDef ext fill:#37474F,stroke:#90A4AE,color:#fff
 
-  subgraph Features["features/ — one folder per route"]
-    auth["auth<br/>(LoginPage, AuthContext,<br/>RequireAuth)"]:::feature
-    dash["dashboard<br/>(15 widgets, 2 hooks,<br/>ComparisonMode)"]:::feature
-    chal["challenges<br/>(List, Form, Detail,<br/>+ 10 sub-components)"]:::feature
-    tmpl["templates<br/>(List, Form,<br/>+ 1 sub-component)"]:::feature
-    grps["groups<br/>(List, Form, Detail,<br/>+ 2 sub-components)"]:::feature
-    usrs["users<br/>(List, Form, Detail,<br/>+ 5 sub-components)"]:::feature
-    rpts["reports<br/>(ReportsPage —<br/>being absorbed by dashboard)"]:::feature
+  subgraph Features["features/ — route-level UI"]
+    direction TB
+    auth["<b>auth</b><br/>LoginPage · AuthContext · RequireAuth"]:::feature
+    dash["<b>dashboard</b><br/>15 widgets · 2 hooks · ComparisonMode"]:::feature
+    chal["<b>challenges</b><br/>List · Form · Detail · +10 sub"]:::feature
+    tmpl["<b>templates</b><br/>List · Form · +1 sub"]:::feature
+    grps["<b>groups</b><br/>List · Form · Detail · +2 sub"]:::feature
+    usrs["<b>users</b><br/>List · Form · Detail · +5 sub"]:::feature
+    rpts["<b>reports</b><br/>ReportsPage<br/><i>(being absorbed by dashboard)</i>"]:::feature
   end
 
-  subgraph Shared["components/shared/"]
-    feedback["feedback/<br/>ConfirmDialog"]:::shared
-    sdata["data/<br/>StatCard, CSVExport,<br/>EntityLink"]:::shared
-    forms["forms/<br/>ActionFormDialog,<br/>CategoryFormDialog"]:::shared
-    layout["layout/<br/>PageHeader"]:::shared
-    preview["preview/<br/>MobilePreview"]:::shared
+  subgraph Cross["Cross-cutting (shared/ + lib/)"]
+    direction TB
+    subgraph Shared["components/shared/"]
+      direction TB
+      feedback["feedback/ — ConfirmDialog"]:::shared
+      sdata["data/ — StatCard · CSVExport · EntityLink"]:::shared
+      forms["forms/ — ActionFormDialog · CategoryFormDialog"]:::shared
+      layout["layout/ — PageHeader"]:::shared
+      preview["preview/ — MobilePreview"]:::shared
+    end
+    subgraph Lib["lib/"]
+      direction TB
+      perms["permissions.js — can(role, perm)"]:::shared
+      theme["theme.js — MUI dark theme"]:::shared
+      consts["constants.js — palettes · status maps"]:::shared
+    end
   end
 
-  subgraph Lib["lib/"]
-    perms["permissions.js<br/>can(role, perm)"]:::shared
-    theme["theme.js<br/>MUI dark theme"]:::shared
-    consts["constants.js<br/>palettes + status maps"]:::shared
+  subgraph DataLayer["data/api/ — single import surface"]
+    direction TB
+    barrel["<b>index.js (barrel)</b><br/>components import only from here"]:::data
+    entities["per-entity modules:<br/>users · challenges · actions · participation<br/>groups · templates · categories<br/>activityLogs · leaderboard"]:::data
+    sb["<b>supabase.js</b><br/>only file importing<br/>@supabase/supabase-js"]:::data
+    barrel --> entities --> sb
   end
 
-  subgraph DataLayer["data/api/ — barrel"]
-    barrel["index.js<br/>(single import surface)"]:::data
-    entities["users · challenges · actions ·<br/>participation · groups · templates ·<br/>categories · activityLogs · leaderboard"]:::data
-    sb["supabase.js<br/>(only file importing<br/>@supabase/supabase-js)"]:::data
-  end
+  ext_supabase[("<b>Supabase</b><br/>Postgres + Auth + RLS")]:::ext
 
-  ext_supabase[("Supabase<br/>Postgres + Auth + RLS")]:::ext
-
-  Features --> Shared
-  Features --> Lib
-  Features --> barrel
-  barrel --> entities
-  entities --> sb
-  sb --> ext_supabase
-
-  auth -.->|context| Features
+  Features ===>|"renders with"| Cross
+  Features ===>|"reads/writes"| DataLayer
+  DataLayer ===> ext_supabase
 ```
 
 ### Verified architectural invariants

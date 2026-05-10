@@ -22,7 +22,7 @@ import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
-import CategoryFormDialog from "./components/CategoryFormDialog";
+import { CategoryFormDialog } from "../../components/shared/forms";
 import {
   ACTIONS,
   CHALLENGE_STATUSES,

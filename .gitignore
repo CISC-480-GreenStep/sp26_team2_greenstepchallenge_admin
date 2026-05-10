@@ -35,3 +35,6 @@ pnpm-debug.log*
 
 # OS
 Thumbs.db
+
+# Local testing artifacts (gitignore from PR #68 will supersede this)
+testing/

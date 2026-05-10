@@ -10,8 +10,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Grid, Paper, Stack, Typography, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 
 import TemplateFieldsSection from "./components/TemplateFieldsSection";
-import ActionFormDialog from "../challenges/components/ActionFormDialog";
-import CategoryFormDialog from "../challenges/components/CategoryFormDialog";
+import { ActionFormDialog, CategoryFormDialog } from "../../components/shared/forms";
 import { MobilePreview } from "../../components/shared/preview";
 import { createTemplate, getTemplateById, updateTemplate, getActions, createAction, getCategories, createCategory } from "../../data/api";
 

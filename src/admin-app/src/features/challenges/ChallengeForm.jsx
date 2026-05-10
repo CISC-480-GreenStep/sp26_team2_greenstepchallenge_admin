@@ -29,6 +29,7 @@ import {
   createAction,
   createChallenge,
   getActionsByChallenge,
+  getArchivedChallenges,
   getChallengeById,
   getGroups,
   getTemplates,
@@ -64,8 +65,10 @@ export default function ChallengeForm() {
   const [actions, setActions] = useState([]);
   const [groups, setGroups] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [archivedChallenges, setArchivedChallenges] = useState([]);
   const [globalCategories, setGlobalCategories] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [selectedCloneId, setSelectedCloneId] = useState("");
   const [templateActions, setTemplateActions] = useState([]);
   
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -79,6 +82,7 @@ export default function ChallengeForm() {
     getCategories().then(setGlobalCategories);
     getGroups().then(setGroups);
     getTemplates().then(setTemplates);
+    getArchivedChallenges().then(setArchivedChallenges);
     if (isEdit) {
       const cid = Number(id);
       getChallengeById(cid).then((c) => {
@@ -91,6 +95,7 @@ export default function ChallengeForm() {
   const handleApplyTemplate = (e) => {
     const pid = e.target.value;
     setSelectedTemplateId(pid);
+    setSelectedCloneId(""); // clear the other dropdown
     const template = templates.find((p) => p.id === pid);
     if (!template) {
       setTemplateActions([]);
@@ -108,6 +113,38 @@ export default function ChallengeForm() {
       status: template.status || prev.status,
     }));
     setTemplateActions(template.actions || []);
+  };
+
+  const handleApplyClone = async (e) => {
+    const cid = e.target.value;
+    setSelectedCloneId(cid);
+    setSelectedTemplateId(""); // clear the other dropdown
+    const challenge = archivedChallenges.find((c) => c.id === cid);
+    if (!challenge) {
+      setTemplateActions([]);
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      name: challenge.name,
+      description: challenge.description,
+      category: challenge.categories?.[0] || prev.category,
+      bgColorHeader: challenge.bgColorHeader || prev.bgColorHeader,
+      txColorHeader: challenge.txColorHeader || prev.txColorHeader,
+      bgColorBody: challenge.bgColorBody || prev.bgColorBody,
+      txColorBody: challenge.txColorBody || prev.txColorBody,
+      groupId: challenge.groupId || prev.groupId,
+      status: CHALLENGE_STATUSES.UPCOMING,
+      startDate: "",
+      endDate: "",
+    }));
+    // Fetch full action objects so the preview table can display them
+    if (challenge.actionIds?.length) {
+      const fullActions = await getActionsByChallenge(challenge.id);
+      setTemplateActions(fullActions);
+    } else {
+      setTemplateActions([]);
+    }
   };
 
   const handleChange = (field) => (e) => {setForm((prev) => ({ ...prev, [field]: e.target.value }))};
@@ -193,6 +230,9 @@ export default function ChallengeForm() {
                     templates={templates}
                     selectedTemplateId={selectedTemplateId}
                     onSelect={handleApplyTemplate}
+                    archivedChallenges={archivedChallenges}
+                    selectedCloneId={selectedCloneId}
+                    onCloneSelect={handleApplyClone}
                     templateActions={templateActions}
                   />
                 </Box>

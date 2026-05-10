@@ -23,7 +23,7 @@ export default function ComparisonCard({ title, minHeight, children }) {
         resize: "both",
         overflow: "auto",
         width: "100%",
-        minHeight,
+        minHeight: Math.max(minHeight, 500),
         padding: 2,
         display: "flex",
         flexDirection: "column",

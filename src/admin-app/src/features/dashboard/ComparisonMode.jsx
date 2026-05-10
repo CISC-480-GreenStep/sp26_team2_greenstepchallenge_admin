@@ -8,6 +8,7 @@
  * decides the responsive grid and forwards data into each card.
  */
 
+import { useState, useEffect } from "react";
 import { Box, Grid } from "@mui/material";
 
 import AverageActionsChart from "./components/comparison/AverageActionsChart";
@@ -30,53 +31,77 @@ export default function ComparisonMode({ stats, challenges, selectedChallengeIds
     selectedChallenges,
   );
 
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    console.log("Container Width on Load:", document.getElementById('chart-container')?.offsetWidth);
+  }, [ready]);
+
   // Cards grow with the number of selected challenges so labels never overlap.
-  const dynamicHeight = Math.max(450, 300 + selectedChallengeIds.length * 35);
+  const dynamicHeight = Math.max(600, 450 + selectedChallengeIds.length * 35);
+  const compositeKey = selectedChallengeIds.join("-") + "-" + ready;
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <RelativeEngagementChart
-            comparisonData={stats.comparisonData}
-            selectedChallenges={selectedChallenges}
-            selectedChallengeIds={selectedChallengeIds}
-            height={dynamicHeight}
-          />
-        </Grid>
+    <Box sx={{ mt: 2, mx: { sm: -1, md: -2 } }}>
+      <Grid container spacing={2}>
+        {ready && (
+          <>
+            <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
+              <Box id="chart-container" key={`rel-${compositeKey}`} sx={{ width: "100% !important", height: "600px !important" }}>
+                <RelativeEngagementChart
+                  comparisonData={stats.comparisonData}
+                  selectedChallenges={selectedChallenges}
+                  selectedChallengeIds={selectedChallengeIds}
+                  height={dynamicHeight}
+                />
+              </Box>
+            </Grid>
 
-        <Grid item xs={12} md={6}>
-          <CategoryBreakdownChart
-            stackedCategoryData={stackedCategoryData}
-            categoryKeys={categoryKeys}
-            selectedChallengeIds={selectedChallengeIds}
-            height={dynamicHeight}
-          />
-        </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
+              <Box key={`cat-${compositeKey}`} sx={{ width: "100% !important", height: "600px !important" }}>
+                <CategoryBreakdownChart
+                  stackedCategoryData={stackedCategoryData}
+                  categoryKeys={categoryKeys}
+                  selectedChallengeIds={selectedChallengeIds}
+                  height={dynamicHeight}
+                />
+              </Box>
+            </Grid>
 
-        <Grid item xs={12} md={6}>
-          <TotalsBarChart
-            barData={barData}
-            selectedChallengeIds={selectedChallengeIds}
-            height={dynamicHeight}
-          />
-        </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
+              <Box key={`tot-${compositeKey}`} sx={{ width: "100% !important", height: "600px !important" }}>
+                <TotalsBarChart
+                  barData={barData}
+                  selectedChallengeIds={selectedChallengeIds}
+                  height={dynamicHeight}
+                />
+              </Box>
+            </Grid>
 
-        <Grid item xs={12} md={6}>
-          <AverageActionsChart
-            avgActionsData={avgActionsData}
-            selectedChallengeIds={selectedChallengeIds}
-            height={dynamicHeight}
-          />
-        </Grid>
+            <Grid item xs={6} sm={6} md={6} lg={6} xl={6}>
+              <Box key={`avg-${compositeKey}`} sx={{ width: "100% !important", height: "600px !important" }}>
+                <AverageActionsChart
+                  avgActionsData={avgActionsData}
+                  selectedChallengeIds={selectedChallengeIds}
+                  height={dynamicHeight}
+                />
+              </Box>
+            </Grid>
 
-        <Grid item xs={12}>
-          <ComparisonSummaryTable
-            selectedChallenges={selectedChallenges}
-            barData={barData}
-            stackedCategoryData={stackedCategoryData}
-          />
-        </Grid>
+            <Grid item xs={12}>
+              <ComparisonSummaryTable
+                selectedChallenges={selectedChallenges}
+                barData={barData}
+                stackedCategoryData={stackedCategoryData}
+              />
+            </Grid>
+          </>
+        )}
       </Grid>
     </Box>
   );

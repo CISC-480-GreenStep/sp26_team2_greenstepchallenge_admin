@@ -43,8 +43,7 @@ src/admin-app/
 ├── package.json                ← deps + scripts (dev / build / lint / format / preview)
 ├── vite.config.js              ← Vite build config
 ├── vercel.json                 ← Vercel deploy config (rewrites, etc.)
-├── netlify/                    ← serverless function for Supabase user invites
-├── api/                        ← Vercel-style equivalent of the same function
+├── api/                        ← Vercel serverless functions (privileged ops: invite-user, set-user-active)
 ├── public/                     ← static assets served as-is
 └── src/                        ← all application source (annotated below)
 ```
@@ -255,7 +254,7 @@ line inside the source tree.
 | Prettier formatting | [`src/admin-app/.prettierrc.json`](../src/admin-app/.prettierrc.json) |
 | Vite build / dev-server config | [`src/admin-app/vite.config.js`](../src/admin-app/vite.config.js) |
 | Vercel deploy behavior (rewrites, etc.) | [`src/admin-app/vercel.json`](../src/admin-app/vercel.json) |
-| The user-invite serverless function | [`src/admin-app/netlify/`](../src/admin-app/netlify/) (Netlify) and [`src/admin-app/api/`](../src/admin-app/api/) (Vercel) — keep both in sync |
+| The serverless functions (invite-user, set-user-active) | [`src/admin-app/api/`](../src/admin-app/api/) — Vercel functions |
 
 ## 5. "I want to add X" — playbooks
 

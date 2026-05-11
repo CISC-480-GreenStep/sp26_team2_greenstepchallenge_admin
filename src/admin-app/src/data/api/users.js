@@ -113,3 +113,31 @@ export async function getUserByEmail(email) {
   const { data } = await supabase.from("users").select("*").eq("email", email).maybeSingle();
   return data;
 }
+
+/**
+ * Permanently delete a user (Auth + profile row) via the serverless
+ * delete endpoint. Distinct from `deactivateUser`, which only bans
+ * the credential and flips a status flag; this purges the user
+ * entirely. Cascades to `participation` and `activity_logs`; rows
+ * the user authored (challenges, templates, groups) keep a NULL
+ * `createdBy`.
+ *
+ * SuperAdmin-only. The frontend gates the affordance via
+ * `can(role, "DELETE_USER_PERMANENT")`; the service-role key is
+ * server-only so the route can't be called from a regular client
+ * even if someone bypasses the UI guard.
+ *
+ * @param {{ id: number|string, email: string }} user The user row to purge.
+ * @returns {Promise<{ ok: boolean, authDeleted: boolean }>}
+ * @throws {Error} When the serverless function responds with a non-2xx.
+ */
+export async function deleteUserPermanently({ id, email }) {
+  const res = await fetch("/api/delete-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: id, email }),
+  });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || "Failed to delete user");
+  return result;
+}

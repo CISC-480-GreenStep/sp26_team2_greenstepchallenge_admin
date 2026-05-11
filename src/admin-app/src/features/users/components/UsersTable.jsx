@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
@@ -46,9 +47,19 @@ import { USER_STATUSES } from "../../../data/api";
  * @param {(gid: number) => string} props.groupName  - id-to-name lookup
  * @param {ColumnPerms}    props.cols
  * @param {boolean}        props.canManage  - show Edit / toggle-status icons
+ * @param {boolean}        props.canDeletePermanent  - show permanent-delete icon (SuperAdmin)
  * @param {(user: object) => void} props.onToggleStatus  - asks parent to confirm
+ * @param {(user: object) => void} [props.onDeletePermanent]  - asks parent to confirm permanent delete
  */
-export default function UsersTable({ users, groupName, cols, canManage, onToggleStatus }) {
+export default function UsersTable({
+  users,
+  groupName,
+  cols,
+  canManage,
+  canDeletePermanent,
+  onToggleStatus,
+  onDeletePermanent,
+}) {
   const navigate = useNavigate();
 
   // colSpan for the empty-state row: name + actions = 2, plus one
@@ -128,6 +139,16 @@ export default function UsersTable({ users, groupName, cols, canManage, onToggle
                       )}
                     </IconButton>
                   </>
+                )}
+                {canDeletePermanent && (
+                  <IconButton
+                    size="small"
+                    color="error"
+                    aria-label="Permanently delete user"
+                    onClick={() => onDeletePermanent?.(u)}
+                  >
+                    <DeleteForeverIcon fontSize="small" />
+                  </IconButton>
                 )}
               </TableCell>
             </TableRow>

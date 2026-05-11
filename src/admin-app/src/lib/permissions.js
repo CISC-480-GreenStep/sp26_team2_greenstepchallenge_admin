@@ -67,6 +67,13 @@ export const PERMS = {
   /** Who can activate/deactivate users */
   ACTIVATE_DEACTIVATE_USER: ROLES.ADMIN,
 
+  /**
+   * Who can permanently delete a user (auth + profile row + cascaded
+   * participation/activity_logs). Distinct from deactivate; this is
+   * irreversible. SuperAdmin only.
+   */
+  DELETE_USER_PERMANENT: ROLES.SUPER_ADMIN,
+
   // ─── Future: scope to specific users (e.g. GeneralUser sees only same group) ───
   // When needed, add: canViewUser(userId, viewerUserId, viewerRole, viewerGroupId)
   // and filter the users list / block detail access accordingly.

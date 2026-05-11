@@ -59,7 +59,8 @@ export async function getUserPoints(userId) {
   );
   const actions = unwrap(await supabase.from("actions").select("id, points"));
   const challenges = unwrap(await supabase.from("challenges").select("id, name, status"));
-  const ca = unwrap(await supabase.from("challenge_actions").select("challengeId, actionId"));
+  // const ca = unwrap(await supabase.from("challenge_actions").select("challengeId, actionId"));
+  const ca = []; // Fallback for missing table
 
   const actionPoints = Object.fromEntries(actions.map((a) => [a.id, a.points]));
   const challengeMap = Object.fromEntries(challenges.map((c) => [c.id, c]));
@@ -108,9 +109,10 @@ export async function getChallengeLeaderboard(challengeId, limit = 10) {
   );
   const actions = unwrap(await supabase.from("actions").select("id, points"));
   const users = unwrap(await supabase.from("users").select("id, name"));
-  const ca = unwrap(
-    await supabase.from("challenge_actions").select("actionId").eq("challengeId", challengeId),
-  );
+  // const ca = unwrap(
+  //   await supabase.from("challenge_actions").select("actionId").eq("challengeId", challengeId),
+  // );
+  const ca = []; // Fallback for missing table
 
   const actionPoints = Object.fromEntries(actions.map((a) => [a.id, a.points]));
   const userNames = Object.fromEntries(users.map((u) => [u.id, u.name]));

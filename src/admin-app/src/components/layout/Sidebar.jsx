@@ -17,6 +17,8 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventIcon from "@mui/icons-material/Event";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PeopleIcon from "@mui/icons-material/People";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import {
   Drawer,
   List,
@@ -37,6 +39,8 @@ const NAV_ITEMS = [
   { label: "Groups", path: "/groups", icon: <GroupsIcon /> },
   { label: "Users", path: "/users", icon: <PeopleIcon /> },
   { label: "Reports", path: "/reports", icon: <AssessmentIcon /> },
+  { label: "Issue Tickets", path: "/issue-tickets", icon: <ConfirmationNumberIcon /> },
+  { label: "Badges", path: "/badges", icon: <EmojiEventsIcon /> },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {

@@ -29,6 +29,7 @@ import {
   USER_STATUSES,
   activateUser,
   deactivateUser,
+  deleteUserPermanently,
   getGroups,
   getUsers,
   logActivity,
@@ -52,12 +53,15 @@ export default function UsersPage() {
   const [error, setError] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const navigate = useNavigate();
   const { user, hasRole } = useAuth();
   const userRole = user?.role || ROLES.GENERAL_USER;
   const canManage = hasRole("Admin");
   const isSuperAdmin = hasRole("SuperAdmin");
+  const canDeletePermanent = can(userRole, "DELETE_USER_PERMANENT");
 
   // Column-visibility flags driven by the permissions matrix.
   const cols = {
@@ -115,6 +119,33 @@ export default function UsersPage() {
     setPendingAction(null);
     setConfirmOpen(false);
     load();
+  };
+
+  const requestDeletePermanent = (target) => {
+    setPendingDelete(target);
+    setDeleteConfirmOpen(true);
+  };
+
+  // Activity log row is written BEFORE the delete -- otherwise the FK
+  // cascade on activity_logs.userId would wipe out the audit entry too.
+  const handleDeletePermanent = async () => {
+    if (!pendingDelete) return;
+    setError(null);
+    try {
+      await logActivity(
+        user.id,
+        "Permanently deleted user",
+        `Permanently deleted ${pendingDelete.name} (${pendingDelete.email})`,
+      );
+      await deleteUserPermanently({ id: pendingDelete.id, email: pendingDelete.email });
+      setPendingDelete(null);
+      setDeleteConfirmOpen(false);
+      load();
+    } catch (err) {
+      setError(err.message || "Failed to permanently delete user");
+      setDeleteConfirmOpen(false);
+      setPendingDelete(null);
+    }
   };
 
   if (loading) {
@@ -179,7 +210,9 @@ export default function UsersPage() {
         groupName={groupName}
         cols={cols}
         canManage={canManage}
+        canDeletePermanent={canDeletePermanent}
         onToggleStatus={requestToggleStatus}
+        onDeletePermanent={requestDeletePermanent}
       />
 
       <ConfirmDialog
@@ -192,6 +225,25 @@ export default function UsersPage() {
         onCancel={() => {
           setConfirmOpen(false);
           setPendingAction(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="Permanently delete user?"
+        message={
+          pendingDelete
+            ? `This will permanently delete ${pendingDelete.name} (${pendingDelete.email}), ` +
+              "their sign-in credential, all of their action completions, and their activity " +
+              "log. Anything they authored (challenges, templates, groups) will remain but " +
+              "show no author. This cannot be undone -- prefer Deactivate if you only need " +
+              "to block sign-in."
+            : ""
+        }
+        onConfirm={handleDeletePermanent}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setPendingDelete(null);
         }}
       />
     </Box>

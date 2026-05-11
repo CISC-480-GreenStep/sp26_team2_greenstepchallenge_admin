@@ -93,11 +93,9 @@ async function setAuthActive(email, active) {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      // eslint-disable-next-line no-console
       console.warn("set-user-active failed:", body.error || res.statusText);
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.warn("set-user-active failed:", err.message);
   }
 }

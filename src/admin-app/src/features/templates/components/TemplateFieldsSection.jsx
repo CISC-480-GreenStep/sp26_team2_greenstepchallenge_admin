@@ -3,8 +3,8 @@
  * @summary Template metadata fields (name, description, categories, theme).
  */
 
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from "@mui/material";
 
 export default function TemplateFieldsSection({ form, onChange, categories = [], onAddCategoryClick }) {
 

@@ -6,6 +6,8 @@
  *   - `feedback` -- modals, alerts, confirmation dialogs
  *   - `data`     -- tables, links, cards, exports
  *   - `preview`  -- preview / visualization shells
+ *   - `forms`    -- dialog-based form editors used by 2+ features
+ *   - `layout`   -- page-level chrome (PageHeader, etc.)
  *
  * Consumers can do either:
  *   import { ConfirmDialog, CSVExport } from "@/components/shared";
@@ -15,3 +17,5 @@
 export * from "./feedback";
 export * from "./data";
 export * from "./preview";
+export * from "./forms";
+export * from "./layout";

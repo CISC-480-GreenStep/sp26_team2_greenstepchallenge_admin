@@ -10,9 +10,9 @@ import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Typography, TextField, Button, Stack, Paper, Grid } from "@mui/material";
+import { Box, TextField, Button, Stack, Paper, Grid } from "@mui/material";
 
+import { PageHeader } from "../../components/shared/layout";
 import { getGroupById, createGroup, updateGroup } from "../../data/api";
 
 const EMPTY = { name: "", description: "" };
@@ -45,18 +45,7 @@ export default function GroupForm() {
 
   return (
     <Box>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
-
-      <Typography
-        variant="h5"
-        fontWeight={700}
-        mb={3}
-        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
-      >
-        {isEdit ? "Edit Group" : "Create Group"}
-      </Typography>
+      <PageHeader title={isEdit ? "Edit Group" : "Create Group"} />
 
       <Paper sx={{ p: { xs: 2, sm: 3 }, maxWidth: 500 }}>
         <form onSubmit={handleSubmit}>

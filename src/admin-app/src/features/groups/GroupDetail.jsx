@@ -15,7 +15,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -38,6 +37,7 @@ import {
 import GroupChallengesTable from "./components/GroupChallengesTable";
 import MembersTable from "./components/MembersTable";
 import { ConfirmDialog } from "../../components/shared/feedback";
+import { PageHeader } from "../../components/shared/layout";
 import { deleteGroup, getChallenges, getGroupById, getUsers, updateUser } from "../../data/api";
 import { useAuth } from "../auth/useAuth";
 
@@ -137,9 +137,7 @@ export default function GroupDetail() {
           {error}
         </Alert>
       )}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
+      <PageHeader />
 
       <GroupHeaderCard
         group={group}

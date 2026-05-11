@@ -12,23 +12,25 @@ Administrative management console for Minnesota GreenStep Cities, enabling staff
 
 This is the **admin-side** application for the GreenStep Sustainability Challenge. A separate team (Team 1) is building the user-facing mobile app. Both teams share a common database (coordination in progress).
 
-### Current Version: v0.9.0 — Theme System + Templates Rename
+### Current Version: v0.10.0 — RLS, OTP, Custom Categories, Reports Widget
 
 **Status:** Frontend MVP backed by Supabase. Codebase modularized into per-entity API modules and per-feature sub-components; shared components grouped by intent (`feedback` / `data` / `preview`); dashboard config split into `widgets` + `layouts`; dashboard stats split into hook + pure `aggregations` module; `WidgetCatalog` decomposed into per-section sub-components; auth context decomposed for React Fast Refresh. **Global MUI v7 dark theme** lives in `src/lib/theme.js` and is mounted in `main.jsx`; both authoring forms (`ChallengeForm` and the new `TemplateForm`) render a sticky `<MobilePreview>` next to the form on `md+` screens. The "Preset" feature has been **renamed to "Template"** at the UI/route/API-module level (Supabase tables remain `presets` / `preset_actions` for now and are accessed through `data/api/templates.js`). Every source file carries a `@file` / `@summary` docblock and **no source file is over 300 lines**. Coding standards enforced via Prettier + ESLint.
 
 ### What's Built
 
-- **Authentication** — Supabase magic-link sign-in with role lookup; a "Quick Login as Kristin (SuperAdmin)" dev shortcut is wired up for local development
-- **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards
-- **Customizable Dashboard** — 22 available widgets (8 stat cards, 9 charts, 5 tables/lists) arranged in a drag-and-drop grid; click **Customize** to enter edit mode where widgets can be rearranged by dragging and resized from corners; **Widget Library** drawer lets you toggle any widget on/off and apply **Quick Layout Presets** (Default, Executive Summary, Analytics Deep Dive, Compact Overview); layout persists to localStorage per user; HCI-informed design with affordance cues (grip handles, dashed borders in edit mode), feedback (snackbar confirmations), error prevention (can't remove all widgets, cancel/reset available), and progressive disclosure (edit controls only appear when customizing)
+- **Authentication** — Supabase **8-digit OTP code** sign-in: enter your email, receive a code, type it in. Replaced magic-link clicks in v0.10.0 (PR #61) because magic links broke when phones opened them in a different browser than the one the user was reading mail in. Deactivated accounts are blocked at the Supabase RPC layer (PR #65). A "Quick Login as Kristin (SuperAdmin)" dev shortcut is still wired up for local development.
+- **Row-Level Security** — every table has Postgres RLS policies keyed off the JWT role claim (PR #63 / migration `011`). Authorization is enforced at the database, not in React, so a UI bug cannot leak data.
+- **Role-based access control** — SuperAdmin, Admin, GeneralUser with route guards. Mirrors the RLS policies above.
+- **Customizable Dashboard** — 23 available widgets (8 stat cards, 9 charts, 5 tables/lists, 1 report panel) arranged in a drag-and-drop grid; click **Customize** to enter edit mode where widgets can be rearranged by dragging and resized from corners; **Widget Library** drawer lets you toggle any widget on/off and apply **Quick Layout Presets** (Default, Executive Summary, Analytics Deep Dive, Compact Overview); layout persists to localStorage per user; HCI-informed design with affordance cues (grip handles, dashed borders in edit mode), feedback (snackbar confirmations), error prevention (can't remove all widgets, cancel/reset available), and progressive disclosure (edit controls only appear when customizing)
 - **Challenge Management** (renamed from "Events") — list with search/filter by status and group (URL support for groupId), create/edit forms, detail view with **Participants** table (who completed actions), participation log, clickable group link, archive/delete, CSV export
 - **Action CRUD** — admins can add, edit, and delete actions within each challenge (name, description, category, points)
+- **Custom action categories** — admins can add new categories from the Challenge or Template form; PR #66 moved the previously-hardcoded six-category list into a Postgres `categories` table (migration `013`). Six MPCA defaults are seeded.
 - **Group Management** — full CRUD for flexible groups; **Group Detail** page with member list (add/remove), challenges in group, bidirectional links; clickable member/challenge counts on list
 - **User Management** — list with search/filter by role and group, create/edit forms with group assignment, detail view with **Change Group** dropdown (Admin/SuperAdmin), clickable group and challenge links, activity log, participation history, **global points** total, and **per-challenge points history** table (earned vs max with progress bars), activate/deactivate, CSV export
-- **Challenge Templates** (formerly "Presets") — reusable templates with pre-configured actions; create, edit, delete templates from a dedicated page (`/templates`); applying a template when creating a new challenge pre-fills form fields and stages template actions to attach on submit; 3 seed templates (H2O Hero Week, Power Down Challenge, Sustainable Commute Week). Backed by the same Supabase `presets` / `preset_actions` tables — UI label changed in v0.9.0, schema unchanged.
-- **Reports** — filter by challenge and date range, category breakdown chart, full participation table with clickable user/challenge links, CSV export
+- **Challenge Templates** (formerly "Presets") — reusable templates with pre-configured actions; create, edit, delete templates from a dedicated page (`/templates`); applying a template when creating a new challenge pre-fills form fields and stages template actions to attach on submit; 3 seed templates (H2O Hero Week, Power Down Challenge, Sustainable Commute Week). Backed by the Supabase `presets` / `preset_actions` tables — UI/folder both renamed to "Template" by v0.10.0; the table names are kept and documented inline in `data/api/templates.js`.
+- **Reports** — `/reports` standalone page (filter by challenge and date range, category breakdown chart, full participation table, CSV export) **plus** a draggable **Participation Report** widget on the dashboard that mirrors the same filterable table + CSV export (PR #68). Issue #40 tracks retiring the standalone page once the widget reaches feature parity.
 - **Responsive layout** — collapsible sidebar on mobile, responsive tables and forms
-- **Persistence** — all entity data lives in Supabase (Postgres); per-user dashboard layout is cached in `localStorage` so customizations survive refresh
+- **Persistence** — all entity data lives in Supabase (Postgres) with RLS; per-user dashboard layout is cached in `localStorage` so customizations survive refresh
 - **Dark design system** — global MUI v7 dark theme in `src/lib/theme.js` (dark surfaces, brand greens, semantic tokens), plus a live mobile-app preview rendered next to the challenge and template forms so admins see the result as they type
 
 ### What's NOT Built Yet
@@ -266,6 +268,18 @@ Mock data was extracted from real MPCA client files (2019 & 2020 Commissioner's 
 ---
 
 ## Version History
+
+### v0.10.0 — RLS, OTP, Custom Categories, Reports Widget (May 2026)
+
+Eight PRs merged into `main` since v0.9.0, plus an internal cleanup pass to keep the codebase navigable for the final demo.
+
+- **OTP code auth (PR #61, #59)** — replaced magic-link sign-in with 8-digit OTP codes. PKCE token exchange in the auth callback (#59) was a prerequisite. Magic links kept opening in a different browser than the one the user was reading mail in, breaking sessions on phones; codes work everywhere.
+- **Row-Level Security (PR #63, plus rollback/redeploy story in migrations 006-011)** — every table now has Postgres RLS policies keyed off the JWT role claim. App-level role checks remain for UI gating, but the security boundary is at the database. The migration history (006 enable, 007 rollback, 009 re-enable, 010 rollback, 011 final) is the lesson-learned about not having a staging database — see `docs/presentation/lessons-learned.md`.
+- **Block deactivated users at sign-in (PR #65)** — pre-flight RPC ignores deactivated accounts so no OTP code is sent if the user is disabled.
+- **Custom action categories (PR #66, migration 013)** — admins can add categories from the Challenge or Template form. Previously the 6 MPCA defaults were hard-coded; they're now seeded into a `categories` table with `data/api/categories.js` as the service module.
+- **Participation Report dashboard widget (PR #68 / issue #40 slice 1)** — the filterable cross-challenge participation table from the legacy `/reports` page is now also a draggable dashboard widget under a new "Reports & Analysis" widget category. Smoke-tested via headless Puppeteer (`testing/2026-05-04-pr-68/RESULTS.md`). Widget count: 22 → 23.
+- **Performance indexes (PR #56)** — added Postgres indexes on `activity_logs` and `participation` for the queries the dashboard hits hardest. Also added `supabase/config.toml` and documented the Supabase CLI workflow in this README.
+- **Internal cleanup (this branch)** — `features/presets/` folder renamed to `features/templates/` to match its `Template*.jsx` filenames; cross-feature dialogs (`ActionFormDialog`, `CategoryFormDialog`) moved to `components/shared/forms/` so they don't violate the documented "features don't import from each other" invariant; new `<PageHeader>` shared component replaces 8 hand-copied Back-button + h5 title rows.
 
 ### v0.9.0 — Theme System + Templates Rename Merged (Apr 28, 2026)
 

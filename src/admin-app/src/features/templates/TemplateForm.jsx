@@ -4,14 +4,15 @@
  */
 
 import { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Grid, Paper, Stack, Typography, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 
 import TemplateFieldsSection from "./components/TemplateFieldsSection";
-import ActionFormDialog from "../challenges/components/ActionFormDialog";
-import CategoryFormDialog from "../challenges/components/CategoryFormDialog";
+import { ActionFormDialog, CategoryFormDialog } from "../../components/shared/forms";
+import { PageHeader } from "../../components/shared/layout";
 import { MobilePreview } from "../../components/shared/preview";
 import { createTemplate, getTemplateById, updateTemplate, getActions, createAction, getCategories, createCategory } from "../../data/api";
 
@@ -120,13 +121,7 @@ export default function TemplateForm() {
 
   return (
     <Box>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
-
-      <Typography variant="h5" fontWeight={700} mb={3} sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
-        {isEdit ? "Edit Template" : "Create Template"}
-      </Typography>
+      <PageHeader title={isEdit ? "Edit Template" : "Create Template"} />
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 7 }}>

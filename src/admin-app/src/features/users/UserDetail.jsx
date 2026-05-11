@@ -16,7 +16,6 @@ import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Alert,
   Box,
@@ -33,6 +32,7 @@ import {
 import ParticipationHistoryTable from "./components/ParticipationHistoryTable";
 import PointsHistoryTable from "./components/PointsHistoryTable";
 import UserActivityLogList from "./components/UserActivityLogList";
+import { PageHeader } from "../../components/shared/layout";
 import {
   ROLES,
   getActions,
@@ -137,9 +137,7 @@ export default function UserDetail() {
           {error}
         </Alert>
       )}
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
-        Back
-      </Button>
+      <PageHeader />
 
       <UserSummaryCard
         user={user}

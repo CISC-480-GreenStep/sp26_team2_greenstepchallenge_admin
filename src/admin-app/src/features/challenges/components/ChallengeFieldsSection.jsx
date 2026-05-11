@@ -8,8 +8,8 @@
  * to know how the parent stores it.
  */
 
-import { Box, Button, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
 
 import { CHALLENGE_STATUSES } from "../../../data/api";
 

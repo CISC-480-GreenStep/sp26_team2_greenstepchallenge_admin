@@ -12,3 +12,4 @@ Meeting notes, transcripts, and project proposal documents for the GreenStep Adm
 | `feb24.txt` | Feb 24 meeting transcript — client requirements, MPCA context |
 | `2026-03-10-meeting-notes.md` | March 10 meeting notes — terminology, constraints, infrastructure |
 | `2026-03-12-meeting-notes.md` | March 12 meeting notes — action items, progress, Supabase decision, team retrospective |
+| `2026-05-10-meeting-prep.md` | May 10 prep notes — what shipped in PR #73, what's left before the May 13 capstone talk |

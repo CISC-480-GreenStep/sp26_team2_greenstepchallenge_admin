@@ -14,8 +14,10 @@
 -- the protection is that production removes the bypass entirely.
 -- ============================================================
 
-create extension if not exists pgcrypto;
-
+-- pgcrypto lives in the `extensions` schema on Supabase, so functions
+-- need to be schema-qualified (search_path inside DO blocks does not
+-- include `extensions` by default).
+create extension if not exists pgcrypto with schema extensions;
 do $$
 declare
   dev_password text := 'gsc-dev-password';
@@ -27,7 +29,7 @@ begin
       -- User already exists (probably from a magic-link sign-in earlier).
       -- Just stamp the dev password on top so the button works.
       update auth.users
-        set encrypted_password = crypt(dev_password, gen_salt('bf')),
+        set encrypted_password = extensions.crypt(dev_password, extensions.gen_salt('bf')),
             email_confirmed_at = coalesce(email_confirmed_at, now()),
             updated_at = now()
         where email = e;
@@ -43,7 +45,7 @@ begin
         'authenticated',
         'authenticated',
         e,
-        crypt(dev_password, gen_salt('bf')),
+        extensions.crypt(dev_password, extensions.gen_salt('bf')),
         now(),
         '{"provider":"email","providers":["email"]}'::jsonb,
         '{}'::jsonb,

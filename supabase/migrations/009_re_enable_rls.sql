@@ -33,7 +33,6 @@ alter table public.challenge_participants enable row level security;
 alter table public.templates              enable row level security;
 alter table public.participation          enable row level security;
 alter table public.activity_logs          enable row level security;
-
 -- Re-revoke anon's table privileges that 007 restored. With RLS on,
 -- anon should have no direct table access -- only the RPC from 008.
 revoke all on all tables in schema public from anon;

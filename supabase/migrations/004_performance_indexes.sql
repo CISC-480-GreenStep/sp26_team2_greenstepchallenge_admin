@@ -14,18 +14,15 @@
 -- full scan + sort.
 create index if not exists idx_activity_logs_timestamp
   on activity_logs(timestamp desc);
-
 -- activity_logs: UserDetail reads a single user's logs ordered by
 -- timestamp desc. A composite (userId, timestamp desc) lets Postgres
 -- satisfy both the filter and the order with one index.
 create index if not exists idx_activity_logs_user_timestamp
   on activity_logs("userId", timestamp desc);
-
 -- participation: getUserPoints() filters by userId and joins on
 -- challengeId; per-user-per-challenge reports filter on both.
 create index if not exists idx_participation_user_challenge
   on participation("userId", "challengeId");
-
 -- participation: date-range report filters and any future "activity
 -- over time" charts will scan by completedAt.
 create index if not exists idx_participation_completed_at

@@ -17,6 +17,5 @@ alter table public.challenge_participants disable row level security;
 alter table public.templates              disable row level security;
 alter table public.participation          disable row level security;
 alter table public.activity_logs          disable row level security;
-
 grant select, insert, update, delete on all tables in schema public to anon;
 grant usage, select on all sequences in schema public to anon;

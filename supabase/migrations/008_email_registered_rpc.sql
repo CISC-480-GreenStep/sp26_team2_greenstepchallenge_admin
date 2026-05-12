@@ -23,5 +23,4 @@ set search_path = public
 as $$
   select exists (select 1 from public.users where email = email_to_check);
 $$;
-
 grant execute on function public.auth_email_is_registered(text) to anon, authenticated;

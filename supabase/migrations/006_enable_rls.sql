@@ -36,7 +36,6 @@ set search_path = public
 as $$
   select role from public.users where email = auth.email() limit 1;
 $$;
-
 -- Convenience predicate for "may mutate admin data".
 create or replace function public.is_admin()
 returns boolean
@@ -47,10 +46,8 @@ set search_path = public
 as $$
   select coalesce(public.current_user_role() in ('Admin', 'SuperAdmin'), false);
 $$;
-
 grant execute on function public.current_user_role() to authenticated;
 grant execute on function public.is_admin() to authenticated;
-
 -- ──────────────────────────────────────────────────────────────
 -- Enable RLS on every admin table
 -- ──────────────────────────────────────────────────────────────
@@ -61,11 +58,8 @@ alter table public.challenges             enable row level security;
 alter table public.challenge_actions      enable row level security;
 alter table public.challenge_participants enable row level security;
 alter table public.templates              enable row level security;
-alter table public.presets                enable row level security;
-alter table public.preset_actions         enable row level security;
 alter table public.participation          enable row level security;
 alter table public.activity_logs          enable row level security;
-
 -- ──────────────────────────────────────────────────────────────
 -- Read policies: any authenticated user can read all admin data
 -- ──────────────────────────────────────────────────────────────
@@ -76,11 +70,8 @@ create policy authenticated_read on public.challenges             for select to 
 create policy authenticated_read on public.challenge_actions      for select to authenticated using (true);
 create policy authenticated_read on public.challenge_participants for select to authenticated using (true);
 create policy authenticated_read on public.templates              for select to authenticated using (true);
-create policy authenticated_read on public.presets                for select to authenticated using (true);
-create policy authenticated_read on public.preset_actions         for select to authenticated using (true);
 create policy authenticated_read on public.participation          for select to authenticated using (true);
 create policy authenticated_read on public.activity_logs          for select to authenticated using (true);
-
 -- ──────────────────────────────────────────────────────────────
 -- Write policies: Admin / SuperAdmin only
 -- (FOR ALL covers INSERT, UPDATE, and DELETE)
@@ -92,9 +83,6 @@ create policy admin_write on public.challenges             for all to authentica
 create policy admin_write on public.challenge_actions      for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy admin_write on public.challenge_participants for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy admin_write on public.templates              for all to authenticated using (public.is_admin()) with check (public.is_admin());
-create policy admin_write on public.presets                for all to authenticated using (public.is_admin()) with check (public.is_admin());
-create policy admin_write on public.preset_actions         for all to authenticated using (public.is_admin()) with check (public.is_admin());
-
 -- ──────────────────────────────────────────────────────────────
 -- Special cases
 -- ──────────────────────────────────────────────────────────────
@@ -103,13 +91,11 @@ create policy admin_write on public.preset_actions         for all to authentica
 create policy any_insert on public.participation for insert to authenticated with check (true);
 create policy admin_update on public.participation for update to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy admin_delete on public.participation for delete to authenticated using (public.is_admin());
-
 -- activity_logs: any authenticated user may INSERT (logging happens
 -- as a side effect of admin operations). Updates and deletes have
 -- no policies, which means RLS denies them -- audit trail is
 -- effectively immutable for normal users.
 create policy any_insert on public.activity_logs for insert to authenticated with check (true);
-
 -- ──────────────────────────────────────────────────────────────
 -- Permissions
 -- ──────────────────────────────────────────────────────────────
@@ -119,6 +105,5 @@ create policy any_insert on public.activity_logs for insert to authenticated wit
 -- granted it.
 grant select, insert, update, delete on all tables in schema public to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
-
 revoke all on all tables in schema public from anon;
 revoke all on all sequences in schema public from anon;

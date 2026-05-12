@@ -32,6 +32,8 @@ import ReportsPage from "./features/reports/ReportsPage";
 import UserDetail from "./features/users/UserDetail";
 import UserForm from "./features/users/UserForm";
 import UsersPage from "./features/users/UsersPage";
+import TicketsPage from "./features/tickets/TicketsPage";
+import BadgesPage from "./features/badges/BadgesPage";
 
 export default function App() {
   return (
@@ -122,8 +124,7 @@ export default function App() {
             }
           />
           <Route path="users/:id" element={<UserDetail />} />
-          <Route
-            path="users/:id/edit"
+          <Route path="users/:id/edit"
             element={
               <RequireAuth minRole={ROLES.ADMIN}>
                 <UserForm />
@@ -132,6 +133,8 @@ export default function App() {
           />
 
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="issue-tickets" element={<TicketsPage />} />
+          <Route path="badges" element={<BadgesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

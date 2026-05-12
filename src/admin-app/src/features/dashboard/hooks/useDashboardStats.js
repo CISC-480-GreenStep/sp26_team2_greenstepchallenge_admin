@@ -20,6 +20,7 @@ import {
   buildChallengeSummary,
   buildCompletionRates,
   buildComparisonData,
+  buildEnrichedParticipation,
   buildGroupPerformance,
   buildMostActiveUsers,
   buildPointsDistribution,
@@ -169,6 +170,12 @@ function buildStats({
     leaderboard,
     mostActive: buildMostActiveUsers(filteredParticipation, users),
     recentActivity: buildRecentActivity(filteredParticipation, users, actions, challenges),
+    // Pre-joined rows for the Reports widget so it can filter client-side
+    // without re-running lookups per render. Always built off the *unfiltered*
+    // `participation` -- the widget owns its own filter UI and shouldn't be
+    // pre-narrowed by the dashboard's challenge-chip selection.
+    enrichedParticipation: buildEnrichedParticipation(participation, users, actions, challenges),
+    challenges,
     upcomingChallenges,
     rawParticipation: participation,
     rawActions: actions,

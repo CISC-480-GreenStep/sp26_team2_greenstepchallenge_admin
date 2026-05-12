@@ -135,16 +135,17 @@ src/admin-app/src/
     │   ├── hooks/
     │   │   ├── useDashboardLayout.js         ← Editable grid state + localStorage persistence
     │   │   ├── useDashboardStats.js          ← Loads data, calls aggregations, returns `stats`
-    │   │   ├── aggregations.js               ← 13 pure builders consumed by useDashboardStats
+    │   │   ├── aggregations.js               ← 14 pure builders consumed by useDashboardStats
     │   │   └── useComparisonData.js          ← Pure aggregation hook for Comparison Mode
-    │   └── widgets/                        ← 14 widget components (one per id in the catalog)
+    │   └── widgets/                        ← 15 widget components (one per id in the catalog)
     │       ├── StatWidget.jsx                ← Used by all 8 stat-* ids (config-driven)
     │       ├── CategoryPieWidget.jsx, ChallengeStatusWidget.jsx,
     │       ├── ChallengeSummaryWidget.jsx, CompletionRatesWidget.jsx,
     │       ├── GroupPerformanceWidget.jsx, LeaderboardWidget.jsx,
     │       ├── MostActiveUsersWidget.jsx, ParticipationBarWidget.jsx,
     │       ├── PointsByChallengeWidget.jsx, PointsDistributionWidget.jsx,
-    │       ├── RecentActivityWidget.jsx, UpcomingChallengesWidget.jsx,
+    │       ├── RecentActivityWidget.jsx, ReportParticipationTableWidget.jsx,
+    │       ├── UpcomingChallengesWidget.jsx,
     │       └── UserGrowthWidget.jsx
     │
     ├── challenges/                        ← Challenge CRUD + detail
@@ -190,6 +191,9 @@ src/admin-app/src/
     │
     └── reports/                           ← Cross-challenge participation report
         └── ReportsPage.jsx                  ← Filters + table + category chart + CSV
+                                              (also surfaced as a dashboard widget
+                                              `table-report-participation` — issue #40
+                                              tracks retiring this standalone page)
 ```
 
 ## 4. "I want to change X" — recipes
@@ -371,19 +375,18 @@ file. The goal is to keep the map accurate without making it a chore.
 ## Appendix: Stale branches awaiting owner decision
 
 The v0.9.0 consolidation pruned branches with **0 unique commits** vs `main`.
-Two remote branches were intentionally **not** deleted because they still hold
-unique commits, but they appear stale and have no open PR:
+Two remote branches were left for owner decision and have since been resolved
+(see issue #55):
 
-- **`origin/feature/auth-magic-links`** — 1 unique commit ("Add permanent user
-  deletion for SuperAdmins"), 64 commits behind `main`. Targets the old
-  pre-split `data/api.js` monolith and ships a Netlify function — the project
-  migrated to Vercel in PR #39, so the function is dead code as-is. Either port
-  the SuperAdmin delete-user feature onto current `data/api/users.js` + a
-  Vercel API route, or close and delete the branch.
-- **`origin/Eli-feature-customizable-dashboard`** — 3 unique commits, 72 behind
-  `main`. The customizable-dashboard work appears to be fully superseded by the
-  per-slice refactor that already landed in v0.7.x. Recommended: file-by-file
-  diff to confirm nothing unique is left, then delete.
+- **`origin/feature/auth-magic-links`** — **Dropped.** Targeted the old
+  pre-split `data/api.js` monolith and shipped a Netlify function (the project
+  moved to Vercel in PR #39). Cheaper to rebuild than to port. Branch deleted.
+  Replacement work tracked in issue #67 (*SuperAdmin: permanent user delete via
+  Vercel API route*).
+- **`origin/Eli-feature-customizable-dashboard`** — **Abandoned.** Confirmed
+  superseded by the per-slice dashboard refactor that landed in v0.7.x. Branch
+  deleted.
 
-Owner (or any maintainer) should triage these and either open a PR or delete
-the branch so the remote stays clean.
+If a future stale branch appears, follow the same pattern: open a tracking
+issue if there is reusable scope, then delete the branch so the remote stays
+clean.

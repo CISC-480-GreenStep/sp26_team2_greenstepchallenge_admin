@@ -29,7 +29,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import ActionFormDialog from "./ActionFormDialog";
+import { ActionFormDialog } from "../../../components/shared/forms";
 import {
   createAction,
   deleteAction,

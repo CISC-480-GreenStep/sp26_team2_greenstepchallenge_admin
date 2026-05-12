@@ -18,11 +18,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 
 import { MobilePreview } from "../../components/shared/preview";
+import { CategoryFormDialog } from "../../components/shared/forms";
 import { useAuth } from "../auth/useAuth";
 import ActionsEditor from "./components/ActionsEditor";
 import ChallengeFieldsSection from "./components/ChallengeFieldsSection";
 import TemplatePicker from "./components/TemplatePicker";
-import CategoryFormDialog from "./components/CategoryFormDialog";
 import {
   ACTIONS,
   CHALLENGE_STATUSES,

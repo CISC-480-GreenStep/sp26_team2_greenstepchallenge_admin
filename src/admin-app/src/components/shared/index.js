@@ -6,6 +6,7 @@
  *   - `feedback` -- modals, alerts, confirmation dialogs
  *   - `data`     -- tables, links, cards, exports
  *   - `preview`  -- preview / visualization shells
+ *   - `forms`    -- form dialogs reused across feature folders
  *
  * Consumers can do either:
  *   import { ConfirmDialog, CSVExport } from "@/components/shared";
@@ -15,3 +16,4 @@
 export * from "./feedback";
 export * from "./data";
 export * from "./preview";
+export * from "./forms";
